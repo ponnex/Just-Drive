@@ -5,7 +5,7 @@
             android:defaultValue="true"
             android:key="switch"
             android:summary="Enabled"
-            android:title="Bloxt Services"
+            android:title="Just Drive Services"
             android:enabled="true" />
     </PreferenceCategory>
     <PreferenceCategory android:title="Phone and Messaging">
@@ -28,7 +28,7 @@
             android:title="Auto Reply SMS" />
         <EditTextPreference
             android:key="msg"
-            android:summary="I am driving right now, I will contact you later. --Auto reply message--"
+            android:summary="I am driving right now, I will contact you later. --This is an automated SMS--"
             android:title="Auto Reply Message"
             android:persistent="true"
             android:hint="Enter your auto reply message here"
