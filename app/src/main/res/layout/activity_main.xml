@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/layout_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+        <!--
+        <fragment android:name="com.ponnex.justdrive.SettingsFragment"
+            android:id="@+id/preferences"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+            -->
+
+        <FrameLayout
+            android:id="@+id/container"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+
+        </FrameLayout>
+
+        <FrameLayout android:id="@+id/main_frame"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <com.melnykov.fab.FloatingActionButton
+                android:id="@+id/fab_main2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:layout_margin="16dp"
+                android:src="@drawable/ic_bloxtoff"
+                fab:fab_colorNormal="@color/fab_ripple_main"
+                fab:fab_colorPressed="@color/fab_pressed_main"
+                fab:fab_colorRipple="@color/fab_ripple_main" />
+
+            <com.melnykov.fab.FloatingActionButton
+                android:id="@+id/fab_main1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:layout_margin="16dp"
+                android:src="@drawable/ic_bloxton"
+                fab:fab_colorNormal="@color/fab_primary_main"
+                fab:fab_colorPressed="@color/fab_pressed_main"
+                fab:fab_colorRipple="@color/fab_ripple_main" />
+
+        </FrameLayout>
+    </RelativeLayout>
+</LinearLayout>

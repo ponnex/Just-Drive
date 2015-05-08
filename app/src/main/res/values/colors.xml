@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- alternative color -->
+    <color name="primary">#FF5722</color>
+    <color name="primaryDark">#E64A19</color>
+    <color name="accent">#FF3D00</color>
+
+    <color name="fab_primary_main">#FF3D00</color>
+    <color name="fab_pressed_main">#DD2C00</color>
+    <color name="fab_ripple_main">#FF6E40</color>
+
+    <color name="fab_primary">#FAFAFA</color>
+    <color name="fab_pressed">#E0E0E0</color>
+    <color name="fab_ripple">#FF5722</color>
+
+</resources>

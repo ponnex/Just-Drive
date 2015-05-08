@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <com.jenzz.materialpreference.PreferenceCategory android:title="General Setting">
+        <com.jenzz.materialpreference.SwitchPreference
+            android:defaultValue="true"
+            android:key="switch"
+            android:summary="Enabled"
+            android:title="Bloxt Services"
+            android:enabled="true" />
+    </com.jenzz.materialpreference.PreferenceCategory>
+    <com.jenzz.materialpreference.PreferenceCategory android:title="Phone and Messaging">
+        <com.jenzz.materialpreference.CheckBoxPreference
+            android:defaultValue="false"
+            android:key="phone"
+            android:summary="Read caller ID of incoming phone calls while driving."
+            android:title="Phone Calls" />
+        <com.jenzz.materialpreference.CheckBoxPreference
+            android:defaultValue="false"
+            android:enabled="false"
+            android:key="autoReplyCalls"
+            android:summary="Reply incoming calls with SMS.
+            COMING SOON"
+            android:title="Auto Reply Calls" />
+        <com.jenzz.materialpreference.CheckBoxPreference
+            android:defaultValue="false"
+            android:key="autoReply"
+            android:summary="Auto reply Enabled."
+            android:title="Auto Reply SMS" />
+        <com.afollestad.materialdialogs.prefs.MaterialEditTextPreference
+            android:key="msg"
+            android:summary="I am driving right now, I will contact you later. --Auto reply message--"
+            android:title="Auto Reply Message"
+            android:persistent="true"
+            android:hint="Enter your auto reply message here"
+            android:dialogTitle="Auto Reply Message"
+            android:dialogMessage="Feel Free to create your own custom auto reply message, to restore default message, clear the edit text and click OK"
+            android:layout="@layout/preference_custom"
+            android:inputType="textPersonName" />
+    </com.jenzz.materialpreference.PreferenceCategory>
+    <com.jenzz.materialpreference.PreferenceCategory android:title="Other">
+        <com.jenzz.materialpreference.Preference android:title="Theme"
+            android:key="theme"
+            android:summary="Select Theme" />
+        <com.jenzz.materialpreference.CheckBoxPreference
+            android:defaultValue="true"
+            android:key="startonboot"
+            android:summary="Start service on boot"
+            android:title="Run On Startup" />
+    </com.jenzz.materialpreference.PreferenceCategory>
+    <com.jenzz.materialpreference.PreferenceCategory android:title="DEBUGGING MODE">
+        <com.jenzz.materialpreference.CheckBoxPreference
+            android:defaultValue="false"
+            android:key="notification"
+            android:summary="Show notifications of activities."
+            android:title="Notify" />
+        <com.jenzz.materialpreference.Preference android:title="Activity Log"
+            android:enabled="true"
+            android:key="debuggingmode"
+            android:summary="Show setting and activity log">
+            <intent
+                android:action="android.intent.action.MAIN"
+                android:targetPackage="com.ponnex.justdrive"
+                android:targetClass="com.ponnex.justdrive.DebuggingActivity" />
+        </com.jenzz.materialpreference.Preference>
+    </com.jenzz.materialpreference.PreferenceCategory>
+</PreferenceScreen>
