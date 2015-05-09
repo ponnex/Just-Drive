@@ -14,6 +14,8 @@ public class NotificationReceiver extends BroadcastReceiver {
     // stops service if user isn't driving
     private LocalBroadcastManager broadcastManager;
 
+    private String TAG = "com.ponnex.justdrive.NotificationReceiver";
+
     @Override
     public void onReceive(Context context, Intent intent) {
 
@@ -63,7 +65,7 @@ public class NotificationReceiver extends BroadcastReceiver {
         Intent intent = new Intent("com.ponnex.justdrive.NotificationReceiver");
         if (message != null) {
             intent.putExtra("isCancel", message);
-            Log.e("TYPE", "Cancelled");
+            Log.d(TAG, "Cancelled");
         }
         broadcastManager.sendBroadcast(intent);
     }

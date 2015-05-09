@@ -7,8 +7,6 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 
 import com.ponnex.justdrive.Fragments.ScreenSlidePageFragment;
-import com.ponnex.justdrive.R;
-
 
 /**
  * Created by ramos on 4/18/2015.

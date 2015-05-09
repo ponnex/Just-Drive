@@ -17,6 +17,7 @@ public class TextReceiver extends BroadcastReceiver {
     SmsMessage[] msgs;
     String msg_from;
     String msg = CarMode.msg + "\n--This is an automated SMS--";
+    private String TAG = "com.ponnex.justdrive.TextReceiver";
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -24,15 +25,15 @@ public class TextReceiver extends BroadcastReceiver {
         SharedPreferences mSharedPreference1= PreferenceManager.getDefaultSharedPreferences(context);
         String isMsgFrom = (mSharedPreference1.getString("isMsgfrom", null));
 
-        Log.e("TextReceiver", "message received");
+        Log.d(TAG, "message received");
         if (CarMode.autoreply) {
             if (intent.getAction().equals("android.provider.Telephony.SMS_RECEIVED")) {
-                Log.e("TextReceiver", "SMS received");
+                Log.d(TAG, "SMS received");
                 // gets the message
                 Bundle bundle = intent.getExtras();
                 if (bundle != null) {
                     // ---retrieve the SMS message received---
-                    Log.e("TextReceiver","Bundle != null");
+                    Log.d(TAG, "Bundle != null");
                     try {
                         // gets the sender then sends a sms back
                         Object[] pdus = (Object[]) bundle.get("pdus");
@@ -43,8 +44,8 @@ public class TextReceiver extends BroadcastReceiver {
 
                             msg_from = msgs[i].getOriginatingAddress();
 
-                            Log.e("TextReceiver","SMS Previous: " + isMsgFrom);
-                            Log.e("TextReceiver","SMS Received: " + msg_from);
+                            Log.d(TAG, "SMS Previous: " + isMsgFrom);
+                            Log.d(TAG,"SMS Received: " + msg_from);
 
                             SmsManager smsManager = SmsManager.getDefault();
                             if (!msg_from.equals(isMsgFrom)) {

@@ -28,7 +28,6 @@ import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import com.ponnex.justdrive.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.ActivityRecognition;
@@ -56,6 +55,7 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
     private Runnable lockrun;
     int TIMER_COUNT = 15000;
     private static int audioMode;
+    private String TAG = "com.ponnex.justdrive.LockScreen";
     AudioManager current;
 
     //required by the service, keep service running in the background
@@ -68,7 +68,7 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
     @Override
     public void onCreate(){
         super.onCreate();
-        Log.e("TYPE", "LS Created");
+        Log.d(TAG, "LS Created");
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(ActivityRecognition.API)
@@ -162,7 +162,7 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
                 try {
                     pendingIntent.send(getApplicationContext(), 0, intent5);
                 } catch (PendingIntent.CanceledException e) {
-                    Log.e("TYPE","Error on PendingIntent5");
+                    Log.d(TAG,"Error on PendingIntent5");
                 }
 
                 try {
@@ -243,7 +243,7 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
 
     private void ServiceOff(){
         if (mGoogleApiClient.isConnected()) {
-            Log.e("TYPE", "Disconnected");
+            Log.d(TAG, "Disconnected");
             ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(mGoogleApiClient, pendingIntent);
             mGoogleApiClient.disconnect();
         }
@@ -294,7 +294,7 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
                     editor1.putInt("isCount", defaultValue);
                     editor1.apply();
                     count = (mSharedPreference1.getInt("isCount",count));
-                    Log.e("TYPE", "VALUE = " + count);
+                    Log.d(TAG, "VALUE = " + count);
 
                     SharedPreferences mSharedPreference2= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                     Boolean isHeadsup=(mSharedPreference2.getBoolean("headsup", false));
@@ -351,7 +351,7 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
                     }
                     catch (RuntimeException e){
                         e.printStackTrace();
-                        Log.e("TYPE window manager", "layout has already been added");
+                        Log.d(TAG, "layout has already been added");
                     }
                 }
 
@@ -388,7 +388,7 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
                         editor3.putInt("isCount1", defaultValue);
                         editor3.apply();
                         count1 = (mSharedPreference2.getInt("isCount1", count1));
-                        Log.e("TYPE", "VALUE1 = " + count1);
+                        Log.d(TAG, "VALUE1 = " + count1);
 
                         if (count1 >= 7) {
                             second = false;
@@ -419,17 +419,17 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
     @Override
     public void onConnected(Bundle bundle) {
         ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(mGoogleApiClient, DETECTION_INT_MILLIS, pendingIntent);
-        Log.e("TYPE", "Connected");
+        Log.d(TAG, "Connected");
     }
 
     @Override
     public void onConnectionSuspended(int i) {
-        Log.e("TYPE", "Suspended");
+        Log.d(TAG, "Suspended");
     }
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-        Log.e("TYPE", "Failed, Reconnecting...");
+        Log.d(TAG, "Failed, Reconnecting...");
         mGoogleApiClient.connect();
     }
 
@@ -467,7 +467,7 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
 
     @Override
     public void onDestroy(){
-        Log.e("TYPE", "LS Destroyed");
+        Log.d(TAG, "LS Destroyed");
         if(mGoogleApiClient.isConnected()) {
             ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(mGoogleApiClient, pendingIntent);
             mGoogleApiClient.disconnect();
@@ -555,7 +555,7 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
                 .setTicker("Just Drive needs your attention")
                 .setDefaults(Notification.DEFAULT_SOUND)
                         //To display the notification bar notification, this must be set
-                .setSmallIcon(R.drawable.driver)
+                .setSmallIcon(R.drawable.ic_driving)
                 .setContentText("Ignore or Dismiss if you're Driving")
                         //2.3 ?To set this parameter set, will be responsible for the error
                 .setContentIntent(pendingIntent)
@@ -565,7 +565,7 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
                 .setPriority(1)
                         //Set whether to display the action buttons
                 .setUsesChronometer(true)
-                .addAction(R.drawable.cancel, "I'm a passenger", notDriving());
+                .addAction(R.drawable.ic_cancel, "I'm a passenger", notDriving());
 
         HeadsUp headsUp = builder.buildHeadUp();
         manage.notify(1, headsUp);
@@ -588,7 +588,7 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
                 .setTicker("Just Drive needs your attention")
                 .setDefaults(Notification.DEFAULT_SOUND)
                 //To display the notification bar notification, this must be set
-                .setSmallIcon(R.drawable.driver)
+                .setSmallIcon(R.drawable.ic_driving)
                 .setContentText("Ignore or Dismiss if you're Driving")
                         //2.3 ?To set this parameter set, will be responsible for the error
                 .setContentIntent(pendingIntent)
@@ -598,7 +598,7 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
                 .setPriority(1)
                         //Set whether to display the action buttons
                 .setUsesChronometer(true)
-                .addAction(R.drawable.cancel, "I'm a passenger", notDriving());
+                .addAction(R.drawable.ic_cancel, "I'm a passenger", notDriving());
 
         HeadsUp headsUp = builder.buildHeadUp();
         manage.notify(1, headsUp);
@@ -629,7 +629,7 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
     }
 
     private void launchLockwithtimer(){
-        Log.e("TYPE","launchLockwithtimer");
+        Log.d(TAG, "launchLockwithtimer");
         lockrun = new Runnable() {
             public void run() {
                 try {
@@ -681,7 +681,7 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
     }
 
     private void launchLockwithtimerTEST(){
-        Log.e("TYPE", "launchLockwithtimerTEST");
+        Log.d(TAG, "launchLockwithtimerTEST");
 
         try {
             showingtest = true;

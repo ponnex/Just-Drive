@@ -9,7 +9,6 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
-import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceGroup;
@@ -42,6 +41,8 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
     static String mPhoneNumber;
     static boolean active = false;
     private View positiveAction;
+
+    private String TAG = "com.ponnex.justdrive.SettingsFragmentLollipop";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -210,7 +211,7 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
                     }
                     else {
                         getPreferenceScreen().findPreference("autoReply").setSummary("Auto reply Enabled.");
-                        Log.e("TYPE", isPhoneNumber);
+                        Log.d(TAG, isPhoneNumber);
                     }
 
                 }
@@ -271,7 +272,7 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
 
                         getPreferenceScreen().findPreference("autoReply").setSummary("Auto reply Enabled.");
 
-                        Log.e("TYPE", isPhoneNumber);
+                        Log.d(TAG, isPhoneNumber);
                     }
                 })
                 .cancelListener(new DialogInterface.OnCancelListener() {

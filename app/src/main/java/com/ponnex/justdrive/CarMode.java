@@ -46,6 +46,8 @@ public class CarMode extends Service {
     TelephonyManager tm;
     private HeadSetIntentReceiver myReceiver;
 
+    private String TAG = "com.ponnex.justdrive.CarMode";
+
     private int headphonestate;
 
     @Override
@@ -55,7 +57,7 @@ public class CarMode extends Service {
 
     @Override
     public void onCreate(){
-        Log.e("TYPE", "CM Created");
+        Log.d(TAG, "CM Created");
         myReceiver = new HeadSetIntentReceiver();
         IntentFilter filter = new IntentFilter(Intent.ACTION_HEADSET_PLUG);
         registerReceiver(myReceiver, filter);
@@ -159,15 +161,15 @@ public class CarMode extends Service {
                 headphonestate = intent.getIntExtra("state", -1);
                 switch (headphonestate) {
                     case 0:
-                        Log.e("TYPE", "Headset is unplugged");
+                        Log.d(TAG, "Headset is unplugged");
                         silent();
                         break;
                     case 1:
-                        Log.e("TYPE", "Headset is plugged");
+                        Log.d(TAG, "Headset is plugged");
                         soundMode();
                         break;
                     default:
-                        Log.e("TYPE", "I have no idea what the headset state is");
+                        Log.d(TAG, "I have no idea what the headset state is");
                 }
             }
         }
@@ -208,14 +210,14 @@ public class CarMode extends Service {
             assert cur != null;
             cur.close();
         } catch (NullPointerException e) {
-            Log.e("CarMode", "Cursor caused a null pointer exception");
+            Log.d(TAG, "Cursor caused a null pointer exception");
         }
         return "";
     }
 
     @Override
     public void onDestroy() {
-        Log.e("TYPE", "CM Destoyed");
+        Log.d(TAG, "CM Destoyed");
         //turn off auto-reply
         autoreply = false;
         //turn back the user's last sound mode

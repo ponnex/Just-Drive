@@ -1,7 +1,6 @@
 package com.ponnex.justdrive;
 
 import android.annotation.TargetApi;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -14,6 +13,8 @@ import android.util.Log;
  */
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class NotificationListener extends NotificationListenerService {
+
+    private String TAG = "com.ponnex.justdrive.NotificationListener";
 
     public static Intent getInterruptionFilterRequestIntent(final int filter) {
         Intent request = new Intent("com.ponnex.justdrive.ACTION_REQUEST_INTERRUPTION_FILTER");
@@ -28,7 +29,7 @@ public class NotificationListener extends NotificationListenerService {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.e("TYPE", "NL Created");
+        Log.d(TAG, "NL Created");
         // Handle being told to change the interruption filter (zen mode).
         if (!TextUtils.isEmpty(intent.getAction())) {
             if ("com.ponnex.justdrive.ACTION_REQUEST_INTERRUPTION_FILTER".equals(intent.getAction())) {

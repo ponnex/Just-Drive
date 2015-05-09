@@ -2,7 +2,6 @@ package com.ponnex.justdrive;
 
 import android.app.IntentService;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -13,7 +12,6 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import com.ponnex.justdrive.R;
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
 
@@ -24,6 +22,8 @@ import com.google.android.gms.location.DetectedActivity;
 public class ActivityRecognitionIntentService extends IntentService {
 
     private LocalBroadcastManager broadcastManager;
+
+    private String TAG = "com.ponnex.justdrive.ActivityRecognitionIntentService";
 
     public ActivityRecognitionIntentService(String name) {
         super(name);
@@ -36,7 +36,7 @@ public class ActivityRecognitionIntentService extends IntentService {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.e("TYPE", "ARIS Created");
+        Log.d(TAG, "ARIS Created");
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(notifReceiver, new IntentFilter("com.ponnex.justdrive.SettingsFragment1"));
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(notifReceiver1, new IntentFilter("com.ponnex.justdrive.MainActivity"));
     }
@@ -57,7 +57,7 @@ public class ActivityRecognitionIntentService extends IntentService {
             if (!isFirstRun) {
                 String activityName = getNameFromType(activityType);
                 String resultstr = "Activity: " + activityName + ", Confidence: " + confidence + "% ";
-                Log.e("TYPE: ", "Activity: " + activityName + ", Confidence: " + confidence + "% ");
+                Log.d(TAG + "TYPE: ", "Activity: " + activityName + ", Confidence: " + confidence + "% ");
 
                 sendResultInfo(resultstr);
                 if (confidence >= 50) {
@@ -162,7 +162,7 @@ public class ActivityRecognitionIntentService extends IntentService {
 
     @Override
     public void onDestroy(){
-        Log.e("TYPE", "ARIS Destroyed");
+        Log.d(TAG, "ARIS Destroyed");
         super.onDestroy();
     }
 }

@@ -22,7 +22,6 @@ import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.ponnex.justdrive.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.nispok.snackbar.Snackbar;
@@ -45,6 +44,8 @@ public class MainActivity extends ActionBarActivity {
     public final static int DARK = 1;
 
     static boolean active = false;
+
+    private String TAG = "com.ponnex.justdrive.MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,7 +81,7 @@ public class MainActivity extends ActionBarActivity {
 
         if (isPlayServicesConfigured()) {
             //start only after verification that user has Google Play Services
-            Log.e("TYPE", "User has Google Play Services");
+            Log.d(TAG, "User has Google Play Services");
             if (isSwitch) {
                 startService(new Intent(getApplication(), LockScreen.class));
                 startService(new Intent(getApplication(), ActivityRecognitionIntentService.class));

@@ -23,7 +23,6 @@ import android.widget.EditText;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.prefs.MaterialEditTextPreference;
-import com.ponnex.justdrive.R;
 import com.jenzz.materialpreference.CheckBoxPreference;
 import com.jenzz.materialpreference.SwitchPreference;
 import com.nispok.snackbar.Snackbar;
@@ -40,6 +39,8 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     static String mPhoneNumber;
     static boolean active = false;
     private View positiveAction;
+
+    private String TAG = "com.ponnex.justdrive.SettingsFragment";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -207,7 +208,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
                     }
                     else {
                         getPreferenceScreen().findPreference("autoReply").setSummary("Auto reply Enabled.");
-                        Log.e("TYPE", isPhoneNumber);
+                        Log.d(TAG, isPhoneNumber);
                     }
 
                 }
@@ -266,7 +267,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
 
                         getPreferenceScreen().findPreference("autoReply").setSummary("Auto reply Enabled.");
 
-                        Log.e("TYPE", isPhoneNumber);
+                        Log.d(TAG, isPhoneNumber);
                     }
                 })
                 .cancelListener(new DialogInterface.OnCancelListener() {

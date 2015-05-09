@@ -6,7 +6,6 @@ import android.os.Build;
 import android.view.Gravity;
 import android.view.WindowManager;
 
-
 import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.ObjectAnimator;
 

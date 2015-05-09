@@ -11,9 +11,11 @@ import android.widget.Toast;
  */
 public class RebootReceiving extends BroadcastReceiver {
 
+    private String TAG = "com.ponnex.justdrive.RebootReceiving";
+
     public void onReceive(Context arg0, Intent arg1)
     {
-        Log.e("TYPE","reboot");
+        Log.d(TAG,"reboot");
         Boolean boot = PreferenceManager.getDefaultSharedPreferences(arg0).getBoolean("startonboot", true);
         if (boot) {
             Intent intent = new Intent(arg0, LockScreen.class);
