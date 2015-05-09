@@ -16,7 +16,6 @@ import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
 import android.preference.SwitchPreference;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AlertDialog;
 import android.telephony.TelephonyManager;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -27,7 +26,6 @@ import android.widget.EditText;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 
-import com.ponnex.justdrive.R;
 import com.nispok.snackbar.Snackbar;
 import com.nispok.snackbar.SnackbarManager;
 
@@ -42,10 +40,10 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
     private SwitchPreference switchbloxt;
     static String mPhoneNumber;
     static boolean active = false;
+    private View positiveAction;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        CheckBoxPreference checkbloxtphone;
         CheckBoxPreference checkbloxtautoReply;
         CheckBoxPreference checkbloxtstartonboot;
         CheckBoxPreference checkbloxtnotify;
@@ -71,9 +69,6 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
         SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getActivity());
         Boolean isSwitch = (mSharedPreference.getBoolean("switch", true));
 
-        SharedPreferences mSharedPreference1= PreferenceManager.getDefaultSharedPreferences(getActivity());
-        Boolean isphone = (mSharedPreference1.getBoolean("phone", false));
-
         SharedPreferences mSharedPreference2= PreferenceManager.getDefaultSharedPreferences(getActivity());
         Boolean isautoReply = (mSharedPreference2.getBoolean("autoReply", true));
 
@@ -93,18 +88,11 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
             getPreferenceScreen().findPreference("switch").setSummary("Disabled");
         }
 
-        if (isphone){
-            getPreferenceScreen().findPreference("phone").setSummary("Block phone calls while driving.");
-        }
-        else {
-            getPreferenceScreen().findPreference("phone").setSummary("Read caller ID of incoming phone calls while driving.");
-        }
-
         if (isautoReply){
-            getPreferenceScreen().findPreference("autoReply").setSummary("Auto reply Enabled.");
+            getPreferenceScreen().findPreference("autoReply").setSummary("Enabled.");
         }
         else {
-            getPreferenceScreen().findPreference("autoReply").setSummary("Auto reply Disabled");
+            getPreferenceScreen().findPreference("autoReply").setSummary("Disabled");
         }
 
         if (isstartonboot){
@@ -207,19 +195,6 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
             }
         });
 
-        checkbloxtphone = (CheckBoxPreference) getPreferenceManager().findPreference("phone");
-        checkbloxtphone.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-
-                if (newValue.toString().equals("true")) {
-                    getPreferenceScreen().findPreference("phone").setSummary("Block phone calls while driving.");
-                }
-                if (newValue.toString().equals("false")) {
-                    getPreferenceScreen().findPreference("phone").setSummary("Read caller ID of incoming phone calls while driving.");
-                }
-                return true;
-            }
-        });
         checkbloxtautoReply = (CheckBoxPreference) getPreferenceManager().findPreference("autoReply");
         checkbloxtautoReply.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             public boolean onPreferenceChange(Preference preference, Object newValue) {
@@ -280,10 +255,9 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
 
     }
 
-    private EditText phonenumber;
-    private View positiveAction;
-
     private void showBasicNoTitleNumberCheck() {
+        EditText phonenumber;
+
         MaterialDialog dialog = new MaterialDialog.Builder(getActivity())
                 .title(R.string.phonenumber)
                 .customView(R.layout.dialog_numberview, true)
@@ -334,30 +308,33 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
     }
 
     private void showBasicNoTitle() {
-        new AlertDialog.Builder(getActivity())
-        .setMessage(R.string.startonbootmsg)
-        .setPositiveButton(R.string.yes_accept, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                getPreferenceScreen().findPreference("startonboot").setSummary("Do not start Just Drive on boot");
-            }
-        })
-        .setNegativeButton(R.string.no_dont, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                CheckBoxPreference startcheck = (CheckBoxPreference) findPreference("startonboot");
-                startcheck.setChecked(true);
-            }
-        })
-        .setOnCancelListener(new DialogInterface.OnCancelListener() {
-            public void onCancel(DialogInterface dialog) {
-                getPreferenceScreen().findPreference("startonboot").setSummary("Start Just Drive on boot");
-                CheckBoxPreference checkPrefs = (CheckBoxPreference) findPreference("startonboot");
-                checkPrefs.setChecked(true);
-            }
-        })
-        .show();
+        new MaterialDialog.Builder(getActivity())
+                .content(R.string.startonbootmsg)
+                .positiveText(R.string.yes_accept)
+                .negativeText(R.string.no_dont)
+                .callback(new MaterialDialog.ButtonCallback() {
+                    @Override
+                    public void onPositive(MaterialDialog dialog) {
+                        getPreferenceScreen().findPreference("startonboot").setSummary("Do not start Just Drive on boot");
+                    }
 
+                    @Override
+                    public void onNegative(MaterialDialog dialog) {
+                        CheckBoxPreference startcheck = (CheckBoxPreference) findPreference("startonboot");
+                        startcheck.setChecked(true);
+                    }
+
+                })
+                .cancelListener(new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialog) {
+                        getPreferenceScreen().findPreference("startonboot").setSummary("Start Just Drive on boot");
+                        CheckBoxPreference checkPrefs = (CheckBoxPreference) findPreference("startonboot");
+                        checkPrefs.setChecked(true);
+                    }
+                })
+
+                .show();
     }
 
     private void showSingleChoice() {

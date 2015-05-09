@@ -10,9 +10,9 @@
     </com.jenzz.materialpreference.PreferenceCategory>
     <com.jenzz.materialpreference.PreferenceCategory android:title="Phone and Messaging">
         <com.jenzz.materialpreference.CheckBoxPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:key="phone"
-            android:summary="Read caller ID of incoming phone calls while driving."
+            android:summary="Use Text-to-Speech to read caller ID of incoming phone calls while driving."
             android:title="Phone Calls" />
         <com.jenzz.materialpreference.CheckBoxPreference
             android:defaultValue="false"

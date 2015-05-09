@@ -39,10 +39,10 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     private SwitchPreference switchbloxt;
     static String mPhoneNumber;
     static boolean active = false;
+    private View positiveAction;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        CheckBoxPreference checkbloxtphone;
         CheckBoxPreference checkbloxtautoReply;
         CheckBoxPreference checkbloxtstartonboot;
         CheckBoxPreference checkbloxtnotify;
@@ -68,9 +68,6 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getActivity());
         Boolean isSwitch = (mSharedPreference.getBoolean("switch", true));
 
-        SharedPreferences mSharedPreference1= PreferenceManager.getDefaultSharedPreferences(getActivity());
-        Boolean isphone = (mSharedPreference1.getBoolean("phone", false));
-
         SharedPreferences mSharedPreference2= PreferenceManager.getDefaultSharedPreferences(getActivity());
         Boolean isautoReply = (mSharedPreference2.getBoolean("autoReply", true));
 
@@ -90,18 +87,11 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
             getPreferenceScreen().findPreference("switch").setSummary("Disabled");
         }
 
-        if (isphone){
-            getPreferenceScreen().findPreference("phone").setSummary("Block phone calls while driving.");
-        }
-        else {
-            getPreferenceScreen().findPreference("phone").setSummary("Read caller ID of incoming phone calls while driving.");
-        }
-
         if (isautoReply){
-            getPreferenceScreen().findPreference("autoReply").setSummary("Auto reply Enabled.");
+            getPreferenceScreen().findPreference("autoReply").setSummary("Enabled.");
         }
         else {
-            getPreferenceScreen().findPreference("autoReply").setSummary("Auto reply Disabled");
+            getPreferenceScreen().findPreference("autoReply").setSummary("Disabled");
         }
 
         if (isstartonboot){
@@ -203,19 +193,6 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
             }
         });
 
-        checkbloxtphone = (CheckBoxPreference) getPreferenceManager().findPreference("phone");
-        checkbloxtphone.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-
-                if (newValue.toString().equals("true")) {
-                    getPreferenceScreen().findPreference("phone").setSummary("Block phone calls while driving.");
-                }
-                if (newValue.toString().equals("false")) {
-                    getPreferenceScreen().findPreference("phone").setSummary("Read caller ID of incoming phone calls while driving.");
-                }
-                return true;
-            }
-        });
         checkbloxtautoReply = (CheckBoxPreference) getPreferenceManager().findPreference("autoReply");
         checkbloxtautoReply.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             public boolean onPreferenceChange(Preference preference, Object newValue) {
@@ -274,10 +251,9 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(switchReceiver, new IntentFilter("com.ponnex.justdrive.MainActivity"));
     }
 
-    private EditText phonenumber;
-    private View positiveAction;
-
     private void showBasicNoTitleNumberCheck() {
+        EditText phonenumber;
+
         MaterialDialog dialog = new MaterialDialog.Builder(getActivity())
                 .title(R.string.phonenumber)
                 .customView(R.layout.dialog_numberview, true)
