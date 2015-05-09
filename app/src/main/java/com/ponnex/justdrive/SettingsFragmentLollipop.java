@@ -26,6 +26,7 @@ import android.widget.EditText;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 
+import com.afollestad.materialdialogs.prefs.MaterialEditTextPreference;
 import com.nispok.snackbar.Snackbar;
 import com.nispok.snackbar.SnackbarManager;
 
@@ -455,8 +456,8 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
     }
 
     private void updatePreference(Preference preference) {
-        if (preference instanceof EditTextPreference) {
-            EditTextPreference editbloxtmsg = (EditTextPreference) preference;
+        if (preference instanceof MaterialEditTextPreference) {
+            MaterialEditTextPreference editbloxtmsg = (MaterialEditTextPreference) preference;
             preference.setSummary("''" + editbloxtmsg.getText()+ " --This is an automated SMS--''");
 
             if (editbloxtmsg.getText() == null || editbloxtmsg.getText().equals("")) {
