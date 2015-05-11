@@ -9,13 +9,6 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent">
 
-        <!--
-        <fragment android:name="com.ponnex.justdrive.SettingsFragment"
-            android:id="@+id/preferences"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-            -->
-
         <FrameLayout
             android:id="@+id/container"
             android:layout_width="fill_parent"
@@ -34,9 +27,9 @@
                 android:layout_gravity="bottom|end"
                 android:layout_margin="16dp"
                 android:src="@drawable/ic_bloxtoff"
-                fab:fab_colorNormal="@color/fab_ripple_main"
-                fab:fab_colorPressed="@color/fab_pressed_main"
-                fab:fab_colorRipple="@color/fab_ripple_main" />
+                fab:fab_colorNormal="?attr/colorAccent"
+                fab:fab_colorPressed="?attr/color"
+                fab:fab_colorRipple="?attr/colorAccent" />
 
             <com.melnykov.fab.FloatingActionButton
                 android:id="@+id/fab_main1"
@@ -45,9 +38,9 @@
                 android:layout_gravity="bottom|end"
                 android:layout_margin="16dp"
                 android:src="@drawable/ic_bloxton"
-                fab:fab_colorNormal="@color/fab_primary_main"
-                fab:fab_colorPressed="@color/fab_pressed_main"
-                fab:fab_colorRipple="@color/fab_ripple_main" />
+                fab:fab_colorNormal="?attr/color"
+                fab:fab_colorPressed="?attr/colorAccent"
+                fab:fab_colorRipple="?attr/color" />
 
         </FrameLayout>
     </RelativeLayout>

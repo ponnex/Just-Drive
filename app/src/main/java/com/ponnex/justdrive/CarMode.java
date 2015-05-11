@@ -239,6 +239,8 @@ public class CarMode extends Service {
 
         stopService(new Intent(CarMode.this, NotificationListener.class));
 
+        LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(bluetoothreceiver);
+
         super.onDestroy();
     }
 

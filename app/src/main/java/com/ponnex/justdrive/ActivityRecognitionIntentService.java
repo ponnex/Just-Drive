@@ -163,6 +163,8 @@ public class ActivityRecognitionIntentService extends IntentService {
     @Override
     public void onDestroy(){
         Log.d(TAG, "ARIS Destroyed");
+        LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(notifReceiver);
+        LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(notifReceiver1);
         super.onDestroy();
     }
 }

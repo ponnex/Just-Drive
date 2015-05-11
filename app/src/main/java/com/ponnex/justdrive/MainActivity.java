@@ -7,14 +7,16 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,7 +33,7 @@ import com.nispok.snackbar.SnackbarManager;
  * Created by ramos on 4/15/2015.
  */
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends AppCompatActivity {
 
     private View view1;
     private View view2;
@@ -40,10 +42,17 @@ public class MainActivity extends ActionBarActivity {
 
     private LocalBroadcastManager broadcastManager;
 
-    public final static int LIGHT = 0;
-    public final static int DARK = 1;
+    public final static int ORANGELIGHT = 0;
+    public final static int ORANGEDARK = 1;
+    public final static int BLUEGREYLIGHT = 2;
+    public final static int BLUEGREYDARK = 3;
+    public final static int INDIGOLIGHT = 4;
+    public final static int INDIGODARK = 5;
 
     static boolean active = false;
+
+    private Integer theme;
+    private Integer color;
 
     private String TAG = "com.ponnex.justdrive.MainActivity";
 
@@ -55,14 +64,26 @@ public class MainActivity extends ActionBarActivity {
         }
 
         SharedPreferences mSharedPreference1 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        final Integer theme = (mSharedPreference1.getInt("theme", 1));
+        theme = (mSharedPreference1.getInt("theme", 1));
 
         switch (theme) {
-            case LIGHT:
-                setTheme(R.style.JustDriveLightTheme);
+            case ORANGELIGHT:
+                setTheme(R.style.JustDriveOrangeLightTheme);
                 break;
-            case DARK:
-                setTheme(R.style.JustDriveDarkTheme);
+            case ORANGEDARK:
+                setTheme(R.style.JustDriveOrangeDarkTheme);
+                break;
+            case BLUEGREYLIGHT:
+                setTheme(R.style.JustDriveBlueGreyLightTheme);
+                break;
+            case BLUEGREYDARK:
+                setTheme(R.style.JustDriveBlueGreyDarkTheme);
+                break;
+            case INDIGOLIGHT:
+                setTheme(R.style.JustDriveIndigoLightTheme);
+                break;
+            case INDIGODARK:
+                setTheme(R.style.JustDriveIndigoDarkTheme);
                 break;
 
             default:
@@ -70,7 +91,7 @@ public class MainActivity extends ActionBarActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if (Build.VERSION.SDK_INT>=21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             getFragmentManager().beginTransaction().replace(R.id.container, new SettingsFragmentLollipop()).commit();
         }else{
             getFragmentManager().beginTransaction().replace(R.id.container, new SettingsFragment()).commit();
@@ -99,6 +120,11 @@ public class MainActivity extends ActionBarActivity {
 
         broadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
 
+        TypedValue typedValue = new TypedValue();
+        Resources.Theme themecolor = getTheme();
+        themecolor.resolveAttribute(R.attr.colorAccent, typedValue, true);
+        color = typedValue.data;
+
         view1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -120,16 +146,7 @@ public class MainActivity extends ActionBarActivity {
                     sendSwitchInfo(false);
                     sendNotifInfo(false);
 
-                    if (theme == 1) {
-                        SnackbarManager.show(
-                                Snackbar.with(MainActivity.this)
-                                        .position(Snackbar.SnackbarPosition.TOP)
-                                        .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
-                                        .textColor(Color.parseColor("#FFFFFF"))
-                                        .color(Color.parseColor("#FF3D00"))
-                                        .text("Just Drive is Disabled")
-                                , (android.view.ViewGroup) findViewById(R.id.main_frame));
-                    } else {
+                    if ((theme % 2) == 0) {
                         SnackbarManager.show(
                                 Snackbar.with(MainActivity.this)
                                         .position(Snackbar.SnackbarPosition.TOP)
@@ -137,7 +154,18 @@ public class MainActivity extends ActionBarActivity {
                                         .textColor(Color.parseColor("#FFFFFF"))
                                         .text("Just Drive is Disabled")
                                 , (android.view.ViewGroup) findViewById(R.id.main_frame));
+                    }
 
+
+                    else {
+                        SnackbarManager.show(
+                                Snackbar.with(MainActivity.this)
+                                        .position(Snackbar.SnackbarPosition.TOP)
+                                        .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
+                                        .textColor(Color.parseColor("#FFFFFF"))
+                                        .color(color)
+                                        .text("Just Drive is Disabled")
+                                , (android.view.ViewGroup) findViewById(R.id.main_frame));
                     }
 
                     SharedPreferences isCountup2 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -170,21 +198,23 @@ public class MainActivity extends ActionBarActivity {
                 startService(new Intent(getApplication(), ActivityRecognitionIntentService.class));
                 sendSwitchInfo(true);
 
-                if (theme == 1) {
+                if ((theme % 2) == 0) {
                     SnackbarManager.show(
                             Snackbar.with(MainActivity.this)
                                     .position(Snackbar.SnackbarPosition.TOP)
                                     .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
                                     .textColor(Color.parseColor("#FFFFFF"))
-                                    .color(Color.parseColor("#FF3D00"))
                                     .text("Just Drive is Enabled")
                             , (android.view.ViewGroup) findViewById(R.id.main_frame));
-                } else {
+                }
+
+                else {
                     SnackbarManager.show(
                             Snackbar.with(MainActivity.this)
                                     .position(Snackbar.SnackbarPosition.TOP)
                                     .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
                                     .textColor(Color.parseColor("#FFFFFF"))
+                                    .color(color)
                                     .text("Just Drive is Enabled")
                             , (android.view.ViewGroup) findViewById(R.id.main_frame));
                 }
@@ -294,6 +324,7 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     protected void onDestroy() {
+        LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(switchReceiver1);
         SharedPreferences mSharedPreference = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         Boolean isSwitch = (mSharedPreference.getBoolean("isSwitch", true));
 
@@ -346,24 +377,27 @@ public class MainActivity extends ActionBarActivity {
             //add runnable
             if (isPressOnce) {
 
-                if (theme==1) {
-                    SnackbarManager.show(
-                            Snackbar.with(MainActivity.this)
-                                    .position(Snackbar.SnackbarPosition.BOTTOM)
-                                    .duration(Snackbar.SnackbarDuration.LENGTH_LONG)
-                                    .textColor(Color.parseColor("#FFFFFF"))
-                                    .color(Color.parseColor("#FF3D00"))
-                                    .text("Press back again to leave")
-                            , (android.view.ViewGroup) findViewById(R.id.layout_main));
-                } else {
+                if ((theme % 2) == 0){
                     SnackbarManager.show(
                             Snackbar.with(MainActivity.this)
                                     .position(Snackbar.SnackbarPosition.BOTTOM)
                                     .duration(Snackbar.SnackbarDuration.LENGTH_LONG)
                                     .textColor(Color.parseColor("#FFFFFF"))
                                     .text("Press back again to leave")
-                            , (android.view.ViewGroup) findViewById(R.id.layout_main));
+                            , (android.view.ViewGroup) findViewById(R.id.main_frame));
                 }
+
+                else  {
+                    SnackbarManager.show(
+                            Snackbar.with(MainActivity.this)
+                                    .position(Snackbar.SnackbarPosition.BOTTOM)
+                                    .duration(Snackbar.SnackbarDuration.LENGTH_LONG)
+                                    .textColor(Color.parseColor("#FFFFFF"))
+                                    .color(color)
+                                    .text("Press back again to leave")
+                            , (android.view.ViewGroup) findViewById(R.id.main_frame));
+                }
+
                 SharedPreferences isPressOnceup = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                 SharedPreferences.Editor editor = isPressOnceup.edit();
                 editor.putBoolean("isPressOnce", false);

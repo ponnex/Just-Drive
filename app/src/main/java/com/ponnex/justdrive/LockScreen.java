@@ -95,7 +95,6 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(testReceiver, new IntentFilter("com.ponnex.justdrive.DebuggingActivity"));
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(testReceiver1, new IntentFilter("com.ponnex.justdrive.DebuggingActivity1"));
         setUpLayout();
-        gpsNotification();
         current = (AudioManager) this.getSystemService(Service.AUDIO_SERVICE);
     }
 
@@ -239,6 +238,8 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
         SharedPreferences.Editor editor2 = isHeadsup.edit();
         editor2.putBoolean("headsup", false);
         editor2.apply();
+
+        gpsNotification();
     }
 
     private void ServiceOff(){
@@ -473,12 +474,17 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
             mGoogleApiClient.disconnect();
         }
         try {
-        unregisterReceiver(screenReceiver);
-        unregisterReceiver(switchReceiver);
-        unregisterReceiver(cancelReceiver);
+            LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(screenReceiver);
+            LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(switchReceiver);
+            LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(switchReceiver1);
+            LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(cancelReceiver);
+            LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(testReceiver);
+            LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(testReceiver1);
+
         } catch (RuntimeException e) {
             e.printStackTrace();
         }
+
         if(isServiceRunning()){
             stopService(new Intent(getApplicationContext(), CarMode.class));
         }
@@ -561,7 +567,7 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
                 .setContentIntent(pendingIntent)
                 .setFullScreenIntent(pendingIntent, true)
                 .setVibrate(pattern)
-                .setAutoCancel(false)
+                .setOngoing(true)
                 .setPriority(1)
                         //Set whether to display the action buttons
                 .setUsesChronometer(true)
@@ -594,7 +600,7 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
                 .setContentIntent(pendingIntent)
                 .setFullScreenIntent(pendingIntent, true)
                 .setVibrate(pattern)
-                .setAutoCancel(false)
+                .setOngoing(true)
                 .setPriority(1)
                         //Set whether to display the action buttons
                 .setUsesChronometer(true)
@@ -680,7 +686,7 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
         lockscreenHandler.postDelayed(lockrun, TIMER_COUNT);
     }
 
-    private void launchLockwithtimerTEST(){
+    private void launchLockwithtimerTEST() {
         Log.d(TAG, "launchLockwithtimerTEST");
 
         try {

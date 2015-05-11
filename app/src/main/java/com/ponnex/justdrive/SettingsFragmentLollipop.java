@@ -6,26 +6,19 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
-import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
 import android.preference.SwitchPreference;
 import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.TelephonyManager;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
-import android.widget.EditText;
 
-import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
-
-import com.afollestad.materialdialogs.prefs.MaterialEditTextPreference;
 import com.nispok.snackbar.Snackbar;
 import com.nispok.snackbar.SnackbarManager;
 
@@ -33,22 +26,20 @@ import com.nispok.snackbar.SnackbarManager;
  * Created by ramos on 4/15/2015.
  */
 
-public class SettingsFragmentLollipop extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener{
+public class SettingsFragmentLollipop extends PreferenceFragment{
     SharedPreferences prefs;
     private LocalBroadcastManager broadcastManager;
     private LocalBroadcastManager broadcastManager1;
     private SwitchPreference switchbloxt;
     static String mPhoneNumber;
     static boolean active = false;
-    private View positiveAction;
+    private Integer theme;
+    private Integer color;
 
     private String TAG = "com.ponnex.justdrive.SettingsFragmentLollipop";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        CheckBoxPreference checkbloxtautoReply;
-        CheckBoxPreference checkbloxtstartonboot;
-        CheckBoxPreference checkbloxtnotify;
         Preference preferencebloxt;
 
         super.onCreate(savedInstanceState);
@@ -64,24 +55,16 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
         editor.apply();
 
         SharedPreferences mSharedPreference6= PreferenceManager.getDefaultSharedPreferences(getActivity());
-        final Integer theme = (mSharedPreference6.getInt("theme", 1));
-
-        getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
+        theme = (mSharedPreference6.getInt("theme", 1));
 
         SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getActivity());
         Boolean isSwitch = (mSharedPreference.getBoolean("switch", true));
-
-        SharedPreferences mSharedPreference2= PreferenceManager.getDefaultSharedPreferences(getActivity());
-        Boolean isautoReply = (mSharedPreference2.getBoolean("autoReply", true));
 
         SharedPreferences mSharedPreference3= PreferenceManager.getDefaultSharedPreferences(getActivity());
         Boolean isstartonboot = (mSharedPreference3.getBoolean("startonboot", true));
 
         SharedPreferences mSharedPreference4= PreferenceManager.getDefaultSharedPreferences(getActivity());
         Boolean isnotify = (mSharedPreference4.getBoolean("notification", true));
-
-        SharedPreferences mSharedPreference5= PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String isMsg=(mSharedPreference5.getString("msg", "I am driving right now, I will contact you later."));
 
         if (isSwitch){
             getPreferenceScreen().findPreference("switch").setSummary("Enabled");
@@ -90,28 +73,24 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
             getPreferenceScreen().findPreference("switch").setSummary("Disabled");
         }
 
-        if (isautoReply){
-            getPreferenceScreen().findPreference("autoReply").setSummary("Enabled.");
-        }
-        else {
-            getPreferenceScreen().findPreference("autoReply").setSummary("Disabled");
-        }
-
         if (isstartonboot){
-            getPreferenceScreen().findPreference("startonboot").setSummary("Start Just Drive on boot");
+            getPreferenceScreen().findPreference("startonboot").setSummary("Enable Just Drive on boot");
         }
         else {
-            getPreferenceScreen().findPreference("startonboot").setSummary("Do not start Just Drive on boot");
+            getPreferenceScreen().findPreference("startonboot").setSummary("Disable Just Drive on boot");
         }
 
         if (isnotify){
-            getPreferenceScreen().findPreference("notification").setSummary("Show notifications of activities.");
+            getPreferenceScreen().findPreference("notification").setSummary("Show notifications of activities");
         }
         else {
-            getPreferenceScreen().findPreference("notification").setSummary("Hide notifications of activities.");
+            getPreferenceScreen().findPreference("notification").setSummary("Hide notifications of activities");
         }
 
-        getPreferenceScreen().findPreference("msg").setSummary("''" + isMsg + " --This is an automated SMS--''");
+        TypedValue typedValue = new TypedValue();
+        Resources.Theme themecolor = getActivity().getTheme();
+        themecolor.resolveAttribute(R.attr.colorAccent, typedValue, true);
+        color = typedValue.data;
 
         broadcastManager = LocalBroadcastManager.getInstance(getActivity());
         broadcastManager1 = LocalBroadcastManager.getInstance(getActivity());
@@ -133,21 +112,23 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
 
                     getPreferenceScreen().findPreference("switch").setSummary("Enabled");
 
-                    if (theme == 1) {
+                    if ((theme % 2) == 0) {
                         SnackbarManager.show(
                                 Snackbar.with(getActivity())
                                         .position(Snackbar.SnackbarPosition.BOTTOM)
                                         .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
                                         .textColor(Color.parseColor("#FFFFFF"))
-                                        .color(Color.parseColor("#FF3D00"))
                                         .text("Just Drive is Enabled")
                                 , (android.view.ViewGroup) getActivity().findViewById(R.id.main_frame));
-                    } else {
+                    }
+
+                    else {
                         SnackbarManager.show(
                                 Snackbar.with(getActivity())
                                         .position(Snackbar.SnackbarPosition.BOTTOM)
                                         .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
                                         .textColor(Color.parseColor("#FFFFFF"))
+                                        .color(color)
                                         .text("Just Drive is Enabled")
                                 , (android.view.ViewGroup) getActivity().findViewById(R.id.main_frame));
                     }
@@ -162,16 +143,7 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
 
                     sendNotifInfo(false);
 
-                    if (theme == 1) {
-                        SnackbarManager.show(
-                                Snackbar.with(getActivity())
-                                        .position(Snackbar.SnackbarPosition.BOTTOM)
-                                        .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
-                                        .textColor(Color.parseColor("#FFFFFF"))
-                                        .color(Color.parseColor("#FF3D00"))
-                                        .text("Just Drive is Disabled")
-                                , (android.view.ViewGroup) getActivity().findViewById(R.id.main_frame));
-                    } else {
+                    if ((theme % 2) == 0) {
                         SnackbarManager.show(
                                 Snackbar.with(getActivity())
                                         .position(Snackbar.SnackbarPosition.BOTTOM)
@@ -180,10 +152,36 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
                                         .text("Just Drive is Disabled")
                                 , (android.view.ViewGroup) getActivity().findViewById(R.id.main_frame));
                     }
+
+                    else {
+                        SnackbarManager.show(
+                                Snackbar.with(getActivity())
+                                        .position(Snackbar.SnackbarPosition.BOTTOM)
+                                        .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
+                                        .textColor(Color.parseColor("#FFFFFF"))
+                                        .color(color)
+                                        .text("Just Drive is Disabled")
+                                , (android.view.ViewGroup) getActivity().findViewById(R.id.main_frame));
+                    }
+
                     SharedPreferences isCountup2 = PreferenceManager.getDefaultSharedPreferences(getActivity());
                     SharedPreferences.Editor editor2 = isCountup2.edit();
                     editor2.putInt("isCount", 0);
                     editor2.apply();
+                }
+                return true;
+            }
+        });
+
+        switchbloxt = (SwitchPreference) getPreferenceManager().findPreference("phone");
+        switchbloxt.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+
+                if (newValue.toString().equals("true")) {
+                    getPreferenceScreen().findPreference("phone").setSummary("Read caller ID of incoming phone calls");
+                }
+                if (newValue.toString().equals("false")) {
+                    getPreferenceScreen().findPreference("phone").setSummary("Disable");
                 }
                 return true;
             }
@@ -197,37 +195,12 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
             }
         });
 
-        checkbloxtautoReply = (CheckBoxPreference) getPreferenceManager().findPreference("autoReply");
-        checkbloxtautoReply.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+        switchbloxt = (SwitchPreference) getPreferenceManager().findPreference("startonboot");
+        switchbloxt.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             public boolean onPreferenceChange(Preference preference, Object newValue) {
 
                 if (newValue.toString().equals("true")) {
-
-                    SharedPreferences mSharedPreference2 = PreferenceManager.getDefaultSharedPreferences(getActivity());
-                    String isPhoneNumber = (mSharedPreference2.getString("PhoneNumber", null));
-
-                    if (isPhoneNumber == null){
-                        showBasicNoTitleNumberCheck();
-                    }
-                    else {
-                        getPreferenceScreen().findPreference("autoReply").setSummary("Auto reply Enabled.");
-                        Log.d(TAG, isPhoneNumber);
-                    }
-
-                }
-                if (newValue.toString().equals("false")) {
-                    getPreferenceScreen().findPreference("autoReply").setSummary("Auto reply Disabled.");
-                }
-                return true;
-            }
-        });
-
-        checkbloxtstartonboot = (CheckBoxPreference) getPreferenceManager().findPreference("startonboot");
-        checkbloxtstartonboot.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-
-                if (newValue.toString().equals("true")) {
-                    getPreferenceScreen().findPreference("startonboot").setSummary("Start Just Drive on boot");
+                    getPreferenceScreen().findPreference("startonboot").setSummary("Enable Just Drive on boot");
                 }
                 if (newValue.toString().equals("false")) {
                     showBasicNoTitle();
@@ -236,16 +209,16 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
             }
         });
 
-        checkbloxtnotify = (CheckBoxPreference) getPreferenceManager().findPreference("notification");
-        checkbloxtnotify.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+        switchbloxt = (SwitchPreference) getPreferenceManager().findPreference("notification");
+        switchbloxt.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             public boolean onPreferenceChange(Preference preference, Object newValue) {
 
                 if (newValue.toString().equals("true")) {
-                    getPreferenceScreen().findPreference("notification").setSummary("Show notifications of activities.");
+                    getPreferenceScreen().findPreference("notification").setSummary("Show notifications of activities");
                     sendNotifInfo(true);
                 }
                 if (newValue.toString().equals("false")) {
-                    getPreferenceScreen().findPreference("notification").setSummary("Hide notifications of activities.");
+                    getPreferenceScreen().findPreference("notification").setSummary("Hide notifications of activities");
                     sendNotifInfo(false);
                 }
                 return true;
@@ -257,58 +230,6 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
 
     }
 
-    private void showBasicNoTitleNumberCheck() {
-        EditText phonenumber;
-
-        MaterialDialog dialog = new MaterialDialog.Builder(getActivity())
-                .title(R.string.phonenumber)
-                .customView(R.layout.dialog_numberview, true)
-                .positiveText(R.string.yes_update)
-                .callback(new MaterialDialog.ButtonCallback() {
-                    @Override
-                    public void onPositive(MaterialDialog dialog) {
-                        SharedPreferences mSharedPreference2 = PreferenceManager.getDefaultSharedPreferences(getActivity());
-                        String isPhoneNumber = (mSharedPreference2.getString("PhoneNumber", null));
-
-                        getPreferenceScreen().findPreference("autoReply").setSummary("Auto reply Enabled.");
-
-                        Log.d(TAG, isPhoneNumber);
-                    }
-                })
-                .cancelListener(new DialogInterface.OnCancelListener() {
-                    @Override
-                    public void onCancel(DialogInterface dialog) {
-
-                    }
-                }).build();
-
-        positiveAction = dialog.getActionButton(DialogAction.POSITIVE);
-        phonenumber = (EditText) dialog.getCustomView().findViewById(R.id.phonenumber);
-        phonenumber.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-                positiveAction.setEnabled(s.toString().trim().length() > 6);
-                SharedPreferences isPhoneNumber = PreferenceManager.getDefaultSharedPreferences(getActivity());
-                SharedPreferences.Editor editor = isPhoneNumber.edit();
-                editor.putString("PhoneNumber", s.toString());
-                editor.apply();
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
-        dialog.show();
-        positiveAction.setEnabled(false);
-    }
-
     private void showBasicNoTitle() {
         new MaterialDialog.Builder(getActivity())
                 .content(R.string.startonbootmsg)
@@ -317,12 +238,12 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
                 .callback(new MaterialDialog.ButtonCallback() {
                     @Override
                     public void onPositive(MaterialDialog dialog) {
-                        getPreferenceScreen().findPreference("startonboot").setSummary("Do not start Just Drive on boot");
+                        getPreferenceScreen().findPreference("startonboot").setSummary("Disable Just Drive on boot");
                     }
 
                     @Override
                     public void onNegative(MaterialDialog dialog) {
-                        CheckBoxPreference startcheck = (CheckBoxPreference) findPreference("startonboot");
+                        SwitchPreference startcheck = (SwitchPreference) findPreference("startonboot");
                         startcheck.setChecked(true);
                     }
 
@@ -330,8 +251,8 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
                 .cancelListener(new DialogInterface.OnCancelListener() {
                     @Override
                     public void onCancel(DialogInterface dialog) {
-                        getPreferenceScreen().findPreference("startonboot").setSummary("Start Just Drive on boot");
-                        CheckBoxPreference checkPrefs = (CheckBoxPreference) findPreference("startonboot");
+                        getPreferenceScreen().findPreference("startonboot").setSummary("Enable Just Drive on boot");
+                        SwitchPreference checkPrefs = (SwitchPreference) findPreference("startonboot");
                         checkPrefs.setChecked(true);
                     }
                 })
@@ -344,12 +265,12 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
         new MaterialDialog.Builder(getActivity())
                 .title(R.string.themetitle)
                 .items(R.array.theme_values)
-                .itemsCallbackSingleChoice(2, new MaterialDialog.ListCallbackSingleChoice() {
+                .itemsCallbackSingleChoice(theme, new MaterialDialog.ListCallbackSingleChoice() {
                     @Override
                     public boolean onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
 
                         SharedPreferences mSharedPreference = PreferenceManager.getDefaultSharedPreferences(getActivity());
-                        final Integer theme = (mSharedPreference.getInt("theme", 1));
+                        theme = (mSharedPreference.getInt("theme", 1));
 
                         //if current theme not equal to the selected theme then apply
                         if (theme != which) {
@@ -429,42 +350,5 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
     public void onStop() {
         super.onStop();
         active = false;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        try {
-            for (int i = 0; i < getPreferenceScreen().getPreferenceCount(); ++i) {
-                Preference preference = getPreferenceScreen().getPreference(i);
-                if (preference instanceof PreferenceGroup) {
-                    PreferenceGroup preferenceGroup = (PreferenceGroup) preference;
-                    for (int j = 0; j < preferenceGroup.getPreferenceCount(); ++j) {
-                        updatePreference(preferenceGroup.getPreference(j));
-                    }
-                } else {
-                    updatePreference(preference);
-                }
-            }
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        updatePreference(findPreference(key));
-    }
-
-    private void updatePreference(Preference preference) {
-        if (preference instanceof MaterialEditTextPreference) {
-            MaterialEditTextPreference editbloxtmsg = (MaterialEditTextPreference) preference;
-            preference.setSummary("''" + editbloxtmsg.getText()+ " --This is an automated SMS--''");
-
-            if (editbloxtmsg.getText() == null || editbloxtmsg.getText().equals("")) {
-                preference.setSummary("''I am driving right now, I will contact you later. --This is an automated SMS--''");
-
-            }
-        }
     }
 }

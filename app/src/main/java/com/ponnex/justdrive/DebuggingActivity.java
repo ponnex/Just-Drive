@@ -6,13 +6,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -25,41 +28,62 @@ import com.nispok.snackbar.SnackbarManager;
  * Created by ramos on 4/15/2015.
  */
 
-public class DebuggingActivity extends ActionBarActivity {
+public class DebuggingActivity extends AppCompatActivity {
     private static TextView activityTV;
 
-    public final static int LIGHT  = 0;
-    public final static int DARK  = 1;
+    public final static int ORANGELIGHT = 0;
+    public final static int ORANGEDARK = 1;
+    public final static int BLUEGREYLIGHT = 2;
+    public final static int BLUEGREYDARK = 3;
+    public final static int INDIGOLIGHT = 4;
+    public final static int INDIGODARK = 5;
 
     private LocalBroadcastManager broadcastManager;
 
     Button testbutton;
     Button testbutton1;
     private static int audioMode;
+    private Integer theme;
+    private Integer color;
+
+    private String TAG = "com.ponnex.justdrive.DebuggingActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        if (getIntent().hasExtra("bundle") && savedInstanceState==null){
+        if (getIntent().hasExtra("bundle") && savedInstanceState == null){
             savedInstanceState = getIntent().getExtras().getBundle("bundle");
         }
 
         SharedPreferences mSharedPreference1= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        Integer theme = (mSharedPreference1.getInt("theme", 1));
+        theme = (mSharedPreference1.getInt("theme", 1));
 
         switch(theme)
         {
-            case LIGHT:
-                setTheme(R.style.JustDriveLightTheme);
+            case ORANGELIGHT:
+                setTheme(R.style.JustDriveOrangeLightTheme);
                 break;
-            case DARK:
-                setTheme(R.style.JustDriveDarkTheme);
+            case ORANGEDARK:
+                setTheme(R.style.JustDriveOrangeDarkTheme);
+                break;
+            case BLUEGREYLIGHT:
+                setTheme(R.style.JustDriveBlueGreyLightTheme);
+                break;
+            case BLUEGREYDARK:
+                setTheme(R.style.JustDriveBlueGreyDarkTheme);
+                break;
+            case INDIGOLIGHT:
+                setTheme(R.style.JustDriveIndigoLightTheme);
+                break;
+            case INDIGODARK:
+                setTheme(R.style.JustDriveIndigoDarkTheme);
                 break;
 
             default:
         }
 
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "DA Created");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setContentView(R.layout.activity_debugging);
         activityTV = (TextView) findViewById(R.id.debugText);
@@ -72,25 +96,32 @@ public class DebuggingActivity extends ActionBarActivity {
         SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         Boolean isSwitch=(mSharedPreference.getBoolean("isSwitch", true));
 
+        TypedValue typedValue = new TypedValue();
+        Resources.Theme themecolor = getTheme();
+        themecolor.resolveAttribute(R.attr.colorAccent, typedValue, true);
+        color = typedValue.data;
+
         if(!isSwitch){
             activityTV.setText("Can't Read Activity :(");
 
-            if (theme==1) {
+            if((theme % 2) == 0){
                 SnackbarManager.show(
                         Snackbar.with(DebuggingActivity.this)
                                 .position(Snackbar.SnackbarPosition.BOTTOM)
                                 .duration(Snackbar.SnackbarDuration.LENGTH_INDEFINITE)
                                 .textColor(Color.parseColor("#FFFFFF"))
-                                .color(Color.parseColor("#FF3D00"))
                                 .text("Please Enable Bloxt Services")
                                 .swipeToDismiss(false)
                         , (android.view.ViewGroup) findViewById(R.id.list_layout));
-            }else{
+            }
+
+            else {
                 SnackbarManager.show(
                         Snackbar.with(DebuggingActivity.this)
                                 .position(Snackbar.SnackbarPosition.BOTTOM)
                                 .duration(Snackbar.SnackbarDuration.LENGTH_INDEFINITE)
-                                .textColor(Color.parseColor("#FF3D00"))
+                                .textColor(Color.parseColor("#FFFFFF"))
+                                .color(color)
                                 .text("Please Enable Bloxt Services")
                                 .swipeToDismiss(false)
                         , (android.view.ViewGroup) findViewById(R.id.list_layout));
@@ -187,7 +218,7 @@ public class DebuggingActivity extends ActionBarActivity {
         broadcastManager.sendBroadcast(intent);
     }
 
-    private BroadcastReceiver screenReceiver=new BroadcastReceiver() {
+    private BroadcastReceiver screenReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String activity = intent.getStringExtra("Activity");
@@ -197,6 +228,13 @@ public class DebuggingActivity extends ActionBarActivity {
 
     public static void updateUI(String activity) {
         activityTV.setText(activity);
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        Log.d(TAG, "DA Destroyed");
+        LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(screenReceiver);
     }
 }
 
