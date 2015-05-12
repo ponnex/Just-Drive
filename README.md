@@ -27,8 +27,8 @@ Using the newest Activity Recognition API by Google, Just Drive detects your act
 #####Feel Free to customize your auto reply message
 ![Auto Reply Message](http://s29.postimg.org/5x621c1jb/Auto_Reply_Message.png)
 
-#Debugging Mode
-#####Debugging Mode
+#Debugging Mode (PRE-RELEASE) will be remove before shipping to Play Store
+#####Debugging Mode (PRE-RELEASE) will be remove before shipping to Play Store
 ![Debugging Mode](http://s29.postimg.org/4jef6129z/Debugging_Mode.png)
 #####HeadsUp notification that will prompt to ask if you're a *Driver* or a *Passenger*.
 ![HeadsUp](http://s29.postimg.org/djnm3ynrb/Heads_Up.png)
@@ -52,7 +52,30 @@ Using the newest Activity Recognition API by Google, Just Drive detects your act
 #####Indigo Light
 ![Indigo Light](http://s29.postimg.org/x2s7dbmiv/Indigo_Light.png)
 
+WHAT'S NEXT?
+=======
+I'm currently working on the following implementations:
 
+• Emergency Call on Lock screen
+• Disable lock screen by speed test
+• On-Screen test to disable lock screen
+• Mimick lockscreen with clock widget and peek notifications
+• Logging of detected activies (for testing accuracies - PRE-RELEASE)
+• Car Dock - Music, GPS, etc
 
+CREDITS
+=======
+
+Without the help and the contribution of the following open source libraries this app would not be as awesome as it is! :D
+
+[Material Preference by jenzz](https://github.com/jenzz/Android-MaterialPreference)
+
+[HeadsUp by zzz40500](https://github.com/zzz40500/HeadsUp)
+
+[Material Dialogs by afollestad](https://github.com/afollestad/material-dialogs)
+
+[FloatingActionButton by makovkastar](https://github.com/makovkastar/FloatingActionButton)
+
+[NineOldAndroids by JakeWharton](https://github.com/JakeWharton/NineOldAndroids/)
 
 
