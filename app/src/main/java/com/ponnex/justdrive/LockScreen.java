@@ -64,7 +64,6 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
         return null;
     }
 
-
     @Override
     public void onCreate(){
         super.onCreate();
@@ -238,8 +237,6 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
         SharedPreferences.Editor editor2 = isHeadsup.edit();
         editor2.putBoolean("headsup", false);
         editor2.apply();
-
-        gpsNotification();
     }
 
     private void ServiceOff(){
@@ -434,32 +431,6 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
         mGoogleApiClient.connect();
     }
 
-    private void gpsNotification() {
-        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            // Create a notification builder that's compatible with platforms >= version 4
-            NotificationCompat.Builder builder =
-                    new NotificationCompat.Builder(getApplicationContext());
-            Intent gpsIntent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-            PendingIntent gpsPI = PendingIntent.getActivity(getApplicationContext(), 0, gpsIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT);
-            // Set the title, text, and icon
-            builder.setContentTitle(getString(R.string.app_name))
-                    .setContentText("Turn on GPS for better accuracy")
-                    .setSmallIcon(R.drawable.ic_notification)
-
-                            // Get the Intent that starts the Location settings panel
-                    .setContentIntent(gpsPI);
-
-            // Get an instance of the Notification Manager
-            NotificationManager notifyManager = (NotificationManager)
-                    getSystemService(Context.NOTIFICATION_SERVICE);
-
-            // Build the notification and post it
-            notifyManager.notify(0, builder.build());
-        }
-    }
-
     @Override
     public int onStartCommand(Intent intent,int flags,int startId){
         //keep the service running
@@ -565,9 +536,9 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
                 .setContentText("Ignore or Dismiss if you're Driving")
                         //2.3 ?To set this parameter set, will be responsible for the error
                 .setContentIntent(pendingIntent)
-                .setFullScreenIntent(pendingIntent, true)
+                .setFullScreenIntent(pendingIntent, false)
                 .setVibrate(pattern)
-                .setOngoing(true)
+                .setSticky(true)
                 .setPriority(1)
                         //Set whether to display the action buttons
                 .setUsesChronometer(true)
@@ -593,14 +564,14 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
         builder.setContentTitle("Are you driving?")
                 .setTicker("Just Drive needs your attention")
                 .setDefaults(Notification.DEFAULT_SOUND)
-                //To display the notification bar notification, this must be set
+                        //To display the notification bar notification, this must be set
                 .setSmallIcon(R.drawable.ic_driving)
                 .setContentText("Ignore or Dismiss if you're Driving")
                         //2.3 ?To set this parameter set, will be responsible for the error
                 .setContentIntent(pendingIntent)
-                .setFullScreenIntent(pendingIntent, true)
+                .setFullScreenIntent(pendingIntent, false)
                 .setVibrate(pattern)
-                .setOngoing(true)
+                .setSticky(true)
                 .setPriority(1)
                         //Set whether to display the action buttons
                 .setUsesChronometer(true)
@@ -618,7 +589,7 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
         // Set the title, text, and icon
         builder.setContentTitle("Just Drive")
                 .setContentText("No text, tweet, Facebook update, or email is worth your life. Put the phone down and Just Drive")
-                .setSmallIcon(R.drawable.driver)
+                .setSmallIcon(R.mipmap.ic_launcher)
                 .setPriority(1);
                         // Get the Intent that starts the Location settings panel
         // Get an instance of the Notification Manager
@@ -655,6 +626,7 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
                         if (!isCancelup) {
                             showing = true;
                             windowManager.addView(relativeLayout, layoutparams);
+
                             if (!isServiceRunning()) {
                                 startService(new Intent(LockScreen.this, CarMode.class));
                             }
@@ -690,6 +662,7 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
         Log.d(TAG, "launchLockwithtimerTEST");
 
         try {
+
             showingtest = true;
             windowManager.addView(relativeLayout, layoutparams);
 
@@ -713,6 +686,9 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
             windowManager.removeView(relativeLayout);
             showing = false;
             showingtest = false;
+
+            NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            notificationManager.cancel(1);
 
             SharedPreferences isMsgfrom = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
             SharedPreferences.Editor editor = isMsgfrom.edit();

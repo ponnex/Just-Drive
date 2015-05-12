@@ -10,9 +10,12 @@ import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import com.afollestad.materialdialogs.DialogAction;
@@ -29,12 +32,14 @@ public class ReplySettingsFragmentLollipop extends PreferenceFragment implements
     static String mPhoneNumber;
     static boolean active = false;
     private View positiveAction;
+    private  MaterialEditTextPreference editbloxtmsg;
 
     private String TAG = "com.ponnex.justdrive.ReplySettingsFragmentLollipop";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        android.preference.CheckBoxPreference checkbloxtautoReply;
+        CheckBoxPreference checkbloxtautoReplyCalls;
+        CheckBoxPreference checkbloxtautoReply;
 
         super.onCreate(savedInstanceState);
         prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -50,20 +55,44 @@ public class ReplySettingsFragmentLollipop extends PreferenceFragment implements
 
         getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
 
+        SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getActivity());
+        Boolean isautoReplyCalls = (mSharedPreference.getBoolean("autoReplyCalls", true));
+
         SharedPreferences mSharedPreference2= PreferenceManager.getDefaultSharedPreferences(getActivity());
         Boolean isautoReply = (mSharedPreference2.getBoolean("autoReply", true));
 
         SharedPreferences mSharedPreference5= PreferenceManager.getDefaultSharedPreferences(getActivity());
         String isMsg=(mSharedPreference5.getString("msg", "I am driving right now, I will contact you later."));
 
+        if (isautoReplyCalls){
+            getPreferenceScreen().findPreference("autoReplyCalls").setSummary("Reply incoming calls with SMS");
+        }
+        else {
+            getPreferenceScreen().findPreference("autoReplyCalls").setSummary("Disabled");
+        }
+
         if (isautoReply){
-            getPreferenceScreen().findPreference("autoReply").setSummary("Enabled");
+            getPreferenceScreen().findPreference("autoReply").setSummary("Reply text messages with SMS");
         }
         else {
             getPreferenceScreen().findPreference("autoReply").setSummary("Disabled");
         }
 
         getPreferenceScreen().findPreference("msg").setSummary("''" + isMsg + " --This is an automated SMS--''");
+
+        checkbloxtautoReplyCalls = (CheckBoxPreference) getPreferenceManager().findPreference("autoReplyCalls");
+        checkbloxtautoReplyCalls.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+
+                if (newValue.toString().equals("true")) {
+                    getPreferenceScreen().findPreference("autoReplyCalls").setSummary("Reply incoming calls with SMS");
+                }
+                if (newValue.toString().equals("false")) {
+                    getPreferenceScreen().findPreference("autoReplyCalls").setSummary("Disabled");
+                }
+                return true;
+            }
+        });
 
         checkbloxtautoReply = (CheckBoxPreference) getPreferenceManager().findPreference("autoReply");
         checkbloxtautoReply.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
@@ -78,8 +107,7 @@ public class ReplySettingsFragmentLollipop extends PreferenceFragment implements
                         showBasicNoTitleNumberCheck();
                     }
                     else {
-                        getPreferenceScreen().findPreference("autoReply").setSummary("Enabled");
-                        Log.d(TAG, isPhoneNumber);
+                        getPreferenceScreen().findPreference("autoReply").setSummary("Reply text messages with SMS");
                     }
 
                 }
@@ -89,6 +117,21 @@ public class ReplySettingsFragmentLollipop extends PreferenceFragment implements
                 return true;
             }
         });
+
+        /*
+        editbloxtmsg = (MaterialEditTextPreference) getPreferenceManager().findPreference("msg");
+        editbloxtmsg.getEditText().setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    //InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    //inputManager.hideSoftInputFromWindow(editbloxtmsg.getEditText().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+
+                    ((InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(v.getWindowToken(), 0);
+                }
+            }
+        });
+        */
     }
 
     private void showBasicNoTitleNumberCheck() {
@@ -183,7 +226,8 @@ public class ReplySettingsFragmentLollipop extends PreferenceFragment implements
 
     private void updatePreference(Preference preference) {
         if (preference instanceof MaterialEditTextPreference) {
-            MaterialEditTextPreference editbloxtmsg = (MaterialEditTextPreference) preference;
+            editbloxtmsg = (MaterialEditTextPreference) preference;
+
             preference.setSummary("''" + editbloxtmsg.getText()+ " --This is an automated SMS--''");
 
             if (editbloxtmsg.getText() == null || editbloxtmsg.getText().equals("")) {

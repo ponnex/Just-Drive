@@ -2,16 +2,14 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory android:title="Phone and Messaging">
         <com.jenzz.materialpreference.CheckBoxPreference
-            android:defaultValue="false"
-            android:enabled="false"
+            android:defaultValue="true"
             android:key="autoReplyCalls"
-            android:summary="Reply incoming calls with SMS
-            COMING SOON"
+            android:summary="Reply incoming calls with SMS"
             android:title="Auto Reply Calls" />
         <com.jenzz.materialpreference.CheckBoxPreference
             android:defaultValue="false"
             android:key="autoReply"
-            android:summary="Enabled"
+            android:summary="Disabled"
             android:title="Auto Reply SMS" />
         <com.afollestad.materialdialogs.prefs.MaterialEditTextPreference
             android:key="msg"
@@ -20,7 +18,7 @@
             android:persistent="true"
             android:hint="Enter your auto reply message here"
             android:dialogTitle="Auto Reply Message"
-            android:dialogMessage="Feel Free to create your own custom auto reply message, to restore default message, clear the edit text and click OK"
+            android:dialogMessage="Feel free to customize your auto reply message, or clear to restore default message."
             android:layout="@layout/preference_custom"
             android:inputType="textPersonName" />
     </PreferenceCategory>

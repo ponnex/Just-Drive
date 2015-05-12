@@ -19,6 +19,7 @@ import android.provider.ContactsContract;
 import android.speech.tts.TextToSpeech;
 import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.PhoneStateListener;
+import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import java.util.Locale;
@@ -34,8 +35,10 @@ public class CarMode extends Service {
     public static boolean autoreply = false;
     //auto-reply message
     static String msg = "I am driving right now, I will contact you later --Auto reply message--";
-    //user auto-reply
-    private boolean auto;
+    //user auto-replySMS
+    private boolean autoSMS;
+    //user auto-replyCall
+    private boolean autoCall;
     //allow phone
     private boolean phone;
     //prefs
@@ -49,6 +52,10 @@ public class CarMode extends Service {
     private String TAG = "com.ponnex.justdrive.CarMode";
 
     private int headphonestate;
+
+    private boolean bluetoothstate = false;
+
+    private String getCallNumber = null;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -79,11 +86,11 @@ public class CarMode extends Service {
         //assign the preferences
         userSettings();
         //enable or disable auto-reply
-        autoreply = auto;
+        autoreply = autoSMS;
         //set the phone to silent
         silent();
         //tts or block phone calls
-        if (!phone && headphonestate==1) {
+        if (!phone && (headphonestate == 1 || bluetoothstate)) {
             //get the phone service
             tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
             //call state listener
@@ -93,7 +100,7 @@ public class CarMode extends Service {
                     final String incoming = incomingNumber;
                     //if the phone is ringing
                     if (state == TelephonyManager.CALL_STATE_RINGING) {
-                        Log.d("Phone State", "Ringing");
+                        Log.d(TAG + "Phone State", "Ringing");
                         //read out the caller name
                         tts = new TextToSpeech(CarMode.this, new TextToSpeech.OnInitListener() {
                             @Override
@@ -106,10 +113,12 @@ public class CarMode extends Service {
                                     if (name.isEmpty()) {
                                         for (int i = 0; i < incoming.length(); i++) {
                                             readNumber = readNumber + incoming.charAt(i) + " ";
+                                            getCallNumber = getCallNumber + incoming.charAt(i);
                                         }
                                     } else {
                                         readNumber = readNumber + name;
                                     }
+
                                     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                                         AudioManager am = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
                                         int amStreamMusicMaxVol = am.getStreamMaxVolume(am.STREAM_MUSIC);
@@ -127,16 +136,18 @@ public class CarMode extends Service {
                         });
 
                     }
+
                     if (state == TelephonyManager.CALL_STATE_IDLE) {
-                        Log.d("Phone State", "Idle");
+                        Log.d(TAG + "Phone State", "Idle");
                         //end text to speech
                         if (tts != null) {
                             tts.stop();
                             tts.shutdown();
                         }
                     }
+
                     if (state == TelephonyManager.CALL_STATE_OFFHOOK) {
-                        Log.d("Phone State", "Offhook");
+                        Log.d(TAG + "Phone State", "Offhook");
                         if (tts != null) {
                             //Stop text to speech if phone is offhook
                             tts.stop();
@@ -150,6 +161,42 @@ public class CarMode extends Service {
             tm.listen(psl, PhoneStateListener.LISTEN_CALL_STATE);
             silent();
         }
+
+        //auto-reply calls
+        if(autoCall && (headphonestate == 0 || !bluetoothstate)){
+            //get the phone service
+            tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+            //call state listener
+            psl = new PhoneStateListener() {
+                public void onCallStateChanged(int state, String incomingNumber) {
+                    //if the phone is ringing
+                    if (state == TelephonyManager.CALL_STATE_RINGING) {
+                        Log.d(TAG + "Phone State Auto Reply Calls", "Ringing");
+                        //get the number of incoming call
+                        for (int i = 0; i < incomingNumber.length(); i++) {
+                            getCallNumber = getCallNumber + incomingNumber.charAt(i);
+                        }
+
+                        SmsManager smsManager = SmsManager.getDefault();
+                        smsManager.sendTextMessage(getCallNumber, null, msg + "\n--This is an automated SMS--", null, null);
+
+                        //for testing
+                        Log.e(TAG + "Incoming Call number: ", getCallNumber);
+                    }
+
+                    if (state == TelephonyManager.CALL_STATE_IDLE) {
+                        Log.d(TAG + "Phone State Auto Reply Calls", "Idle");
+
+                    }
+
+                    if (state == TelephonyManager.CALL_STATE_OFFHOOK) {
+                        Log.d(TAG + "PPhone State Auto Reply Calls", "Offhook");
+                    }
+                }
+
+            };
+        }
+
         //run until stopped
         return START_STICKY;
     }
@@ -184,6 +231,7 @@ public class CarMode extends Service {
             if (action.equals(BluetoothAdapter.STATE_CONNECTED)) {
                 if (action.equals(BluetoothA2dp.HEADSET)) {
                     soundMode();
+                    bluetoothstate = true;
                 }
             }
         }
@@ -247,8 +295,10 @@ public class CarMode extends Service {
     void userSettings() {
         //phone calls
         phone = getPrefs.getBoolean("phone", false);
-        // autoreply
-        auto = getPrefs.getBoolean("autoReply", true);
+        // autoreplySMS
+        autoCall = getPrefs.getBoolean("autoReplyCalls", true);
+        // autoreplySMS
+        autoSMS = getPrefs.getBoolean("autoReply", true);
         // autoreply message
         msg = getPrefs
                 .getString("msg", "I am driving right now, I will contact you later");

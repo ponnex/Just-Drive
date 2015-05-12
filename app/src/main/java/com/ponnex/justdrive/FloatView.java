@@ -271,7 +271,6 @@ public class FloatView extends LinearLayout {
             cutDownTime.start();
         }
 
-
         cutDown= headsUp.getDuration();
 
         if (headsUp.getCustomView() == null) {

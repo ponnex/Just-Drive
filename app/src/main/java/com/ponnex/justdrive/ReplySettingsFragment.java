@@ -34,7 +34,8 @@ public class ReplySettingsFragment extends PreferenceFragment implements SharedP
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        com.jenzz.materialpreference.CheckBoxPreference checkbloxtautoReply;
+        CheckBoxPreference checkbloxtautoReplyCalls;
+        CheckBoxPreference checkbloxtautoReply;
 
         super.onCreate(savedInstanceState);
         prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -50,20 +51,44 @@ public class ReplySettingsFragment extends PreferenceFragment implements SharedP
 
         getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
 
+        SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getActivity());
+        Boolean isautoReplyCalls = (mSharedPreference.getBoolean("autoReplyCalls", true));
+
         SharedPreferences mSharedPreference2= PreferenceManager.getDefaultSharedPreferences(getActivity());
         Boolean isautoReply = (mSharedPreference2.getBoolean("autoReply", true));
 
         SharedPreferences mSharedPreference5= PreferenceManager.getDefaultSharedPreferences(getActivity());
         String isMsg=(mSharedPreference5.getString("msg", "I am driving right now, I will contact you later."));
 
+        if (isautoReplyCalls){
+            getPreferenceScreen().findPreference("autoReplyCalls").setSummary("Reply incoming calls with SMS");
+        }
+        else {
+            getPreferenceScreen().findPreference("autoReplyCalls").setSummary("Disabled");
+        }
+
         if (isautoReply){
-            getPreferenceScreen().findPreference("autoReply").setSummary("Enabled");
+            getPreferenceScreen().findPreference("autoReply").setSummary("Reply text messages with SMS");
         }
         else {
             getPreferenceScreen().findPreference("autoReply").setSummary("Disabled");
         }
 
         getPreferenceScreen().findPreference("msg").setSummary("''" + isMsg + " --This is an automated SMS--''");
+
+        checkbloxtautoReplyCalls = (CheckBoxPreference) getPreferenceManager().findPreference("autoReplyCalls");
+        checkbloxtautoReplyCalls.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+
+                if (newValue.toString().equals("true")) {
+                    getPreferenceScreen().findPreference("autoReplyCalls").setSummary("Reply incoming calls with SMS");
+                }
+                if (newValue.toString().equals("false")) {
+                    getPreferenceScreen().findPreference("autoReplyCalls").setSummary("Disabled");
+                }
+                return true;
+            }
+        });
 
         checkbloxtautoReply = (CheckBoxPreference) getPreferenceManager().findPreference("autoReply");
         checkbloxtautoReply.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
@@ -78,8 +103,7 @@ public class ReplySettingsFragment extends PreferenceFragment implements SharedP
                         showBasicNoTitleNumberCheck();
                     }
                     else {
-                        getPreferenceScreen().findPreference("autoReply").setSummary("Enabled");
-                        Log.d(TAG, isPhoneNumber);
+                        getPreferenceScreen().findPreference("autoReply").setSummary("Reply text messages with SMS");
                     }
 
                 }

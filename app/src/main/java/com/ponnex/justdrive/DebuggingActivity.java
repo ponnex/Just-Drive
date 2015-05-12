@@ -1,5 +1,6 @@
 package com.ponnex.justdrive;
 
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -136,6 +137,9 @@ public class DebuggingActivity extends AppCompatActivity {
 
                 if (isSwitch) {
                     sendTestButton(true);
+
+                    NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                    notificationManager.cancel(1);
                 }
             }
         });

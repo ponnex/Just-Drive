@@ -59,6 +59,9 @@ public class SettingsFragment extends PreferenceFragment{
         SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getActivity());
         Boolean isSwitch = (mSharedPreference.getBoolean("switch", true));
 
+        SharedPreferences mSharedPreference2= PreferenceManager.getDefaultSharedPreferences(getActivity());
+        Boolean isphone = (mSharedPreference2.getBoolean("phone", true));
+
         SharedPreferences mSharedPreference3= PreferenceManager.getDefaultSharedPreferences(getActivity());
         Boolean isstartonboot = (mSharedPreference3.getBoolean("startonboot", true));
 
@@ -77,6 +80,15 @@ public class SettingsFragment extends PreferenceFragment{
         }
         else {
             getPreferenceScreen().findPreference("startonboot").setSummary("Disable Just Drive on boot");
+        }
+
+        if (isphone){
+            getPreferenceScreen().findPreference("phone").setSummary("(Headset or bluetooth mode only)\n" +
+                    "Read caller ID of incoming phone calls");
+        }
+        else {
+            getPreferenceScreen().findPreference("phone").setSummary("(Headset or bluetooth mode only)\n" +
+                    "Disable reading caller ID of incoming phone calls");
         }
 
         if (isnotify){
@@ -172,10 +184,12 @@ public class SettingsFragment extends PreferenceFragment{
             public boolean onPreferenceChange(Preference preference, Object newValue) {
 
                 if (newValue.toString().equals("true")) {
-                    getPreferenceScreen().findPreference("phone").setSummary("Read caller ID of incoming phone calls");
+                    getPreferenceScreen().findPreference("phone").setSummary("(Headset or bluetooth mode only)\n" +
+                            "Read caller ID of incoming phone calls");
                 }
                 if (newValue.toString().equals("false")) {
-                    getPreferenceScreen().findPreference("phone").setSummary("Disable");
+                    getPreferenceScreen().findPreference("phone").setSummary("(Headset or bluetooth mode only)\n" +
+                            "Disable reading caller ID of incoming phone calls");
                 }
                 return true;
             }
