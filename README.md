@@ -10,29 +10,49 @@ Texting while driving is now the leading cause of death among teenagers suprisin
 Using the newest Activity Recognition API by Google, Just Drive detects your activity if you're in a vehicle or not while maintaining low battery consumption on your device in the long run, it will displays a lockscreen to prevent device usage without compromising basic function of your device. The lockscreen will be deactivated automatically and/or through an on-screen test to prove that you are not driving. Although there will be a HeadsUp notification that will prompt and will ask if you are a passenger or a driver before activating the lockscreen. This app also turns your notification volume to silent (unless you're using wired or bluetooth headset), Send an automated text to those who are trying to reach you via a phone call or text messaging while you are driving, and Just Drive also uses Text-to-Speech to read incoming contact or number of incoming phone calling.
 
 #Main Activity
+#####Just Drive Services Enabled
 ![Orange Dark](http://s29.postimg.org/lvjd57l53/Orange_Dark.png)
+#####Just Drive Services Disabled
 ![Off](http://s29.postimg.org/r5obwi5dz/Off.png)
+#####Bottom Screen
 ![Screen1](http://s29.postimg.org/4yyvqj2yv/Screen1.png)
+#####When turned on, Just Drive can notify you of detected activities
 ![Notification](http://s29.postimg.org/n1nd409fr/Notification.png)
+#####About Just Drive
 ![About](http://s29.postimg.org/c9l7b64lj/About.png)
 
-#Themes
-![Theme Chooser](http://s29.postimg.org/z7h5s5djb/Theme_Chooser.png)
-![Orange Dark](http://s29.postimg.org/lvjd57l53/Orange_Dark.png)
-![Orange Light](http://s29.postimg.org/mh8c1bg7b/Orange_Light.png)
-![BlueGray Dark](http://s29.postimg.org/y7m9ip8zr/Blue_Gray_Dark.png)
-![BlueGray Light](http://s29.postimg.org/euqryotzb/Blue_Gray_Light.png)
-![Indigo Dark](http://s29.postimg.org/dv52gq47b/Indigo_Dark.png)
-![Indigo Light](http://s29.postimg.org/x2s7dbmiv/Indigo_Light.png)
+#Phone and Messaging
+#####Preferences about Phone and Messaging, Enable or Disable sending automated text to those who are trying to reach you via a phone call or text messaging while you are driving.
+![Phone and Messaging](http://s29.postimg.org/7hkkr7op3/Phone_and_Messaging.png)
+#####Feel Free to customize your auto reply message
+![Auto Reply Message](http://s29.postimg.org/5x621c1jb/Auto_Reply_Message.png)
 
 #Debugging Mode
+#####Debugging Mode
 ![Debugging Mode](http://s29.postimg.org/4jef6129z/Debugging_Mode.png)
+#####HeadsUp notification that will prompt to ask if you're a *Driver* or a *Passenger*.
 ![HeadsUp](http://s29.postimg.org/djnm3ynrb/Heads_Up.png)
+#####Lock Screen that will be disable by on-screen test to prove that you are not driving, hence will be disable automatically by detection if you are not in a vehicle.
 ![Lock Screen](http://s29.postimg.org/chi0z5ubr/Lock_Screen.png)
 
-#Phone and Messaging
-![Phone and Messaging](http://s29.postimg.org/7hkkr7op3/Phone_and_Messaging.png)
-![Auto Reply Message](http://s29.postimg.org/5x621c1jb/Auto_Reply_Message.png)
+#Themes
+####Select Themes according to your taste!
+![Theme Chooser](http://s29.postimg.org/z7h5s5djb/Theme_Chooser.png)
+
+#####Orange Dark
+![Orange Dark](http://s29.postimg.org/lvjd57l53/Orange_Dark.png)
+#####Orange Light
+![Orange Light](http://s29.postimg.org/mh8c1bg7b/Orange_Light.png)
+#####Blue Gray Dark
+![BlueGray Dark](http://s29.postimg.org/y7m9ip8zr/Blue_Gray_Dark.png)
+#####Blue Gray Light
+![BlueGray Light](http://s29.postimg.org/euqryotzb/Blue_Gray_Light.png)
+#####Indigo Dark
+![Indigo Dark](http://s29.postimg.org/dv52gq47b/Indigo_Dark.png)
+#####Indigo Light
+![Indigo Light](http://s29.postimg.org/x2s7dbmiv/Indigo_Light.png)
+
+
 
 
 
