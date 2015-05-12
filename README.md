@@ -63,6 +63,9 @@ I'm currently working on the following implementations:
 • Logging of detected activies (for testing accuracies - PRE-RELEASE)
 • Car Dock - Music, GPS, etc
 
+#Releases
+[###Check it out here###](https://github.com/ponnex/Just-Drive/releases)
+
 CREDITS
 =======
 
