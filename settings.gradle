@@ -1,1 +1,2 @@
-include ':app'
+include ':app', ':HeadsUp'
+project(':HeadsUp').projectDir = new File('library/HeadsUp')

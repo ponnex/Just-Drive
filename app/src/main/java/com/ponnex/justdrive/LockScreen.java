@@ -31,6 +31,8 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.ActivityRecognition;
+import com.mingle.headsUp.HeadsUp;
+import com.mingle.headsUp.HeadsUpManager;
 
 /**
  * Created by ramos on 4/14/2015.
@@ -527,7 +529,6 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
         HeadsUpManager manage = HeadsUpManager.getInstant(getApplication());
         HeadsUp.Builder builder = new HeadsUp.Builder(LockScreen.this);
 
-        long pattern[]={0, 3000};
         builder.setContentTitle("Are you driving?")
                 .setTicker("Just Drive needs your attention")
                 .setDefaults(Notification.DEFAULT_SOUND)
@@ -537,7 +538,6 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
                         //2.3 ?To set this parameter set, will be responsible for the error
                 .setContentIntent(pendingIntent)
                 .setFullScreenIntent(pendingIntent, false)
-                .setVibrate(pattern)
                 .setSticky(true)
                 .setPriority(1)
                         //Set whether to display the action buttons
@@ -560,7 +560,6 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
         editor.putBoolean("isTEST", true);
         editor.apply();
 
-        long pattern[]={0, 3000};
         builder.setContentTitle("Are you driving?")
                 .setTicker("Just Drive needs your attention")
                 .setDefaults(Notification.DEFAULT_SOUND)
@@ -570,7 +569,6 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
                         //2.3 ?To set this parameter set, will be responsible for the error
                 .setContentIntent(pendingIntent)
                 .setFullScreenIntent(pendingIntent, false)
-                .setVibrate(pattern)
                 .setSticky(true)
                 .setPriority(1)
                         //Set whether to display the action buttons
