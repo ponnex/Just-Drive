@@ -1,23 +1,16 @@
 package com.ponnex.justdrive;
 
 import android.app.Dialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Build;
-import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.support.v4.content.LocalBroadcastManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -33,14 +26,12 @@ import com.nispok.snackbar.SnackbarManager;
  * Created by ramos on 4/15/2015.
  */
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener{
 
     private View view1;
     private View view2;
 
-    private boolean isFirstImage = true;
-
-    private LocalBroadcastManager broadcastManager;
+    private boolean isFirstImage;
 
     public final static int ORANGELIGHT = 0;
     public final static int ORANGEDARK = 1;
@@ -91,6 +82,11 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+        prefs.registerOnSharedPreferenceChangeListener(this);
+
         if (Build.VERSION.SDK_INT >= 21) {
             getFragmentManager().beginTransaction().replace(R.id.container, new SettingsFragmentLollipop()).commit();
         }else{
@@ -98,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         SharedPreferences mSharedPreference = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        Boolean isSwitch = (mSharedPreference.getBoolean("isSwitch", true));
+        Boolean isSwitch = (mSharedPreference.getBoolean("switch", true));
 
         if (isPlayServicesConfigured()) {
             //start only after verification that user has Google Play Services
@@ -114,11 +110,9 @@ public class MainActivity extends AppCompatActivity {
         view2.setVisibility(View.GONE);
 
         if (!isSwitch) {
-            applyRotation(0, 90);
-            isFirstImage = !isFirstImage;
+            view1.setVisibility(View.INVISIBLE);
+            view2.setVisibility(View.VISIBLE);
         }
-
-        broadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
 
         TypedValue typedValue = new TypedValue();
         Resources.Theme themecolor = getTheme();
@@ -128,67 +122,45 @@ public class MainActivity extends AppCompatActivity {
         view1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                isFirstImage = true;
+                SharedPreferences switchPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                SharedPreferences.Editor editor1 = switchPref.edit();
+                editor1.putBoolean("switch", false);
+                editor1.apply();
 
-                if (isFirstImage) {
-                    applyRotation(0, 90);
-                    isFirstImage = !isFirstImage;
-
-                    SharedPreferences isSwitchup = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                    SharedPreferences.Editor editor = isSwitchup.edit();
-                    editor.putBoolean("isSwitch", false);
-                    editor.apply();
-
-                    SharedPreferences switchPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                    SharedPreferences.Editor editor1 = switchPref.edit();
-                    editor1.putBoolean("switch", false);
-                    editor1.apply();
-
-                    sendSwitchInfo(false);
-                    sendNotifInfo(false);
-
-                    if ((theme % 2) == 0) {
-                        SnackbarManager.show(
-                                Snackbar.with(MainActivity.this)
-                                        .position(Snackbar.SnackbarPosition.TOP)
-                                        .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
-                                        .textColor(Color.parseColor("#FFFFFF"))
-                                        .text("Just Drive is Disabled")
-                                , (android.view.ViewGroup) findViewById(R.id.main_frame));
-                    }
-
-
-                    else {
-                        SnackbarManager.show(
-                                Snackbar.with(MainActivity.this)
-                                        .position(Snackbar.SnackbarPosition.TOP)
-                                        .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
-                                        .textColor(Color.parseColor("#FFFFFF"))
-                                        .color(color)
-                                        .text("Just Drive is Disabled")
-                                , (android.view.ViewGroup) findViewById(R.id.main_frame));
-                    }
-
-                    SharedPreferences isCountup2 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                    SharedPreferences.Editor editor2 = isCountup2.edit();
-                    editor2.putInt("isCount", 0);
-                    editor2.apply();
-
+                if ((theme % 2) == 0) {
+                    SnackbarManager.show(
+                            Snackbar.with(MainActivity.this)
+                                    .position(Snackbar.SnackbarPosition.TOP)
+                                    .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
+                                    .textColor(Color.parseColor("#FFFFFF"))
+                                    .text("Just Drive is Disabled")
+                            , (android.view.ViewGroup) findViewById(R.id.main_frame));
                 }
+
+                else {
+                    SnackbarManager.show(
+                            Snackbar.with(MainActivity.this)
+                                    .position(Snackbar.SnackbarPosition.TOP)
+                                    .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
+                                    .textColor(Color.parseColor("#FFFFFF"))
+                                    .color(color)
+                                    .text("Just Drive is Disabled")
+                            , (android.view.ViewGroup) findViewById(R.id.main_frame));
+                    }
+
+                SharedPreferences isCountup2 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                SharedPreferences.Editor editor2 = isCountup2.edit();
+                editor2.putInt("isCount", 0);
+                editor2.apply();
+
             }
         });
 
         view2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                applyRotation(0, 90);
-                isFirstImage = !isFirstImage;
-
-                SharedPreferences isSwitchup = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                SharedPreferences.Editor editor = isSwitchup.edit();
-                editor.putBoolean("isSwitch", true);
-                editor.apply();
-
+                isFirstImage = false;
                 SharedPreferences switchPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                 SharedPreferences.Editor editor1 = switchPref.edit();
                 editor1.putBoolean("switch", true);
@@ -196,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
 
                 startService(new Intent(getApplication(), LockScreen.class));
                 startService(new Intent(getApplication(), ActivityRecognitionIntentService.class));
-                sendSwitchInfo(true);
+
 
                 if ((theme % 2) == 0) {
                     SnackbarManager.show(
@@ -206,9 +178,7 @@ public class MainActivity extends AppCompatActivity {
                                     .textColor(Color.parseColor("#FFFFFF"))
                                     .text("Just Drive is Enabled")
                             , (android.view.ViewGroup) findViewById(R.id.main_frame));
-                }
-
-                else {
+                } else {
                     SnackbarManager.show(
                             Snackbar.with(MainActivity.this)
                                     .position(Snackbar.SnackbarPosition.TOP)
@@ -222,9 +192,6 @@ public class MainActivity extends AppCompatActivity {
             }
 
         });
-
-        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(switchReceiver1, new IntentFilter("com.ponnex.justdrive.SettingsFragment"));
-
         SharedPreferences mSharedPreference2 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         Boolean isFirstRun = (mSharedPreference2.getBoolean("isFirstRun", true));
 
@@ -237,24 +204,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
-
-    private BroadcastReceiver switchReceiver1 = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            SharedPreferences mSharedPreference = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            Boolean isSwitch = (mSharedPreference.getBoolean("isSwitch", true));
-
-            Boolean SwitchVal = intent.getBooleanExtra("SwitchVal", isSwitch);
-            if (SwitchVal && isSwitch) {
-                applyRotation(0, 90);
-                isFirstImage = !isFirstImage;
-            }
-            if (!SwitchVal && !isSwitch) {
-                applyRotation(0, 90);
-                isFirstImage = !isFirstImage;
-            }
-        }
-    };
 
     @Override
     public void onStart() {
@@ -270,8 +219,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void applyRotation(float start, float end) {
         // Find the center of image
-        final float centerX = view1.getWidth() / 2.0f;
-        final float centerY = view1.getHeight() / 2.0f;
+        float centerX = view1.getWidth() / 2.0f;
+        float centerY = view1.getHeight() / 2.0f;
 
         // Create a new 3D rotation with the supplied parameter
         // The animation listener is used to trigger the next animation
@@ -287,19 +236,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             view2.startAnimation(rotation);
         }
-
-    }
-
-    public void sendSwitchInfo(Boolean switchval) {
-        Intent intent = new Intent("com.ponnex.justdrive.MainActivity");
-        intent.putExtra("SwitchVal", switchval);
-        broadcastManager.sendBroadcast(intent);
-    }
-
-    public void sendNotifInfo(Boolean notifval) {
-        Intent intent = new Intent("com.ponnex.justdrive.MainActivity1");
-        intent.putExtra("NotifVal", notifval);
-        broadcastManager.sendBroadcast(intent);
     }
 
     @Override
@@ -324,20 +260,19 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(switchReceiver1);
         SharedPreferences mSharedPreference = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        Boolean isSwitch = (mSharedPreference.getBoolean("isSwitch", true));
+        Boolean isSwitch = (mSharedPreference.getBoolean("switch", true));
 
         if (isSwitch) {
             startService(new Intent(getApplication(), LockScreen.class));
             startService(new Intent(getApplication(), ActivityRecognitionIntentService.class));
-            sendSwitchInfo(true);
+
         }
 
         if (!isSwitch) {
             stopService(new Intent(getApplication(), LockScreen.class));
             stopService(new Intent(getApplication(), ActivityRecognitionIntentService.class));
-            sendSwitchInfo(false);
+
         }
         super.onDestroy();
     }
@@ -352,14 +287,15 @@ public class MainActivity extends AppCompatActivity {
             case ConnectionResult.SERVICE_MISSING:
             case ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED:
                 Dialog dialog = GooglePlayServicesUtil.getErrorDialog(googlePlayServicesCheck, this, 0);
-                dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-                    @Override
-                    public void onCancel(DialogInterface dialogInterface) {
-                        MainActivity.this.finish();
-                    }
-                });
                 dialog.show();
         }
         return false;
+    }
+
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals("switch")) {
+            applyRotation(0, 90);
+            isFirstImage = !isFirstImage;
+        }
     }
 }

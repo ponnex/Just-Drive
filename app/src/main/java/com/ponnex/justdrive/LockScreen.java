@@ -12,13 +12,11 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.location.LocationManager;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -38,7 +36,7 @@ import com.mingle.headsUp.HeadsUpManager;
  * Created by ramos on 4/14/2015.
  */
 
-public class LockScreen extends Service implements View.OnClickListener,GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class LockScreen extends Service implements View.OnClickListener,GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final int MILLIS_PER_SEC = 0;
     private static final int DETECTION_INT_SEC = 0;
@@ -71,6 +69,10 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
         super.onCreate();
         Log.d(TAG, "LS Created");
 
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+        prefs.registerOnSharedPreferenceChangeListener(this);
+
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(ActivityRecognition.API)
                 .addConnectionCallbacks(this)
@@ -78,7 +80,7 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
                 .build();
 
         SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        Boolean isSwitch=(mSharedPreference.getBoolean("isSwitch", true));
+        Boolean isSwitch=(mSharedPreference.getBoolean("switch", true));
 
         if (isSwitch) {
             ServiceOn();
@@ -90,50 +92,10 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
         pendingIntent = PendingIntent.getService(this, 0, intent1, PendingIntent.FLAG_UPDATE_CURRENT);
 
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(screenReceiver, new IntentFilter("com.ponnex.justdrive.ActivityRecognitionIntentService1"));
-        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(switchReceiver, new IntentFilter("com.ponnex.justdrive.MainActivity"));
-        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(switchReceiver1, new IntentFilter("com.ponnex.justdrive.SettingsFragment"));
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(cancelReceiver, new IntentFilter("com.ponnex.justdrive.NotificationReceiver"));
-        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(testReceiver, new IntentFilter("com.ponnex.justdrive.DebuggingActivity"));
-        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(testReceiver1, new IntentFilter("com.ponnex.justdrive.DebuggingActivity1"));
         setUpLayout();
         current = (AudioManager) this.getSystemService(Service.AUDIO_SERVICE);
     }
-
-
-    private BroadcastReceiver switchReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            Boolean isSwitch=(mSharedPreference.getBoolean("isSwitch", true));
-
-            Boolean SwitchVal = intent.getBooleanExtra("SwitchVal", isSwitch);
-
-            if(SwitchVal) {
-                ServiceOn();
-            }
-            if(!SwitchVal) {
-                ServiceOff();
-            }
-        }
-    };
-
-    private BroadcastReceiver switchReceiver1 = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            Boolean isSwitch=(mSharedPreference.getBoolean("isSwitch", true));
-
-            Boolean SwitchVal = intent.getBooleanExtra("SwitchVal", isSwitch);
-
-            if(SwitchVal) {
-                ServiceOn();
-            }
-            if(!SwitchVal) {
-                ServiceOff();
-            }
-
-        }
-    };
 
     private BroadcastReceiver cancelReceiver = new BroadcastReceiver() {
         @Override
@@ -154,7 +116,7 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
                     ServiceOff();
                     sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                     SharedPreferences.Editor editor2 = sharedPrefs.edit();
-                    editor2.putBoolean("isSwitch", false);
+                    editor2.putBoolean("switch", false);
                     editor2.apply();
                 }
 
@@ -172,16 +134,6 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
                     e.printStackTrace();
                 }
 
-            }
-        }
-    };
-
-    private BroadcastReceiver testReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Boolean isTest= intent.getBooleanExtra("TestButton", false);
-            if (isTest && !showing){
-                launchLockwithtimerTEST();
             }
         }
     };
@@ -215,21 +167,7 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
         mode.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
     }
 
-    private BroadcastReceiver testReceiver1 = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Boolean isTest= intent.getBooleanExtra("TestButton1", false);
-
-            SharedPreferences mSharedPreference2= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            Boolean isHeadsup=(mSharedPreference2.getBoolean("headsup", false));
-
-            if (isTest && !showing && !isHeadsup){
-                headsupTEST();
-            }
-        }
-    };
-
-    private void ServiceOn(){
+    public void ServiceOn(){
         mGoogleApiClient.connect();
 
         //to make sure
@@ -241,7 +179,7 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
         editor2.apply();
     }
 
-    private void ServiceOff(){
+    public void ServiceOff(){
         if (mGoogleApiClient.isConnected()) {
             Log.d(TAG, "Disconnected");
             ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(mGoogleApiClient, pendingIntent);
@@ -261,6 +199,13 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
         SharedPreferences.Editor editor2 = isHeadsup.edit();
         editor2.putBoolean("headsup", false);
         editor2.apply();
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.cancel(0);
+
+        NotificationManager notificationManager1 = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        notificationManager1.cancel(1);
+
     }
 
     private BroadcastReceiver screenReceiver=new BroadcastReceiver() {
@@ -268,7 +213,7 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
         public void onReceive(Context context, Intent intent) {
 
             SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            Boolean isSwitch=(mSharedPreference.getBoolean("isSwitch", true));
+            Boolean isSwitch=(mSharedPreference.getBoolean("switch", true));
 
             if(isSwitch)
             {
@@ -448,12 +393,7 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
         }
         try {
             LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(screenReceiver);
-            LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(switchReceiver);
-            LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(switchReceiver1);
             LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(cancelReceiver);
-            LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(testReceiver);
-            LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(testReceiver1);
-
         } catch (RuntimeException e) {
             e.printStackTrace();
         }
@@ -538,7 +478,6 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
                         //2.3 ?To set this parameter set, will be responsible for the error
                 .setContentIntent(pendingIntent)
                 .setFullScreenIntent(pendingIntent, false)
-                .setSticky(true)
                 .setPriority(1)
                         //Set whether to display the action buttons
                 .setUsesChronometer(true)
@@ -569,7 +508,6 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
                         //2.3 ?To set this parameter set, will be responsible for the error
                 .setContentIntent(pendingIntent)
                 .setFullScreenIntent(pendingIntent, false)
-                .setSticky(true)
                 .setPriority(1)
                         //Set whether to display the action buttons
                 .setUsesChronometer(true)
@@ -577,25 +515,6 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
 
         HeadsUp headsUp = builder.buildHeadUp();
         manage.notify(1, headsUp);
-    }
-
-    private void JustdriveNotification() {
-
-        // Create a notification builder that's compatible with platforms >= version 4
-        NotificationCompat.Builder builder =
-                new NotificationCompat.Builder(getApplicationContext());
-        // Set the title, text, and icon
-        builder.setContentTitle("Just Drive")
-                .setContentText("No text, tweet, Facebook update, or email is worth your life. Put the phone down and Just Drive")
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setPriority(1);
-                        // Get the Intent that starts the Location settings panel
-        // Get an instance of the Notification Manager
-        NotificationManager notifyManager = (NotificationManager)
-                getSystemService(Context.NOTIFICATION_SERVICE);
-
-        // Build the notification and post it
-        notifyManager.notify(0, builder.build());
     }
 
     PendingIntent notDriving() {
@@ -612,7 +531,7 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
                     Boolean isCancelup=(mSharedPreference.getBoolean("isCancelup", false));
 
                     SharedPreferences mSharedPreference1= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                    Boolean isSwitch=(mSharedPreference1.getBoolean("isSwitch", false));
+                    Boolean isSwitch=(mSharedPreference1.getBoolean("switch", false));
 
                     SharedPreferences mSharedPreference2= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                     String isActivity=(mSharedPreference2.getString("isActivity", "Unknown"));
@@ -723,6 +642,49 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
                 notificationManager.cancel(1);
             }catch (RuntimeException e){
                 e.printStackTrace();
+            }
+        }
+    }
+
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals("switch")) {
+            SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            Boolean isSwitch = (mSharedPreference.getBoolean("switch", true));
+            if(isSwitch) {
+                ServiceOn();
+            }
+            if(!isSwitch) {
+                ServiceOff();
+            }
+        }
+
+        if (key.equals("sendTestButton")){
+            SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            Boolean sendTestButton = (mSharedPreference.getBoolean("sendTestButton", true));
+            if (sendTestButton && !showing){
+                launchLockwithtimerTEST();
+
+                SharedPreferences sendTestButtonreturn = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                SharedPreferences.Editor editor1 = sendTestButtonreturn.edit();
+                editor1.putBoolean("sendTestButton", false);
+                editor1.apply();
+            }
+        }
+
+        if (key.equals("sendTestButton1")){
+            SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            Boolean sendTestButton1 = (mSharedPreference.getBoolean("sendTestButton1", true));
+
+            SharedPreferences mSharedPreference2= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            Boolean isHeadsup=(mSharedPreference2.getBoolean("headsup", false));
+
+            if (sendTestButton1 && !showing && !isHeadsup){
+                headsupTEST();
+
+                SharedPreferences sendTestButtonreturn1 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                SharedPreferences.Editor editor1 = sendTestButtonreturn1.edit();
+                editor1.putBoolean("sendTestButton1", false);
+                editor1.apply();
             }
         }
     }

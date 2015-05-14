@@ -21,7 +21,6 @@ public class NotificationReceiver extends BroadcastReceiver {
 
         SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(context);
         Boolean isTEST = (mSharedPreference.getBoolean("isTEST", false));
-
         broadcastManager = LocalBroadcastManager.getInstance(context);
 
         cancellable(true);
@@ -34,31 +33,11 @@ public class NotificationReceiver extends BroadcastReceiver {
         if (!isTEST) {
             context.stopService(new Intent(context, CarMode.class));
 
-            SharedPreferences isSwitchup = PreferenceManager.getDefaultSharedPreferences(context);
-            SharedPreferences.Editor editor = isSwitchup.edit();
-            editor.putBoolean("isSwitch", false);
-            editor.apply();
-
-            SharedPreferences switchPref = PreferenceManager.getDefaultSharedPreferences(context);
-            SharedPreferences.Editor editor1 = switchPref.edit();
+            SharedPreferences isSwitch = PreferenceManager.getDefaultSharedPreferences(context);
+            SharedPreferences.Editor editor1 = isSwitch.edit();
             editor1.putBoolean("switch", false);
             editor1.apply();
-
-            sendSwitchInfo(false);
-            sendSwitchInfo1(false);
         }
-    }
-
-    public void sendSwitchInfo(Boolean switchval) {
-        Intent intent = new Intent("com.ponnex.justdrive.MainActivity");
-        intent.putExtra("SwitchVal", switchval);
-        broadcastManager.sendBroadcast(intent);
-    }
-
-    public void sendSwitchInfo1(Boolean switchval) {
-        Intent intent = new Intent("com.ponnex.justdrive.SettingsFragment");
-        intent.putExtra("SwitchVal", switchval);
-        broadcastManager.sendBroadcast(intent);
     }
 
     public void cancellable(Boolean message) {

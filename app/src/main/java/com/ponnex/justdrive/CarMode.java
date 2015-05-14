@@ -90,7 +90,7 @@ public class CarMode extends Service {
         //set the phone to silent
         silent();
         //tts or block phone calls
-        if (!phone && (headphonestate == 1 || bluetoothstate)) {
+        if (phone && (headphonestate == 1 || bluetoothstate)) {
             //get the phone service
             tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
             //call state listener
@@ -190,7 +190,7 @@ public class CarMode extends Service {
                     }
 
                     if (state == TelephonyManager.CALL_STATE_OFFHOOK) {
-                        Log.d(TAG + "PPhone State Auto Reply Calls", "Offhook");
+                        Log.d(TAG + "Phone State Auto Reply Calls", "Offhook");
                     }
                 }
 
@@ -285,8 +285,6 @@ public class CarMode extends Service {
         //unregister headset receiver
         unregisterReceiver(myReceiver);
 
-        stopService(new Intent(CarMode.this, NotificationListener.class));
-
         LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(bluetoothreceiver);
 
         super.onDestroy();
@@ -294,7 +292,7 @@ public class CarMode extends Service {
 
     void userSettings() {
         //phone calls
-        phone = getPrefs.getBoolean("phone", false);
+        phone = getPrefs.getBoolean("phone", true);
         // autoreplySMS
         autoCall = getPrefs.getBoolean("autoReplyCalls", true);
         // autoreplySMS
@@ -313,10 +311,6 @@ public class CarMode extends Service {
                 .getSystemService(Context.AUDIO_SERVICE);
         // Silent Mode
         mode.setRingerMode(AudioManager.RINGER_MODE_SILENT);
-        if (Build.VERSION.SDK_INT >= 18) {
-           //add notification listener here
-            startService(new Intent(CarMode.this, NotificationListener.class));
-        }
     }
 
     void vibrate() {

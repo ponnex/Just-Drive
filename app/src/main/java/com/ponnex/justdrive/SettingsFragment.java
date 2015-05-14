@@ -1,10 +1,9 @@
 package com.ponnex.justdrive;
 
-import android.content.BroadcastReceiver;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -12,7 +11,6 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.TelephonyManager;
 import android.util.TypedValue;
 import android.view.View;
@@ -26,9 +24,8 @@ import com.nispok.snackbar.SnackbarManager;
  * Created by ramos on 4/15/2015.
  */
 
-public class SettingsFragment extends PreferenceFragment{
+public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener{
     SharedPreferences prefs;
-    private LocalBroadcastManager broadcastManager;
     private SwitchPreference switchbloxt;
     static String mPhoneNumber;
     static boolean active = false;
@@ -44,6 +41,8 @@ public class SettingsFragment extends PreferenceFragment{
         super.onCreate(savedInstanceState);
         prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         addPreferencesFromResource(R.xml.prefs);
+
+        getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
 
         TelephonyManager mManager =(TelephonyManager)getActivity().getSystemService(Context.TELEPHONY_SERVICE);
         mPhoneNumber =  mManager.getLine1Number();
@@ -103,18 +102,15 @@ public class SettingsFragment extends PreferenceFragment{
         themecolor.resolveAttribute(R.attr.colorAccent, typedValue, true);
         color = typedValue.data;
 
-        broadcastManager = LocalBroadcastManager.getInstance(getActivity());
         switchbloxt = (SwitchPreference) getPreferenceManager().findPreference("switch");
         switchbloxt.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             public boolean onPreferenceChange(Preference preference, Object newValue) {
-                final boolean value = (Boolean) newValue;
-                switchbloxt.setChecked(value);
-                sendSwitchInfo(value);
 
                 if (newValue.toString().equals("true")) {
+
                     SharedPreferences isSwitchup = PreferenceManager.getDefaultSharedPreferences(getActivity());
                     SharedPreferences.Editor editor = isSwitchup.edit();
-                    editor.putBoolean("isSwitch", true);
+                    editor.putBoolean("switch", true);
                     editor.apply();
 
                     getActivity().startService(new Intent(getActivity(), LockScreen.class));
@@ -125,7 +121,7 @@ public class SettingsFragment extends PreferenceFragment{
                     if ((theme % 2) == 0) {
                         SnackbarManager.show(
                                 Snackbar.with(getActivity())
-                                        .position(Snackbar.SnackbarPosition.BOTTOM)
+                                        .position(Snackbar.SnackbarPosition.TOP)
                                         .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
                                         .textColor(Color.parseColor("#FFFFFF"))
                                         .text("Just Drive is Enabled")
@@ -133,7 +129,7 @@ public class SettingsFragment extends PreferenceFragment{
                     } else {
                         SnackbarManager.show(
                                 Snackbar.with(getActivity())
-                                        .position(Snackbar.SnackbarPosition.BOTTOM)
+                                        .position(Snackbar.SnackbarPosition.TOP)
                                         .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
                                         .textColor(Color.parseColor("#FFFFFF"))
                                         .color(color)
@@ -144,17 +140,15 @@ public class SettingsFragment extends PreferenceFragment{
                 if (newValue.toString().equals("false")) {
                     SharedPreferences isSwitchup = PreferenceManager.getDefaultSharedPreferences(getActivity());
                     SharedPreferences.Editor editor = isSwitchup.edit();
-                    editor.putBoolean("isSwitch", false);
+                    editor.putBoolean("switch", false);
                     editor.apply();
 
                     getPreferenceScreen().findPreference("switch").setSummary("Disabled");
 
-                    sendNotifInfo(false);
-
                     if ((theme % 2) == 0) {
                         SnackbarManager.show(
                                 Snackbar.with(getActivity())
-                                        .position(Snackbar.SnackbarPosition.BOTTOM)
+                                        .position(Snackbar.SnackbarPosition.TOP)
                                         .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
                                         .textColor(Color.parseColor("#FFFFFF"))
                                         .text("Just Drive is Disabled")
@@ -162,7 +156,7 @@ public class SettingsFragment extends PreferenceFragment{
                     } else {
                         SnackbarManager.show(
                                 Snackbar.with(getActivity())
-                                        .position(Snackbar.SnackbarPosition.BOTTOM)
+                                        .position(Snackbar.SnackbarPosition.TOP)
                                         .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
                                         .textColor(Color.parseColor("#FFFFFF"))
                                         .color(color)
@@ -223,17 +217,16 @@ public class SettingsFragment extends PreferenceFragment{
 
                 if (newValue.toString().equals("true")) {
                     getPreferenceScreen().findPreference("notification").setSummary("Show notifications of activities");
-                    sendNotifInfo(true);
                 }
                 if (newValue.toString().equals("false")) {
                     getPreferenceScreen().findPreference("notification").setSummary("Hide notifications of activities");
-                    sendNotifInfo(false);
+
+                    NotificationManager notificationManager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
+                    notificationManager.cancel(0);
                 }
                 return true;
             }
         });
-
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(switchReceiver, new IntentFilter("com.ponnex.justdrive.MainActivity"));
     }
 
     private void showBasicNoTitle() {
@@ -299,38 +292,6 @@ public class SettingsFragment extends PreferenceFragment{
                 .show();
     }
 
-    public void sendSwitchInfo(Boolean switchval) {
-        Intent intent = new Intent("com.ponnex.justdrive.SettingsFragment");
-        intent.putExtra("SwitchVal", switchval);
-        broadcastManager.sendBroadcast(intent);
-    }
-
-    public void sendNotifInfo(Boolean notifval) {
-        Intent intent = new Intent("com.ponnex.justdrive.SettingsFragment1");
-        intent.putExtra("NotifVal", notifval);
-        broadcastManager.sendBroadcast(intent);
-    }
-
-    private BroadcastReceiver switchReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-            Boolean SwitchVal = intent.getBooleanExtra("SwitchVal", true);
-
-            if(SwitchVal) {
-                getPreferenceScreen().findPreference("switch").setSummary("Enabled");
-                SwitchPreference switchPrefs = (SwitchPreference) findPreference("switch");
-                switchPrefs.setChecked(true);
-            }
-
-            if(!SwitchVal) {
-                getPreferenceScreen().findPreference("switch").setSummary("Disabled");
-                SwitchPreference switchPrefs = (SwitchPreference) findPreference("switch");
-                switchPrefs.setChecked(false);
-            }
-        }
-    };
-
     @Override
     public void onStart() {
         super.onStart();
@@ -341,5 +302,21 @@ public class SettingsFragment extends PreferenceFragment{
     public void onStop() {
         super.onStop();
         active = false;
+    }
+
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals("switch")) {
+            updatePreference(findPreference(key));
+        }
+    }
+
+    private void updatePreference(Preference preference) {
+        if (preference instanceof SwitchPreference) {
+            SharedPreferences mSharedPreference = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            Boolean isSwitch = (mSharedPreference.getBoolean("switch", true));
+
+            switchbloxt = (SwitchPreference) preference;
+            ((SwitchPreference) preference).setChecked(isSwitch);
+        }
     }
 }

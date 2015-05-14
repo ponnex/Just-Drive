@@ -2,10 +2,8 @@ package com.ponnex.justdrive;
 
 import android.app.IntentService;
 import android.app.NotificationManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
@@ -37,8 +35,6 @@ public class ActivityRecognitionIntentService extends IntentService {
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "ARIS Created");
-        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(notifReceiver, new IntentFilter("com.ponnex.justdrive.SettingsFragment1"));
-        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(notifReceiver1, new IntentFilter("com.ponnex.justdrive.MainActivity"));
     }
 
     @Override
@@ -57,7 +53,7 @@ public class ActivityRecognitionIntentService extends IntentService {
             if (!isFirstRun) {
                 String activityName = getNameFromType(activityType);
                 String resultstr = "Activity: " + activityName + ", Confidence: " + confidence + "% ";
-                Log.d(TAG + "TYPE: ", "Activity: " + activityName + ", Confidence: " + confidence + "% ");
+                Log.d(TAG, "Activity: " + activityName + ", Confidence: " + confidence + "% ");
 
                 sendResultInfo(resultstr);
                 if (confidence >= 50) {
@@ -81,29 +77,6 @@ public class ActivityRecognitionIntentService extends IntentService {
             }
         }
     }
-
-    private BroadcastReceiver notifReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Boolean isNotify = intent.getBooleanExtra("NotifVal", false);
-            if (!isNotify){
-                NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                notificationManager.cancel(0);
-            }
-        }
-    };
-
-    private BroadcastReceiver notifReceiver1 = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            Boolean isNotify=(mSharedPreference.getBoolean("notification", false));
-            if (!isNotify){
-                NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                notificationManager.cancel(0);
-            }
-        }
-    };
 
     public void sendResultInfo(String message) {
         Intent intent = new Intent("com.ponnex.justdrive.ActivityRecognitionIntentService");
@@ -163,8 +136,6 @@ public class ActivityRecognitionIntentService extends IntentService {
     @Override
     public void onDestroy(){
         Log.d(TAG, "ARIS Destroyed");
-        LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(notifReceiver);
-        LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(notifReceiver1);
         super.onDestroy();
     }
 }

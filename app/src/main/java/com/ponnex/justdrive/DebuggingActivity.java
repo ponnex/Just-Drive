@@ -85,8 +85,8 @@ public class DebuggingActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         Log.d(TAG, "DA Created");
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setContentView(R.layout.activity_debugging);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         activityTV = (TextView) findViewById(R.id.debugText);
 
         broadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
@@ -95,7 +95,7 @@ public class DebuggingActivity extends AppCompatActivity {
         testbutton1 = (Button) findViewById(R.id.testbutton1);
 
         SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        Boolean isSwitch=(mSharedPreference.getBoolean("isSwitch", true));
+        Boolean isSwitch=(mSharedPreference.getBoolean("switch", true));
 
         TypedValue typedValue = new TypedValue();
         Resources.Theme themecolor = getTheme();
@@ -133,10 +133,13 @@ public class DebuggingActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 SharedPreferences mSharedPreference = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                Boolean isSwitch = (mSharedPreference.getBoolean("isSwitch", true));
+                Boolean isSwitch = (mSharedPreference.getBoolean("switch", true));
 
                 if (isSwitch) {
-                    sendTestButton(true);
+                    SharedPreferences sendTestButton = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                    SharedPreferences.Editor editor1 = sendTestButton.edit();
+                    editor1.putBoolean("sendTestButton", true);
+                    editor1.apply();
 
                     NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
                     notificationManager.cancel(1);
@@ -148,7 +151,7 @@ public class DebuggingActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 SharedPreferences mSharedPreference = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                Boolean isSwitch = (mSharedPreference.getBoolean("isSwitch", true));
+                Boolean isSwitch = (mSharedPreference.getBoolean("switch", true));
 
                 AudioManager current = (AudioManager) getSystemService(Service.AUDIO_SERVICE);
                 audioMode = current.getRingerMode();
@@ -156,7 +159,10 @@ public class DebuggingActivity extends AppCompatActivity {
                 normal();
 
                 if (isSwitch) {
-                    sendTestButton1(true);
+                    SharedPreferences sendTestButton1 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                    SharedPreferences.Editor editor1 = sendTestButton1.edit();
+                    editor1.putBoolean("sendTestButton1", true);
+                    editor1.apply();
 
                     new Handler().postDelayed(new Runnable() {
 
@@ -210,23 +216,17 @@ public class DebuggingActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void sendTestButton(Boolean testbutton) {
-        Intent intent = new Intent("com.ponnex.justdrive.DebuggingActivity");
-        intent.putExtra("TestButton", testbutton);
-        broadcastManager.sendBroadcast(intent);
-    }
-
-    public void sendTestButton1(Boolean testbutton) {
-        Intent intent = new Intent("com.ponnex.justdrive.DebuggingActivity1");
-        intent.putExtra("TestButton1", testbutton);
-        broadcastManager.sendBroadcast(intent);
-    }
-
     private BroadcastReceiver screenReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String activity = intent.getStringExtra("Activity");
-            updateUI(activity);
+
+            SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            Boolean isSwitch=(mSharedPreference.getBoolean("switch", true));
+
+            if (isSwitch) {
+                updateUI(activity);
+            }
         }
     };
 
