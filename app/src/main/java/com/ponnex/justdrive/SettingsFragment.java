@@ -189,7 +189,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
             }
         });
 
-        preferencebloxt = (Preference)getPreferenceManager().findPreference("theme");
+        preferencebloxt = getPreferenceManager().findPreference("theme");
         preferencebloxt.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             public boolean onPreferenceClick(Preference preference) {
                 showSingleChoice();

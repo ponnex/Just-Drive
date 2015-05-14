@@ -81,4 +81,6 @@ Without the help and the contribution of the following open source libraries thi
 
 [NineOldAndroids by JakeWharton](https://github.com/JakeWharton/NineOldAndroids/)
 
+[HeadsUp by zzz40500](https://github.com/zzz40500/HeadsUp)
+
 
