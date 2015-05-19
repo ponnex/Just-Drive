@@ -29,7 +29,6 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
     private SwitchPreference switchbloxt;
     static String mPhoneNumber;
     static boolean active = false;
-    private Integer theme;
     private Integer color;
 
     private String TAG = "com.ponnex.justdrive.SettingsFragmentLollipop";
@@ -51,9 +50,6 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
         SharedPreferences.Editor editor = isPhoneNumber.edit();
         editor.putString("PhoneNumber", mPhoneNumber);
         editor.apply();
-
-        SharedPreferences mSharedPreference6= PreferenceManager.getDefaultSharedPreferences(getActivity());
-        theme = (mSharedPreference6.getInt("theme", 1));
 
         SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getActivity());
         Boolean isSwitch = (mSharedPreference.getBoolean("switch", true));
@@ -118,26 +114,14 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
 
                     getPreferenceScreen().findPreference("switch").setSummary("Enabled");
 
-                    if ((theme % 2) == 0) {
-                        SnackbarManager.show(
-                                Snackbar.with(getActivity())
-                                        .position(Snackbar.SnackbarPosition.TOP)
-                                        .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
-                                        .textColor(Color.parseColor("#FFFFFF"))
-                                        .text("Just Drive is Enabled")
-                                , (android.view.ViewGroup) getActivity().findViewById(R.id.main_frame));
-                    }
-
-                    else {
-                        SnackbarManager.show(
-                                Snackbar.with(getActivity())
-                                        .position(Snackbar.SnackbarPosition.TOP)
-                                        .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
-                                        .textColor(Color.parseColor("#FFFFFF"))
-                                        .color(color)
-                                        .text("Just Drive is Enabled")
-                                , (android.view.ViewGroup) getActivity().findViewById(R.id.main_frame));
-                    }
+                    SnackbarManager.show(
+                            Snackbar.with(getActivity())
+                                    .position(Snackbar.SnackbarPosition.TOP)
+                                    .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
+                                    .textColor(Color.parseColor("#FFFFFF"))
+                                    .color(color)
+                                    .text("Just Drive is Enabled")
+                            , (android.view.ViewGroup) getActivity().findViewById(R.id.main_frame));
                 }
                 if (newValue.toString().equals("false")) {
                     SharedPreferences isSwitchup = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -147,26 +131,14 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
 
                     getPreferenceScreen().findPreference("switch").setSummary("Disabled");
 
-                    if ((theme % 2) == 0) {
-                        SnackbarManager.show(
-                                Snackbar.with(getActivity())
-                                        .position(Snackbar.SnackbarPosition.TOP)
-                                        .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
-                                        .textColor(Color.parseColor("#FFFFFF"))
-                                        .text("Just Drive is Disabled")
-                                , (android.view.ViewGroup) getActivity().findViewById(R.id.main_frame));
-                    }
-
-                    else {
-                        SnackbarManager.show(
-                                Snackbar.with(getActivity())
-                                        .position(Snackbar.SnackbarPosition.TOP)
-                                        .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
-                                        .textColor(Color.parseColor("#FFFFFF"))
-                                        .color(color)
-                                        .text("Just Drive is Disabled")
-                                , (android.view.ViewGroup) getActivity().findViewById(R.id.main_frame));
-                    }
+                    SnackbarManager.show(
+                            Snackbar.with(getActivity())
+                                    .position(Snackbar.SnackbarPosition.TOP)
+                                    .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
+                                    .textColor(Color.parseColor("#FFFFFF"))
+                                    .color(color)
+                                    .text("Just Drive is Disabled")
+                            , (android.view.ViewGroup) getActivity().findViewById(R.id.main_frame));
 
                     SharedPreferences isCountup2 = PreferenceManager.getDefaultSharedPreferences(getActivity());
                     SharedPreferences.Editor editor2 = isCountup2.edit();
@@ -189,14 +161,6 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
                     getPreferenceScreen().findPreference("phone").setSummary("(Headset or bluetooth mode only)\n" +
                             "Disable reading caller ID of incoming phone calls");
                 }
-                return true;
-            }
-        });
-
-        preferencebloxt = getPreferenceManager().findPreference("theme");
-        preferencebloxt.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            public boolean onPreferenceClick(Preference preference) {
-                showSingleChoice();
                 return true;
             }
         });
@@ -231,41 +195,6 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
                 return true;
             }
         });
-    }
-
-    private void showSingleChoice() {
-
-        new MaterialDialog.Builder(getActivity())
-                .title(R.string.themetitle)
-                .items(R.array.theme_values)
-                .itemsCallbackSingleChoice(theme, new MaterialDialog.ListCallbackSingleChoice() {
-                    @Override
-                    public boolean onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
-
-                        SharedPreferences mSharedPreference = PreferenceManager.getDefaultSharedPreferences(getActivity());
-                        theme = (mSharedPreference.getInt("theme", 1));
-
-                        //if current theme not equal to the selected theme then apply
-                        if (theme != which) {
-                            SharedPreferences isTheme = PreferenceManager.getDefaultSharedPreferences(getActivity());
-                            SharedPreferences.Editor editor = isTheme.edit();
-                            editor.putInt("theme", which);
-                            editor.apply();
-
-                            Bundle temp_bundle = new Bundle();
-                            onSaveInstanceState(temp_bundle);
-                            Intent intent = new Intent(getActivity(), MainActivity.class);
-                            intent.putExtra("bundle", temp_bundle);
-                            startActivity(intent);
-                            getActivity().finish();
-                        }
-
-                        return true; // allow selection
-                    }
-                })
-                .positiveText(R.string.choose)
-                .show();
-
     }
 
     @Override

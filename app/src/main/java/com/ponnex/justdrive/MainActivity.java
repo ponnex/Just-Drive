@@ -31,56 +31,14 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
     private View view1;
     private View view2;
-
     private boolean isFirstImage;
-
-    public final static int ORANGELIGHT = 0;
-    public final static int ORANGEDARK = 1;
-    public final static int BLUEGREYLIGHT = 2;
-    public final static int BLUEGREYDARK = 3;
-    public final static int INDIGOLIGHT = 4;
-    public final static int INDIGODARK = 5;
-
     static boolean active = false;
-
-    private Integer theme;
     private Integer color;
 
     private String TAG = "com.ponnex.justdrive.MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-        if (getIntent().hasExtra("bundle") && savedInstanceState == null) {
-            savedInstanceState = getIntent().getExtras().getBundle("bundle");
-        }
-
-        SharedPreferences mSharedPreference1 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        theme = (mSharedPreference1.getInt("theme", 1));
-
-        switch (theme) {
-            case ORANGELIGHT:
-                setTheme(R.style.JustDriveOrangeLightTheme);
-                break;
-            case ORANGEDARK:
-                setTheme(R.style.JustDriveOrangeDarkTheme);
-                break;
-            case BLUEGREYLIGHT:
-                setTheme(R.style.JustDriveBlueGreyLightTheme);
-                break;
-            case BLUEGREYDARK:
-                setTheme(R.style.JustDriveBlueGreyDarkTheme);
-                break;
-            case INDIGOLIGHT:
-                setTheme(R.style.JustDriveIndigoLightTheme);
-                break;
-            case INDIGODARK:
-                setTheme(R.style.JustDriveIndigoDarkTheme);
-                break;
-
-            default:
-        }
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -131,26 +89,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 editor1.putBoolean("switch", false);
                 editor1.apply();
 
-                if ((theme % 2) == 0) {
-                    SnackbarManager.show(
-                            Snackbar.with(MainActivity.this)
-                                    .position(Snackbar.SnackbarPosition.TOP)
-                                    .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
-                                    .textColor(Color.parseColor("#FFFFFF"))
-                                    .text("Just Drive is Disabled")
-                            , (android.view.ViewGroup) findViewById(R.id.main_frame));
-                }
-
-                else {
-                    SnackbarManager.show(
-                            Snackbar.with(MainActivity.this)
-                                    .position(Snackbar.SnackbarPosition.TOP)
-                                    .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
-                                    .textColor(Color.parseColor("#FFFFFF"))
-                                    .color(color)
-                                    .text("Just Drive is Disabled")
-                            , (android.view.ViewGroup) findViewById(R.id.main_frame));
-                    }
+                ShowSnackbar(R.string.justdrivedisable);
 
                 SharedPreferences isCountup2 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                 SharedPreferences.Editor editor2 = isCountup2.edit();
@@ -172,25 +111,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 startService(new Intent(getApplication(), LockScreen.class));
                 startService(new Intent(getApplication(), ActivityRecognitionIntentService.class));
 
-
-                if ((theme % 2) == 0) {
-                    SnackbarManager.show(
-                            Snackbar.with(MainActivity.this)
-                                    .position(Snackbar.SnackbarPosition.TOP)
-                                    .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
-                                    .textColor(Color.parseColor("#FFFFFF"))
-                                    .text("Just Drive is Enabled")
-                            , (android.view.ViewGroup) findViewById(R.id.main_frame));
-                } else {
-                    SnackbarManager.show(
-                            Snackbar.with(MainActivity.this)
-                                    .position(Snackbar.SnackbarPosition.TOP)
-                                    .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
-                                    .textColor(Color.parseColor("#FFFFFF"))
-                                    .color(color)
-                                    .text("Just Drive is Enabled")
-                            , (android.view.ViewGroup) findViewById(R.id.main_frame));
-                }
+                ShowSnackbar(R.string.justdriveenable);
 
             }
 
@@ -206,6 +127,17 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             editor.apply();
         }
 
+    }
+
+    public void ShowSnackbar(Integer text){
+        SnackbarManager.show(
+                Snackbar.with(MainActivity.this)
+                        .position(Snackbar.SnackbarPosition.TOP)
+                        .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
+                        .textColor(Color.parseColor("#FFFFFF"))
+                        .color(color)
+                        .text(text)
+                , (android.view.ViewGroup) findViewById(R.id.main_frame));
     }
 
     @Override

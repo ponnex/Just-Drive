@@ -25,9 +25,6 @@
         </com.jenzz.materialpreference.Preference>
     </com.jenzz.materialpreference.PreferenceCategory>
     <com.jenzz.materialpreference.PreferenceCategory android:title="Other">
-        <com.jenzz.materialpreference.Preference android:title="Theme"
-            android:key="theme"
-            android:summary="Select Theme" />
         <com.jenzz.materialpreference.SwitchPreference
             android:defaultValue="true"
             android:key="startonboot"

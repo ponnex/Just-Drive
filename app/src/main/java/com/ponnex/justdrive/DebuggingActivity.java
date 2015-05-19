@@ -32,19 +32,9 @@ import com.nispok.snackbar.SnackbarManager;
 public class DebuggingActivity extends AppCompatActivity {
     private static TextView activityTV;
 
-    public final static int ORANGELIGHT = 0;
-    public final static int ORANGEDARK = 1;
-    public final static int BLUEGREYLIGHT = 2;
-    public final static int BLUEGREYDARK = 3;
-    public final static int INDIGOLIGHT = 4;
-    public final static int INDIGODARK = 5;
-
-    private LocalBroadcastManager broadcastManager;
-
     Button testbutton;
     Button testbutton1;
     private static int audioMode;
-    private Integer theme;
     private Integer color;
 
     private String TAG = "com.ponnex.justdrive.DebuggingActivity";
@@ -52,44 +42,11 @@ public class DebuggingActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        if (getIntent().hasExtra("bundle") && savedInstanceState == null){
-            savedInstanceState = getIntent().getExtras().getBundle("bundle");
-        }
-
-        SharedPreferences mSharedPreference1= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        theme = (mSharedPreference1.getInt("theme", 1));
-
-        switch(theme)
-        {
-            case ORANGELIGHT:
-                setTheme(R.style.JustDriveOrangeLightTheme);
-                break;
-            case ORANGEDARK:
-                setTheme(R.style.JustDriveOrangeDarkTheme);
-                break;
-            case BLUEGREYLIGHT:
-                setTheme(R.style.JustDriveBlueGreyLightTheme);
-                break;
-            case BLUEGREYDARK:
-                setTheme(R.style.JustDriveBlueGreyDarkTheme);
-                break;
-            case INDIGOLIGHT:
-                setTheme(R.style.JustDriveIndigoLightTheme);
-                break;
-            case INDIGODARK:
-                setTheme(R.style.JustDriveIndigoDarkTheme);
-                break;
-
-            default:
-        }
-
         super.onCreate(savedInstanceState);
         Log.d(TAG, "DA Created");
         setContentView(R.layout.activity_debugging);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         activityTV = (TextView) findViewById(R.id.debugText);
-
-        broadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
 
         testbutton = (Button) findViewById(R.id.testbutton);
         testbutton1 = (Button) findViewById(R.id.testbutton1);
@@ -105,28 +62,15 @@ public class DebuggingActivity extends AppCompatActivity {
         if(!isSwitch){
             activityTV.setText("Can't Read Activity :(");
 
-            if((theme % 2) == 0){
-                SnackbarManager.show(
-                        Snackbar.with(DebuggingActivity.this)
-                                .position(Snackbar.SnackbarPosition.BOTTOM)
-                                .duration(Snackbar.SnackbarDuration.LENGTH_INDEFINITE)
-                                .textColor(Color.parseColor("#FFFFFF"))
-                                .text("Please Enable Bloxt Services")
-                                .swipeToDismiss(false)
-                        , (android.view.ViewGroup) findViewById(R.id.list_layout));
-            }
-
-            else {
-                SnackbarManager.show(
-                        Snackbar.with(DebuggingActivity.this)
-                                .position(Snackbar.SnackbarPosition.BOTTOM)
-                                .duration(Snackbar.SnackbarDuration.LENGTH_INDEFINITE)
-                                .textColor(Color.parseColor("#FFFFFF"))
-                                .color(color)
-                                .text("Please Enable Bloxt Services")
-                                .swipeToDismiss(false)
-                        , (android.view.ViewGroup) findViewById(R.id.list_layout));
-            }
+            SnackbarManager.show(
+                    Snackbar.with(DebuggingActivity.this)
+                            .position(Snackbar.SnackbarPosition.BOTTOM)
+                            .duration(Snackbar.SnackbarDuration.LENGTH_INDEFINITE)
+                            .textColor(Color.parseColor("#FFFFFF"))
+                            .color(color)
+                            .text("Please Enable Bloxt Services")
+                            .swipeToDismiss(false)
+                    , (android.view.ViewGroup) findViewById(R.id.list_layout));
         }
 
         testbutton.setOnClickListener(new View.OnClickListener() {

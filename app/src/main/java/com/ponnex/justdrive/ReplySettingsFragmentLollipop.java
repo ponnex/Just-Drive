@@ -117,21 +117,6 @@ public class ReplySettingsFragmentLollipop extends PreferenceFragment implements
                 return true;
             }
         });
-
-        /*
-        editbloxtmsg = (MaterialEditTextPreference) getPreferenceManager().findPreference("msg");
-        editbloxtmsg.getEditText().setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) {
-                    //InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    //inputManager.hideSoftInputFromWindow(editbloxtmsg.getEditText().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-
-                    ((InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(v.getWindowToken(), 0);
-                }
-            }
-        });
-        */
     }
 
     private void showBasicNoTitleNumberCheck() {

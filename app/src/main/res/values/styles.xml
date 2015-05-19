@@ -1,75 +1,18 @@
 <resources>
-    <!-- ######### Styles ######### -->
 
+    <!-- Styles -->
     <style name="AppTheme" parent="Theme.AppCompat">
-        <item name="colorPrimaryDark">@color/transparency</item>
-    </style>
-
-    <!-- Orange -->
-    <style name="JustDriveOrangeLightTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <item name="colorPrimary">@color/primaryOrange</item>
-        <item name="colorPrimaryDark">@color/primaryDarkOrange</item>
-        <item name="colorAccent">@color/accentOrange</item>
-        <item name="color">@color/fabOrange</item>
-    </style>
-
-    <style name="JustDriveOrangeDarkTheme" parent="Theme.AppCompat">
-        <item name="colorPrimary">@color/primaryOrange</item>
-        <item name="colorPrimaryDark">@color/primaryDarkOrange</item>
-        <item name="colorAccent">@color/accentOrange</item>
-        <item name="color">@color/fabOrange</item>
-    </style>
-
-    <!-- Blue Grey -->
-    <style name="JustDriveBlueGreyLightTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="colorPrimary">@color/primaryBlueGrey</item>
         <item name="colorPrimaryDark">@color/primaryDarkBlueGrey</item>
         <item name="colorAccent">@color/accentBlueGrey</item>
         <item name="color">@color/fabBlueGrey</item>
     </style>
 
-    <style name="JustDriveBlueGreyDarkTheme" parent="Theme.AppCompat">
-        <item name="colorPrimary">@color/primaryBlueGrey</item>
-        <item name="colorPrimaryDark">@color/primaryDarkBlueGrey</item>
-        <item name="colorAccent">@color/accentBlueGrey</item>
-        <item name="color">@color/fabBlueGrey</item>
-    </style>
-
-    <!-- Indigo -->
-    <style name="JustDriveIndigoLightTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <item name="colorPrimary">@color/primaryIndigo</item>
-        <item name="colorPrimaryDark">@color/primaryDarkIndigo</item>
-        <item name="colorAccent">@color/accentIndigo</item>
-        <item name="color">@color/fabIndigo</item>
-    </style>
-
-    <style name="JustDriveIndigoDarkTheme" parent="Theme.AppCompat">
-        <item name="colorPrimary">@color/primaryIndigo</item>
-        <item name="colorPrimaryDark">@color/primaryDarkIndigo</item>
-        <item name="colorAccent">@color/accentIndigo</item>
-        <item name="color">@color/fabIndigo</item>
-    </style>
-
-
-    <!-- ######### Color ######### -->
-
-    <!-- Orange -->
-    <color name="primaryOrange">#FF5722</color>
-    <color name="primaryDarkOrange">#E64A19</color>
-    <color name="accentOrange">#FF6E40</color>
-    <color name="fabOrange">#FF3D00</color>
-
-    <!-- Blue Grey -->
+    <!-- Color -->
     <color name="primaryBlueGrey">#37474f</color>
     <color name="primaryDarkBlueGrey">#263238</color>
     <color name="accentBlueGrey">#00BCD4</color>
     <color name="fabBlueGrey">#0097A7</color>
-
-    <!-- Indigo -->
-    <color name="primaryIndigo">#3F51B5</color>
-    <color name="primaryDarkIndigo">#303F9F</color>
-    <color name="accentIndigo">#FF4081</color>
-    <color name="fabIndigo">#F50057</color>
 
 </resources>
 

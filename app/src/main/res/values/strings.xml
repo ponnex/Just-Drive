@@ -35,4 +35,6 @@
     <string name="updateplayservicestmessage">This app won\'t run unless you update Google Play services.</string>
     <string name="enternumber">Unfortunately, Just Drive can\'t find your mobile number</string>
     <string name="phonenumber">Phone Number</string>
+    <string name="justdriveenable">Just Drive is Enabled</string>
+    <string name="justdrivedisable">Just Drive is Disabled</string>
 </resources>
