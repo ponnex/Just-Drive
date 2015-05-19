@@ -1,6 +1,7 @@
 package com.ponnex.justdrive;
 
 import android.app.Dialog;
+import android.app.Fragment;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -87,12 +88,14 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
         prefs.registerOnSharedPreferenceChangeListener(this);
 
-        if (Build.VERSION.SDK_INT >= 21) {
-            getFragmentManager().beginTransaction().replace(R.id.container, new SettingsFragmentLollipop()).commit();
-        }else{
-            getFragmentManager().beginTransaction().replace(R.id.container, new SettingsFragment()).commit();
+        Fragment existingFragment = getFragmentManager().findFragmentById(R.id.container);
+        if (existingFragment == null || !existingFragment.getClass().equals(SettingsFragment.class) || !existingFragment.getClass().equals(SettingsFragmentLollipop.class)) {
+            if (Build.VERSION.SDK_INT >= 21) {
+                getFragmentManager().beginTransaction().replace(R.id.container, new SettingsFragmentLollipop()).commit();
+            } else {
+                getFragmentManager().beginTransaction().replace(R.id.container, new SettingsFragment()).commit();
+            }
         }
-
         SharedPreferences mSharedPreference = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         Boolean isSwitch = (mSharedPreference.getBoolean("switch", true));
 

@@ -2,7 +2,6 @@ package com.ponnex.justdrive;
 
 import android.app.NotificationManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -205,7 +204,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
                     getPreferenceScreen().findPreference("startonboot").setSummary("Enable Just Drive on boot");
                 }
                 if (newValue.toString().equals("false")) {
-                    showBasicNoTitle();
+                    getPreferenceScreen().findPreference("startonboot").setSummary("Disable Just Drive on boot");
                 }
                 return true;
             }
@@ -227,36 +226,6 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
                 return true;
             }
         });
-    }
-
-    private void showBasicNoTitle() {
-        new MaterialDialog.Builder(getActivity())
-                .content(R.string.startonbootmsg)
-                .positiveText(R.string.yes_accept)
-                .negativeText(R.string.no_dont)
-                .callback(new MaterialDialog.ButtonCallback() {
-                    @Override
-                    public void onPositive(MaterialDialog dialog) {
-                        getPreferenceScreen().findPreference("startonboot").setSummary("Disable Just Drive on boot");
-                    }
-
-                    @Override
-                    public void onNegative(MaterialDialog dialog) {
-                        SwitchPreference startcheck = (SwitchPreference) findPreference("startonboot");
-                        startcheck.setChecked(true);
-                    }
-
-                })
-                .cancelListener(new DialogInterface.OnCancelListener() {
-                    @Override
-                    public void onCancel(DialogInterface dialog) {
-                        getPreferenceScreen().findPreference("startonboot").setSummary("Enable Just Drive on boot");
-                        SwitchPreference checkPrefs = (SwitchPreference) findPreference("startonboot");
-                        checkPrefs.setChecked(true);
-                    }
-                })
-
-                .show();
     }
 
     private void showSingleChoice() {

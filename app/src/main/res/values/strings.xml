@@ -18,18 +18,11 @@
         notification volume off (unless you\'re using wired or bluetooth headset), Send an automated text to those who are trying to reach you while driving, and use Text-to-Speech API to read incoming
         contact or number of those that are calling. You can even customize your own Auto reply Message! </string>
     <string name="dismiss">Dismiss</string>
-    <string name="bloxt_content">Let Google help apps determine location. This means sending data to Google, even when no apps are running.</string>
-    <string name="agree">Agree</string>
-    <string name="disagree">Disagree</string>
-    <string name="more_info">More Info</string>
-    <string name="useGoogleLocationServices">Use Google\'s Location Services?</string>
-    <string name="mustaccept">You must accept to use Just Drive</string>
     <string name="ok_accept">OK</string>
     <string name="quit_app">Quit</string>
     <string name="yes_accept">YES</string>
     <string name="yes_update">UPDATE</string>
     <string name="no_dont">NO</string>
-    <string name="startonbootmsg">It is recommended to start Just Drive services on boot, proceed anyway?</string>
     <string name="themetitle">Select Theme</string>
     <string name="choose">Choose</string>
     <string name="button_close">CLOSE</string>
@@ -38,7 +31,6 @@
     <string name="button_done">GET STARTED</string>
     <string name="button_update">UPDATE</string>
     <string name="phone_guide">guide</string>
-    <string name="service_name_notificationlistener">Sound Mode Switcher</string>
     <string name="updateplayservicestitle">Update Google Play services</string>
     <string name="updateplayservicestmessage">This app won\'t run unless you update Google Play services.</string>
     <string name="enternumber">Unfortunately, Just Drive can\'t find your mobile number</string>

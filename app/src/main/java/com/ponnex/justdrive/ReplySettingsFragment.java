@@ -30,7 +30,7 @@ public class ReplySettingsFragment extends PreferenceFragment implements SharedP
     static boolean active = false;
     private View positiveAction;
 
-    private String TAG = "com.ponnex.justdrive.ReplySettingsFragmentLollipop";
+    private String TAG = "com.ponnex.justdrive.ReplySettingsFragment";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
