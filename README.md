@@ -1,4 +1,4 @@
-# Just-Drive
+# Just Drive
 "No text, tweet, Facebook update, or email is worth your life. Put the phone down and Just Drive"
 
 #Problem Description
@@ -32,36 +32,17 @@ Using the newest Activity Recognition API by Google, Just Drive detects your act
 ![Debugging Mode](http://s29.postimg.org/4jef6129z/Debugging_Mode.png)
 #####HeadsUp notification that will prompt to ask if you're a *Driver* or a *Passenger*.
 ![HeadsUp](http://s29.postimg.org/djnm3ynrb/Heads_Up.png)
-#####Lock Screen that will be disable by on-screen test to prove that you are not driving, hence will be disable automatically by detection if you are not in a vehicle.
-![Lock Screen](http://s29.postimg.org/chi0z5ubr/Lock_Screen.png)
-
-#Themes
-####Select Themes according to your taste!
-![Theme Chooser](http://s29.postimg.org/z7h5s5djb/Theme_Chooser.png)
-
-#####Orange Dark
-![Orange Dark](http://s29.postimg.org/lvjd57l53/Orange_Dark.png)
-#####Orange Light
-![Orange Light](http://s29.postimg.org/mh8c1bg7b/Orange_Light.png)
-#####Blue Gray Dark
-![BlueGray Dark](http://s29.postimg.org/y7m9ip8zr/Blue_Gray_Dark.png)
-#####Blue Gray Light
-![BlueGray Light](http://s29.postimg.org/euqryotzb/Blue_Gray_Light.png)
-#####Indigo Dark
-![Indigo Dark](http://s29.postimg.org/dv52gq47b/Indigo_Dark.png)
-#####Indigo Light
-![Indigo Light](http://s29.postimg.org/x2s7dbmiv/Indigo_Light.png)
 
 WHAT'S NEXT?
 =======
 I'm currently working on the following implementations:
 
-• Emergency Call on Lock screen
+• Emergency Calls on Selected Contacts
+
 • Disable lock screen by speed test
-• On-Screen test to disable lock screen
-• Mimick lockscreen with clock widget and peek notifications
-• Logging of detected activies (for testing accuracies - PRE-RELEASE)
-• Car Dock - Music, GPS, etc
+
+• On-Screen test to disable app lock
+
 
 #Releases
 [###Check it out here###](https://github.com/ponnex/Just-Drive/releases)
