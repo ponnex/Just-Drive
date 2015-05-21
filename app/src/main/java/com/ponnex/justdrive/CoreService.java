@@ -10,21 +10,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.graphics.PixelFormat;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.View;
-import android.view.WindowManager;
-import android.widget.ImageButton;
-import android.widget.RelativeLayout;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -32,31 +27,31 @@ import com.google.android.gms.location.ActivityRecognition;
 import com.mingle.headsUp.HeadsUp;
 import com.mingle.headsUp.HeadsUpManager;
 
+import java.util.List;
+
 /**
  * Created by ramos on 4/14/2015.
  */
 
-public class LockScreen extends Service implements View.OnClickListener,GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,SharedPreferences.OnSharedPreferenceChangeListener {
+public class CoreService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final int MILLIS_PER_SEC = 0;
     private static final int DETECTION_INT_SEC = 0;
     private static final int DETECTION_INT_MILLIS = MILLIS_PER_SEC * DETECTION_INT_SEC; //change to variable type next update -- let user pick detection time from a drop down menu, will be added to Debugging Mode
     private GoogleApiClient mGoogleApiClient;
     private PendingIntent pendingIntent;
-    WindowManager windowManager;
-    WindowManager.LayoutParams layoutparams;
-    RelativeLayout relativeLayout;
-    ImageButton ok;
-    private Boolean showing = false;
-    private Boolean showingtest = false;
     private Boolean second = false;
     SharedPreferences sharedPrefs;
+    private static int audioMode;
+    AudioManager current;
+    LockerThread lockerThread;
+    boolean isInterrupted;
     private Handler lockscreenHandler = new Handler();
     private Runnable lockrun;
     int TIMER_COUNT = 15000;
-    private static int audioMode;
-    private String TAG = "com.ponnex.justdrive.LockScreen";
-    AudioManager current;
+    private Boolean activated = false;
+
+    private String TAG = "com.ponnex.justdrive.CoreService";
 
     //required by the service, keep service running in the background
     @Override
@@ -67,6 +62,10 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
     @Override
     public void onCreate(){
         super.onCreate();
+        isInterrupted = true;
+        lockerThread = new LockerThread();
+        lockerThread.start();
+
         Log.d(TAG, "LS Created");
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -80,7 +79,7 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
                 .build();
 
         SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        Boolean isSwitch=(mSharedPreference.getBoolean("switch", true));
+        Boolean isSwitch = (mSharedPreference.getBoolean("switch", true));
 
         if (isSwitch) {
             ServiceOn();
@@ -88,12 +87,12 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
         if (!isSwitch) {
             ServiceOff();
         }
+
         Intent intent1 = new Intent(this, ActivityRecognitionIntentService.class);
         pendingIntent = PendingIntent.getService(this, 0, intent1, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(screenReceiver, new IntentFilter("com.ponnex.justdrive.ActivityRecognitionIntentService1"));
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(activityReceiver, new IntentFilter("com.ponnex.justdrive.ActivityRecognitionIntentService1"));
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(cancelReceiver, new IntentFilter("com.ponnex.justdrive.NotificationReceiver"));
-        setUpLayout();
         current = (AudioManager) this.getSystemService(Service.AUDIO_SERVICE);
     }
 
@@ -107,18 +106,13 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
             editor.putBoolean("isCancelup", isCancel);
             editor.apply();
 
-            SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(context);
-            Boolean isTEST = (mSharedPreference.getBoolean("isTEST", false));
-
             if (isCancel){
 
-                if (!isTEST) {
-                    ServiceOff();
-                    sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                    SharedPreferences.Editor editor2 = sharedPrefs.edit();
-                    editor2.putBoolean("switch", false);
-                    editor2.apply();
-                }
+                ServiceOff();
+                sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                SharedPreferences.Editor editor2 = sharedPrefs.edit();
+                editor2.putBoolean("switch", false);
+                editor2.apply();
 
                 Intent intent5 = new Intent();
                 try {
@@ -177,6 +171,18 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
         SharedPreferences.Editor editor2 = isHeadsup.edit();
         editor2.putBoolean("headsup", false);
         editor2.apply();
+
+        SharedPreferences mSharedPreference1 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        Boolean isDebugtest = (mSharedPreference1.getBoolean("debugmode", false));
+        if(isDebugtest) {
+            isInterrupted = false;
+            lockerThread = new LockerThread();
+            lockerThread.start();
+
+            if (!isServiceRunning()) {
+                startService(new Intent(CoreService.this, TelephonyService.class));
+            }
+        }
     }
 
     public void ServiceOff(){
@@ -206,9 +212,10 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
         NotificationManager notificationManager1 = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         notificationManager1.cancel(1);
 
+        isInterrupted = true;
     }
 
-    private BroadcastReceiver screenReceiver=new BroadcastReceiver() {
+    private BroadcastReceiver activityReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
 
@@ -245,13 +252,14 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
                     Boolean isHeadsup=(mSharedPreference2.getBoolean("headsup", false));
 
                     if (count == 3) {
-                        if (!showing && !isHeadsup) {
+                        if (!activated && !isHeadsup) {
                             headsup();
                         }
 
                         audioMode = current.getRingerMode();
 
                         normal();
+
                         launchLockwithtimer();
 
                         new Handler().postDelayed(new Runnable() {
@@ -274,11 +282,14 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
                 //if (activity.equals("Tilting") && second) { //debugging code
                 if ((activity.equals("In Vehicle") && second) || (activity.equals("On Bicycle") && second)) {
                     try {
-                        ///launchLock
-                        windowManager.addView(relativeLayout, layoutparams);
-                        showing = true;
+                        activated = true;
+
+                        isInterrupted = false;
+                        lockerThread = new LockerThread();
+                        lockerThread.start();
+
                         if (!isServiceRunning()) {
-                            startService(new Intent(LockScreen.this, CarMode.class));
+                            startService(new Intent(CoreService.this, TelephonyService.class));
                         }
 
                         try {
@@ -303,12 +314,15 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
                 //if (activity.equals("Still")) { //debugging code
                 if (activity.equals("Still") || activity.equals("On Foot") || activity.equals("Running") || activity.equals("Walking")) {
 
-                    if (!showingtest) {
-                        removeLock();
-                    }
+                    SharedPreferences mSharedPreference5= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                    Boolean isdebug = (mSharedPreference5.getBoolean("debugmode", false));
+                    if(!isdebug) {
+                        isInterrupted = true;
+                        activated = false;
 
-                    if (isServiceRunning()) {
-                        stopService(new Intent(context, CarMode.class));
+                        if (isServiceRunning()) {
+                            stopService(new Intent(context, TelephonyService.class));
+                        }
                     }
 
                     //cancel runnable for the lockscreen
@@ -387,19 +401,20 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
     @Override
     public void onDestroy(){
         Log.d(TAG, "LS Destroyed");
+        isInterrupted = true;
         if(mGoogleApiClient.isConnected()) {
             ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(mGoogleApiClient, pendingIntent);
             mGoogleApiClient.disconnect();
         }
         try {
-            LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(screenReceiver);
+            LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(activityReceiver);
             LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(cancelReceiver);
         } catch (RuntimeException e) {
             e.printStackTrace();
         }
 
         if(isServiceRunning()){
-            stopService(new Intent(getApplicationContext(), CarMode.class));
+            stopService(new Intent(getApplicationContext(), TelephonyService.class));
         }
 
         SharedPreferences isCountup2 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -413,48 +428,11 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
     private boolean isServiceRunning() {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (CarMode.class.getName().equals(service.service.getClassName())) {
+            if (TelephonyService.class.getName().equals(service.service.getClassName())) {
                 return true;
             }
         }
         return false;
-    }
-
-    public int dpToPx(int dp) {
-        DisplayMetrics displayMetrics = getApplicationContext().getResources().getDisplayMetrics();
-        return Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
-    }
-
-    private void setUpLayout(){
-
-        windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
-        layoutparams = new WindowManager.LayoutParams(
-                WindowManager.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.TYPE_SYSTEM_ERROR,
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                PixelFormat.RGBA_8888
-        );
-
-        relativeLayout = new RelativeLayout(this);
-        relativeLayout.setBackgroundResource(R.drawable.back);
-        int paddingPix=dpToPx(20);
-        RelativeLayout.LayoutParams ok_param = new RelativeLayout.LayoutParams(
-                RelativeLayout.LayoutParams.WRAP_CONTENT,
-                RelativeLayout.LayoutParams.WRAP_CONTENT
-        );
-        ok_param.addRule(RelativeLayout.CENTER_HORIZONTAL);
-        ok_param.addRule(RelativeLayout.CENTER_IN_PARENT);
-        ok_param.setMargins(dpToPx(12), dpToPx(6), 0, 0);
-        ok=new ImageButton(this);
-        ok.setId(R.id.ok);
-        ok.setImageResource(R.drawable.ic_lockscreen_ok);
-        ok.setBackgroundColor(Color.parseColor("#00000000"));
-        ok.setPadding(paddingPix, paddingPix, paddingPix, paddingPix);
-        ok.setLayoutParams(ok_param);
-        ok.setOnClickListener(this);
-        relativeLayout.addView(ok);
     }
 
     private void headsup(){
@@ -467,37 +445,7 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
         editor1.apply();
 
         HeadsUpManager manage = HeadsUpManager.getInstant(getApplication());
-        HeadsUp.Builder builder = new HeadsUp.Builder(LockScreen.this);
-
-        builder.setContentTitle("Are you driving?")
-                .setTicker("Just Drive needs your attention")
-                .setDefaults(Notification.DEFAULT_SOUND)
-                        //To display the notification bar notification, this must be set
-                .setSmallIcon(R.drawable.ic_driving)
-                .setContentText("Ignore or Dismiss if you're Driving")
-                        //2.3 ?To set this parameter set, will be responsible for the error
-                .setContentIntent(pendingIntent)
-                .setFullScreenIntent(pendingIntent, false)
-                .setPriority(1)
-                        //Set whether to display the action buttons
-                .setUsesChronometer(true)
-                .addAction(R.drawable.ic_cancel, "I'm a passenger", notDriving());
-
-        HeadsUp headsUp = builder.buildHeadUp();
-        manage.notify(1, headsUp);
-    }
-
-    private void headsupTEST(){
-
-        audioMode = current.getRingerMode();
-
-        HeadsUpManager manage = HeadsUpManager.getInstant(getApplication());
-        HeadsUp.Builder builder = new HeadsUp.Builder(LockScreen.this);
-
-        SharedPreferences isTEST = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        SharedPreferences.Editor editor = isTEST.edit();
-        editor.putBoolean("isTEST", true);
-        editor.apply();
+        HeadsUp.Builder builder = new HeadsUp.Builder(CoreService.this);
 
         builder.setContentTitle("Are you driving?")
                 .setTicker("Just Drive needs your attention")
@@ -541,12 +489,15 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
                     //if(isSwitch && isActivity.equals("Tilting")) { //debugging code
                     if(isSwitch && (isActivity.equals("In Vehicle")||isActivity.equals("On Bicycle"))) {
                         if (!isCancelup) {
-                            showing = true;
-                            windowManager.addView(relativeLayout, layoutparams);
+                            activated = true;
+                            isInterrupted = false;
+                            lockerThread = new LockerThread();
+                            lockerThread.start();
 
                             if (!isServiceRunning()) {
-                                startService(new Intent(LockScreen.this, CarMode.class));
+                                startService(new Intent(CoreService.this, TelephonyService.class));
                             }
+
                             try {
                                 NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
                                 notificationManager.cancel(1);
@@ -575,77 +526,6 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
         lockscreenHandler.postDelayed(lockrun, TIMER_COUNT);
     }
 
-    private void launchLockwithtimerTEST() {
-        Log.d(TAG, "launchLockwithtimerTEST");
-
-        try {
-
-            showingtest = true;
-            windowManager.addView(relativeLayout, layoutparams);
-
-            Toast toast;
-            toast = Toast.makeText(getBaseContext(), "Click Image to Dismiss", Toast.LENGTH_LONG);
-            toast.show();
-
-            if (!isServiceRunning()) {
-                startService(new Intent(LockScreen.this, CarMode.class));
-            }
-        }
-
-        catch(RuntimeException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void removeLock(){
-
-        if(showing || showingtest){
-            windowManager.removeView(relativeLayout);
-            showing = false;
-            showingtest = false;
-
-            NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            notificationManager.cancel(1);
-
-            SharedPreferences isMsgfrom = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            SharedPreferences.Editor editor = isMsgfrom.edit();
-            editor.putString("isMsgfrom", null);
-            editor.apply();
-        }
-    }
-
-    @Override
-    public void onClick(View view) {
-        int id=view.getId();
-        if (id==R.id.ok)
-        {
-            removeLock();
-
-            if (isServiceRunning()) {
-                stopService(new Intent(getApplicationContext(), CarMode.class));
-            }
-
-            //to make sure
-            second = false;
-
-            //cancel runnable for the lockscreen
-            lockscreenHandler.removeCallbacks(lockrun);
-
-            //counter for the in vehicle, if it is detected 3 times, if it detects still and etc if the value is < 3 then reset it back to 0
-            SharedPreferences isCountup2 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            SharedPreferences.Editor editor2 = isCountup2.edit();
-            editor2.putInt("isCount", 0);
-            editor2.apply();
-
-            try {
-                NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                notificationManager.cancel(1);
-            }catch (RuntimeException e){
-                e.printStackTrace();
-            }
-        }
-    }
-
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals("switch")) {
             SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -658,34 +538,96 @@ public class LockScreen extends Service implements View.OnClickListener,GoogleAp
             }
         }
 
-        if (key.equals("sendTestButton")){
+        if (key.equals("debugmode")){
             SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            Boolean sendTestButton = (mSharedPreference.getBoolean("sendTestButton", true));
-            if (sendTestButton && !showing){
-                launchLockwithtimerTEST();
+            Boolean debugmode = (mSharedPreference.getBoolean("debugmode", false));
+            if (debugmode){
+                isInterrupted = false;
+                lockerThread = new LockerThread();
+                lockerThread.start();
 
-                SharedPreferences sendTestButtonreturn = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                SharedPreferences.Editor editor1 = sendTestButtonreturn.edit();
-                editor1.putBoolean("sendTestButton", false);
-                editor1.apply();
+                if (!isServiceRunning()) {
+                    startService(new Intent(CoreService.this, TelephonyService.class));
+                }
+            }
+            if(!debugmode){
+                isInterrupted = true;
+
+                if (isServiceRunning()) {
+                    stopService(new Intent(CoreService.this, TelephonyService.class));
+                }
             }
         }
+    }
 
-        if (key.equals("sendTestButton1")){
-            SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            Boolean sendTestButton1 = (mSharedPreference.getBoolean("sendTestButton1", true));
+    class LockerThread extends Thread
+    {
+        private String getTopActivityPkgName()
+        {
+            ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+            List<ActivityManager.RunningTaskInfo> runTask = activityManager.getRunningTasks(1);
+            return runTask.get(0).topActivity.getPackageName();
+        }
 
-            SharedPreferences mSharedPreference2= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            Boolean isHeadsup=(mSharedPreference2.getBoolean("headsup", false));
+        @Override
+        public  void  run ()
+        {
+            while (!isInterrupted)
+            {
+                SharedPreferences mSharedPreference1= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                Boolean isSwitch=(mSharedPreference1.getBoolean("switch", false));
 
-            if (sendTestButton1 && !showing && !isHeadsup){
-                headsupTEST();
+                if(isSwitch) {
+                    String runPkgName = getTopActivityPkgName();
 
-                SharedPreferences sendTestButtonreturn1 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                SharedPreferences.Editor editor1 = sendTestButtonreturn1.edit();
-                editor1.putBoolean("sendTestButton1", false);
-                editor1.apply();
+                    Log.d(TAG, "TopActivity: " + runPkgName);
+
+                    Intent intent = new Intent(Intent.ACTION_MAIN);
+                    intent.addCategory(Intent.CATEGORY_HOME);
+                    ResolveInfo resolveInfo = getPackageManager().resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY);
+                    String currentHomePackage = resolveInfo.activityInfo.packageName;
+
+                    String PACKAGE_NAME = BuildConfig.APPLICATION_ID;
+
+                    if (!isSystemApp(runPkgName) && !currentHomePackage.equals(runPkgName) && !PACKAGE_NAME.equals(runPkgName)) {
+
+                        Log.d(TAG, runPkgName + " process locked!");
+
+                        Intent dialogintent = new Intent(CoreService.this, AppLockActivity.class);
+                        dialogintent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP
+                                | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                        startActivity(dialogintent);
+
+                    } else {
+                        Log.d(TAG, runPkgName + " process is exclude!");
+                    }
+
+                    Log.d(TAG, "================== CYCLE ====================");
+
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
+        }
+    }
+
+    public boolean isSystemApp(String packageName) {
+        PackageManager mPackageManager = getPackageManager();
+        try {
+            // Get packageinfo for target application
+            PackageInfo targetPkgInfo = mPackageManager.getPackageInfo(
+                    packageName, PackageManager.GET_SIGNATURES);
+            // Get packageinfo for system package
+            PackageInfo sys = mPackageManager.getPackageInfo(
+                    "android", PackageManager.GET_SIGNATURES);
+            // Match both packageinfo for there signatures
+            return (targetPkgInfo != null && targetPkgInfo.signatures != null && sys.signatures[0]
+                    .equals(targetPkgInfo.signatures[0]));
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
         }
     }
 }

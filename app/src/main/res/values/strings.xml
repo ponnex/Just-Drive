@@ -4,13 +4,6 @@
     <string name="app_name">Just Drive</string>
 	<string name="hello_world">Hello world!</string>
     <string name="debuggingmode">Debugging Mode</string>
-    <string name="action_settings">Settings</string>
-    <string name="bloxt_desc">Keep you safe while you\'re driving.</string>
-    <string name="welcome">Welcome to Just Drive!</string>
-    <string name="welcome_screen">welcome screen</string>
-    <string name="start">Let\'s Start!</string>
-    <string name="hello">Hello, I\'m</string>
-    <string name="name_hint"> Your Name </string>
     <string name="about">About</string>
     <string name="about_body">Just Drive aims for lesser vehicle accidents by preventing texting, use, and distractions to those that are driving. Using the newest ActivityRecognitionAPI
         (com.google.android.gms:play-services-location:7.0.0) by Google to detect your activity if you\'re in a vehicle or not, it then display a lockscreen that will only be deactivated when Just Drive will
@@ -21,16 +14,10 @@
     <string name="ok_accept">OK</string>
     <string name="quit_app">Quit</string>
     <string name="yes_accept">YES</string>
-    <string name="yes_update">UPDATE</string>
     <string name="no_dont">NO</string>
     <string name="themetitle">Select Theme</string>
     <string name="choose">Choose</string>
-    <string name="button_close">CLOSE</string>
-    <string name="button_next">NEXT</string>
-    <string name="button_back">BACK</string>
-    <string name="button_done">GET STARTED</string>
     <string name="button_update">UPDATE</string>
-    <string name="phone_guide">guide</string>
     <string name="updateplayservicestitle">Update Google Play services</string>
     <string name="updateplayservicestmessage">This app won\'t run unless you update Google Play services.</string>
     <string name="enternumber">Unfortunately, Just Drive can\'t find your mobile number</string>

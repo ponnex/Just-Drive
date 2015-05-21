@@ -9,14 +9,16 @@ import android.preference.PreferenceManager;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
 import android.util.Log;
+
 /**
  * Created by ramos on 4/15/2015.
  */
+
 public class TextReceiver extends BroadcastReceiver {
 
     SmsMessage[] msgs;
     String msg_from;
-    String msg = CarMode.msg + "\n--This is an automated SMS--";
+    String msg = TelephonyService.msg + "\n--This is an automated SMS--";
     private String TAG = "com.ponnex.justdrive.TextReceiver";
 
     @Override
@@ -26,7 +28,7 @@ public class TextReceiver extends BroadcastReceiver {
         String isMsgFrom = (mSharedPreference1.getString("isMsgfrom", null));
 
         Log.d(TAG, "message received");
-        if (CarMode.autoreply) {
+        if (TelephonyService.autoreply) {
             if (intent.getAction().equals("android.provider.Telephony.SMS_RECEIVED")) {
                 Log.d(TAG, "SMS received");
                 // gets the message

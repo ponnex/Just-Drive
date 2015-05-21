@@ -10,12 +10,9 @@ import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
 import android.text.Editable;
-import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import com.afollestad.materialdialogs.DialogAction;
@@ -125,7 +122,7 @@ public class ReplySettingsFragmentLollipop extends PreferenceFragment implements
         MaterialDialog dialog = new MaterialDialog.Builder(getActivity())
                 .title(R.string.phonenumber)
                 .customView(R.layout.dialog_numberview, true)
-                .positiveText(R.string.yes_update)
+                .positiveText(R.string.button_update)
                 .callback(new MaterialDialog.ButtonCallback() {
                     @Override
                     public void onPositive(MaterialDialog dialog) {

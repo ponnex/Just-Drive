@@ -1,5 +1,6 @@
 package com.ponnex.justdrive;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.app.Fragment;
 import android.content.Intent;
@@ -34,6 +35,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     private boolean isFirstImage;
     static boolean active = false;
     private Integer color;
+    public static Activity minimize;
 
     private String TAG = "com.ponnex.justdrive.MainActivity";
 
@@ -41,6 +43,8 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        minimize = this;
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -61,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             //start only after verification that user has Google Play Services
             Log.d(TAG, "User has Google Play Services");
             if (isSwitch) {
-                startService(new Intent(getApplication(), LockScreen.class));
+                startService(new Intent(getApplication(), CoreService.class));
                 startService(new Intent(getApplication(), ActivityRecognitionIntentService.class));
             }
         }
@@ -108,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 editor1.putBoolean("switch", true);
                 editor1.apply();
 
-                startService(new Intent(getApplication(), LockScreen.class));
+                startService(new Intent(getApplication(), CoreService.class));
                 startService(new Intent(getApplication(), ActivityRecognitionIntentService.class));
 
                 ShowSnackbar(R.string.justdriveenable);
@@ -199,16 +203,23 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         Boolean isSwitch = (mSharedPreference.getBoolean("switch", true));
 
         if (isSwitch) {
-            startService(new Intent(getApplication(), LockScreen.class));
+            startService(new Intent(getApplication(), CoreService.class));
             startService(new Intent(getApplication(), ActivityRecognitionIntentService.class));
 
         }
 
         if (!isSwitch) {
-            stopService(new Intent(getApplication(), LockScreen.class));
+            stopService(new Intent(getApplication(), CoreService.class));
             stopService(new Intent(getApplication(), ActivityRecognitionIntentService.class));
 
         }
+
+        SharedPreferences mSharedPreference1 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        Boolean debugmode = (mSharedPreference1.getBoolean("debugmode", false));
+        if (debugmode){
+            stopService(new Intent(getApplication(), TelephonyService.class));
+        }
+
         super.onDestroy();
     }
 

@@ -2,7 +2,6 @@ package com.ponnex.justdrive;
 
 import android.app.NotificationManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -14,9 +13,7 @@ import android.preference.PreferenceManager;
 import android.preference.SwitchPreference;
 import android.telephony.TelephonyManager;
 import android.util.TypedValue;
-import android.view.View;
 
-import com.afollestad.materialdialogs.MaterialDialog;
 import com.nispok.snackbar.Snackbar;
 import com.nispok.snackbar.SnackbarManager;
 
@@ -35,7 +32,6 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        Preference preferencebloxt;
 
         super.onCreate(savedInstanceState);
         prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -61,7 +57,10 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
         Boolean isstartonboot = (mSharedPreference3.getBoolean("startonboot", true));
 
         SharedPreferences mSharedPreference4= PreferenceManager.getDefaultSharedPreferences(getActivity());
-        Boolean isnotify = (mSharedPreference4.getBoolean("notification", true));
+        Boolean isnotify = (mSharedPreference4.getBoolean("notification", false));
+
+        SharedPreferences mSharedPreference5= PreferenceManager.getDefaultSharedPreferences(getActivity());
+        Boolean isdebug = (mSharedPreference5.getBoolean("debugmode", false));
 
         if (isSwitch){
             getPreferenceScreen().findPreference("switch").setSummary("Enabled");
@@ -93,6 +92,13 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
             getPreferenceScreen().findPreference("notification").setSummary("Hide notifications of activities");
         }
 
+        if (isdebug){
+            getPreferenceScreen().findPreference("debugmode").setSummary("Debug mode ON");
+        }
+        else {
+            getPreferenceScreen().findPreference("debugmode").setSummary("Debug mode OFF");
+        }
+
         TypedValue typedValue = new TypedValue();
         Resources.Theme themecolor = getActivity().getTheme();
         themecolor.resolveAttribute(R.attr.colorAccent, typedValue, true);
@@ -109,7 +115,7 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
                     editor.putBoolean("switch", true);
                     editor.apply();
 
-                    getActivity().startService(new Intent(getActivity(), LockScreen.class));
+                    getActivity().startService(new Intent(getActivity(), CoreService.class));
                     getActivity().startService(new Intent(getActivity(), ActivityRecognitionIntentService.class));
 
                     getPreferenceScreen().findPreference("switch").setSummary("Enabled");
@@ -195,6 +201,20 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
                 return true;
             }
         });
+
+        switchbloxt = (SwitchPreference) getPreferenceManager().findPreference("debugmode");
+        switchbloxt.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+
+                if (newValue.toString().equals("true")) {
+                    getPreferenceScreen().findPreference("debugmode").setSummary("Debug mode ON");
+                }
+                if (newValue.toString().equals("false")) {
+                    getPreferenceScreen().findPreference("debugmode").setSummary("Debug mode OFF");
+                }
+                return true;
+            }
+        });
     }
 
     @Override
@@ -212,6 +232,15 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals("switch")) {
             updatePreference(findPreference(key));
+
+            SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getActivity());
+            Boolean isSwitch = (mSharedPreference.getBoolean("switch", true));
+            if(isSwitch) {
+                getPreferenceScreen().findPreference("debugmode").setEnabled(true);
+            }
+            if(!isSwitch) {
+                getPreferenceScreen().findPreference("debugmode").setEnabled(false);
+            }
         }
     }
 

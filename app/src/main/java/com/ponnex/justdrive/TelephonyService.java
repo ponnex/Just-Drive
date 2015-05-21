@@ -28,7 +28,7 @@ import java.util.Locale;
  * Created by ramos on 4/15/2015.
  */
 
-public class CarMode extends Service {
+public class TelephonyService extends Service {
     //the sound mode of the user's phone
     private static int audioMode;
     //autoreply
@@ -49,7 +49,7 @@ public class CarMode extends Service {
     TelephonyManager tm;
     private HeadSetIntentReceiver myReceiver;
 
-    private String TAG = "com.ponnex.justdrive.CarMode";
+    private String TAG = "com.ponnex.justdrive.TelephonyService";
 
     private int headphonestate;
 
@@ -102,7 +102,7 @@ public class CarMode extends Service {
                     if (state == TelephonyManager.CALL_STATE_RINGING) {
                         Log.d(TAG + "Phone State", "Ringing");
                         //read out the caller name
-                        tts = new TextToSpeech(CarMode.this, new TextToSpeech.OnInitListener() {
+                        tts = new TextToSpeech(TelephonyService.this, new TextToSpeech.OnInitListener() {
                             @Override
                             public void onInit(int status) {
                                 if (status != TextToSpeech.ERROR) {

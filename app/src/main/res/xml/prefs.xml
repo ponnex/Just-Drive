@@ -37,14 +37,10 @@
             android:key="notification"
             android:summary="Show notifications of activities"
             android:title="Notify" />
-        <com.jenzz.materialpreference.Preference android:title="Activity Log"
-            android:enabled="true"
-            android:key="debuggingmode"
-            android:summary="Show setting and activity log">
-            <intent
-                android:action="android.intent.action.MAIN"
-                android:targetPackage="com.ponnex.justdrive"
-                android:targetClass="com.ponnex.justdrive.DebuggingActivity" />
-        </com.jenzz.materialpreference.Preference>
+        <com.jenzz.materialpreference.SwitchPreference
+            android:defaultValue="false"
+            android:key="debugmode"
+            android:summary="Debug mode ON"
+            android:title="Debug Mode" />
     </com.jenzz.materialpreference.PreferenceCategory>
 </PreferenceScreen>

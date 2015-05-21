@@ -124,11 +124,7 @@ public class HeadsUpManager  {
         if(headsUp.getNotification()!=null ){
             notificationManager.notify(headsUp.getCode(), headsUp.getNotification());
         }
-
-
     }
-
-
 
     public void cancel(){
 

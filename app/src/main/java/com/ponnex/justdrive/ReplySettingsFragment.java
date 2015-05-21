@@ -121,7 +121,7 @@ public class ReplySettingsFragment extends PreferenceFragment implements SharedP
         MaterialDialog dialog = new MaterialDialog.Builder(getActivity())
                 .title(R.string.phonenumber)
                 .customView(R.layout.dialog_numberview, true)
-                .positiveText(R.string.yes_update)
+                .positiveText(R.string.button_update)
                 .callback(new MaterialDialog.ButtonCallback() {
                     @Override
                     public void onPositive(MaterialDialog dialog) {

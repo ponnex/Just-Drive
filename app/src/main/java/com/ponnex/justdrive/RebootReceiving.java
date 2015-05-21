@@ -6,9 +6,11 @@ import android.content.Intent;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
+
 /**
  * Created by ramos on 4/15/2015.
  */
+
 public class RebootReceiving extends BroadcastReceiver {
 
     private String TAG = "com.ponnex.justdrive.RebootReceiving";
@@ -18,7 +20,7 @@ public class RebootReceiving extends BroadcastReceiver {
         Log.d(TAG,"reboot");
         Boolean boot = PreferenceManager.getDefaultSharedPreferences(arg0).getBoolean("startonboot", true);
         if (boot) {
-            Intent intent = new Intent(arg0, LockScreen.class);
+            Intent intent = new Intent(arg0, CoreService.class);
             arg0.startService(intent);
 
             Toast toast;

@@ -1,10 +1,11 @@
 package com.ponnex.justdrive;
 
+import android.view.View;
+import android.view.animation.Animation;
+
 /**
  * Created by ramos on 4/21/2015.
  */
-import android.view.View;
-import android.view.animation.Animation;
 
 public final class DisplayNextView implements Animation.AnimationListener {
     private boolean mCurrentView;

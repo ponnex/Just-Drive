@@ -1,17 +1,14 @@
 package com.ponnex.justdrive;
 
-import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.TypedValue;
 import android.view.MenuItem;
 
 /**
  * Created by EmmanuelFrancis on 5/10/2015.
  */
+
 public class ReplySMSActivity extends AppCompatActivity {
 
     @Override
