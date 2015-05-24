@@ -3,20 +3,17 @@
 
     <string name="app_name">Just Drive</string>
 	<string name="hello_world">Hello world!</string>
-    <string name="debuggingmode">Debugging Mode</string>
+    <string name="debuggingmode">Debug</string>
+    <string name="debugmode_on">Debugging Mode Activated</string>
     <string name="about">About</string>
     <string name="about_body">Just Drive aims for lesser vehicle accidents by preventing texting, use, and distractions to those that are driving. Using the newest ActivityRecognitionAPI
         (com.google.android.gms:play-services-location:7.0.0) by Google to detect your activity if you\'re in a vehicle or not, it then display a lockscreen that will only be deactivated when Just Drive will
         detect that you are not driving. Although there will be a HeadsUp notification that will prompt you if you are a passenger or a driver before activating the lockscreen. This app also turn your
         notification volume off (unless you\'re using wired or bluetooth headset), Send an automated text to those who are trying to reach you while driving, and use Text-to-Speech API to read incoming
         contact or number of those that are calling. You can even customize your own Auto reply Message! </string>
-    <string name="dismiss">Dismiss</string>
-    <string name="ok_accept">OK</string>
-    <string name="quit_app">Quit</string>
-    <string name="yes_accept">YES</string>
-    <string name="no_dont">NO</string>
-    <string name="themetitle">Select Theme</string>
-    <string name="choose">Choose</string>
+    <string name="start">START</string>
+    <string name="stop">STOP</string>
+    <string name="dismiss">DISMISS</string>
     <string name="button_update">UPDATE</string>
     <string name="updateplayservicestitle">Update Google Play services</string>
     <string name="updateplayservicestmessage">This app won\'t run unless you update Google Play services.</string>
@@ -24,4 +21,10 @@
     <string name="phonenumber">Phone Number</string>
     <string name="justdriveenable">Just Drive is Enabled</string>
     <string name="justdrivedisable">Just Drive is Disabled</string>
+
+    <string name="dialog_title">"App Locked"</string>
+    <string name="dialog_message">No text, tweet, Facebook update, or email is worth your life so put the phone down and <i>Just Drive</i>.\n\n<i>Just Drive</i> lock this app for your own safety, It will be enabled later after you drive.</string>
+    <string name="about_title">Are you driving?</string>
+    <string name="about_message">For your own safety, <i>Just Drive</i> locked selected applications while taking care of all incoming calls and text messages while you are driving.</string>
+    <string name="notification_message">For your own safety, <i>Just Drive</i> locked selected applications.</string>
 </resources>

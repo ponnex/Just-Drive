@@ -98,6 +98,5 @@
     <orderEntry type="library" exported="" name="snackbar-2.10.7" level="project" />
     <orderEntry type="library" exported="" name="floatingactionbutton-1.3.0" level="project" />
     <orderEntry type="library" exported="" name="appcompat-v7-22.1.1" level="project" />
-    <orderEntry type="module" module-name="HeadsUp" exported="" />
   </component>
 </module>

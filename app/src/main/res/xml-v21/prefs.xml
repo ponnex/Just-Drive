@@ -34,16 +34,4 @@
             android:summary="Start service on boot"
             android:title="Run On Startup" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="DEBUGGING MODE">
-        <SwitchPreference
-            android:defaultValue="false"
-            android:key="notification"
-            android:summary="Show notifications of activities"
-            android:title="Notify" />
-        <SwitchPreference
-            android:defaultValue="false"
-            android:key="debugmode"
-            android:summary="Debug mode ON"
-            android:title="Debug Mode" />
-    </PreferenceCategory>
 </PreferenceScreen>

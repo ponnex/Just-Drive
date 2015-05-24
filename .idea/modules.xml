@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/library/HeadsUp/HeadsUp.iml" filepath="$PROJECT_DIR$/library/HeadsUp/HeadsUp.iml" />
       <module fileurl="file://$PROJECT_DIR$/Just Drive.iml" filepath="$PROJECT_DIR$/Just Drive.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>

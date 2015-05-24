@@ -19,6 +19,7 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.prefs.MaterialEditTextPreference;
 import com.jenzz.materialpreference.CheckBoxPreference;
+import com.ponnex.justdrive.R;
 
 /**
  * Created by EmmanuelFrancis on 5/10/2015.

@@ -1,8 +1,9 @@
 package com.ponnex.justdrive;
 
-import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.Dialog;
 import android.app.Fragment;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -17,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
+import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.gms.common.ConnectionResult;
@@ -28,14 +30,13 @@ import com.nispok.snackbar.SnackbarManager;
  * Created by ramos on 4/15/2015.
  */
 
-public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener{
+public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private View view1;
     private View view2;
     private boolean isFirstImage;
     static boolean active = false;
     private Integer color;
-    public static Activity minimize;
 
     private String TAG = "com.ponnex.justdrive.MainActivity";
 
@@ -44,15 +45,12 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        minimize = this;
-
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-
         prefs.registerOnSharedPreferenceChangeListener(this);
 
         Fragment existingFragment = getFragmentManager().findFragmentById(R.id.container);
         if (existingFragment == null || !existingFragment.getClass().equals(SettingsFragment.class) || !existingFragment.getClass().equals(SettingsFragmentLollipop.class)) {
-            if (Build.VERSION.SDK_INT >= 21) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 getFragmentManager().beginTransaction().replace(R.id.container, new SettingsFragmentLollipop()).commit();
             } else {
                 getFragmentManager().beginTransaction().replace(R.id.container, new SettingsFragment()).commit();
@@ -65,8 +63,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             //start only after verification that user has Google Play Services
             Log.d(TAG, "User has Google Play Services");
             if (isSwitch) {
-                startService(new Intent(getApplication(), CoreService.class));
-                startService(new Intent(getApplication(), ActivityRecognitionIntentService.class));
+                startService(new Intent(MainActivity.this, CoreService.class));
             }
         }
 
@@ -89,9 +86,9 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             public void onClick(View v) {
                 isFirstImage = true;
                 SharedPreferences switchPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                SharedPreferences.Editor editor1 = switchPref.edit();
-                editor1.putBoolean("switch", false);
-                editor1.apply();
+                SharedPreferences.Editor editor = switchPref.edit();
+                editor.putBoolean("switch", false);
+                editor.apply();
 
                 ShowSnackbar(R.string.justdrivedisable);
 
@@ -108,12 +105,12 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             public void onClick(View v) {
                 isFirstImage = false;
                 SharedPreferences switchPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                SharedPreferences.Editor editor1 = switchPref.edit();
-                editor1.putBoolean("switch", true);
-                editor1.apply();
+                SharedPreferences.Editor editor = switchPref.edit();
+                editor.putBoolean("switch", true);
+                editor.apply();
 
-                startService(new Intent(getApplication(), CoreService.class));
-                startService(new Intent(getApplication(), ActivityRecognitionIntentService.class));
+                startService(new Intent(MainActivity.this, CoreService.class));
+                startService(new Intent(MainActivity.this, ActivityRecognition.class));
 
                 ShowSnackbar(R.string.justdriveenable);
 
@@ -124,9 +121,8 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         Boolean isFirstRun = (mSharedPreference2.getBoolean("isFirstRun", true));
 
         if (isFirstRun) {
-
-            SharedPreferences isFirstRun1 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            SharedPreferences.Editor editor = isFirstRun1.edit();
+            SharedPreferences isFirstRun_write = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            SharedPreferences.Editor editor = isFirstRun_write.edit();
             editor.putBoolean("isFirstRun", false);
             editor.apply();
         }
@@ -144,8 +140,21 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 , (android.view.ViewGroup) findViewById(R.id.main_frame));
     }
 
+    private boolean isServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public void onStart() {
+        if (isServiceRunning(LockDialog.class)){
+            stopService(new Intent(MainActivity.this, LockDialog.class));
+        }
         super.onStart();
         active = true;
     }
@@ -186,12 +195,12 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.about) {
-            new MaterialDialog.Builder(this)
-                    .title(R.string.about)
-                    .positiveText(R.string.dismiss)
-                    .content(getString(R.string.about_body))
-                    .contentLineSpacing(1.6f)
-                    .show();
+            AboutDialog();
+            return true;
+        }
+
+        if(item.getItemId() == R.id.debug) {
+            DebugDialog();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -202,25 +211,54 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         SharedPreferences mSharedPreference = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         Boolean isSwitch = (mSharedPreference.getBoolean("switch", true));
 
-        if (isSwitch) {
-            startService(new Intent(getApplication(), CoreService.class));
-            startService(new Intent(getApplication(), ActivityRecognitionIntentService.class));
-
-        }
-
         if (!isSwitch) {
-            stopService(new Intent(getApplication(), CoreService.class));
-            stopService(new Intent(getApplication(), ActivityRecognitionIntentService.class));
-
+            stopService(new Intent(this, CoreService.class));
         }
-
-        SharedPreferences mSharedPreference1 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        Boolean debugmode = (mSharedPreference1.getBoolean("debugmode", false));
-        if (debugmode){
-            stopService(new Intent(getApplication(), TelephonyService.class));
-        }
-
         super.onDestroy();
+    }
+
+    private void AboutDialog(){
+        new MaterialDialog.Builder(this)
+                .title(R.string.about)
+                .positiveText(R.string.dismiss)
+                .content(getString(R.string.about_body))
+                .contentLineSpacing(1.6f)
+                .show();
+    }
+
+    private void DebugDialog(){
+        new MaterialDialog.Builder(this)
+                .title(R.string.debuggingmode)
+                .positiveText(R.string.start)
+                .negativeText(R.string.stop)
+                .content("Start Debugging Mode")
+                .contentLineSpacing(1.6f)
+                .callback(new MaterialDialog.ButtonCallback() {
+                    @Override
+                    public void onPositive(MaterialDialog dialog) {
+                        SharedPreferences isDebug = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                        SharedPreferences.Editor editor = isDebug.edit();
+                        editor.putBoolean("isDebug", true);
+                        editor.apply();
+
+                        Toast toast;
+                        toast = Toast.makeText(getApplicationContext(), "Starting Debugging Mode", Toast.LENGTH_SHORT);
+                        toast.show();
+                    }
+
+                    @Override
+                    public void onNegative(MaterialDialog dialog) {
+                        SharedPreferences isDebug = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                        SharedPreferences.Editor editor = isDebug.edit();
+                        editor.putBoolean("isDebug", false);
+                        editor.apply();
+
+                        Toast toast;
+                        toast = Toast.makeText(getApplicationContext(), "Stopping Debugging Mode", Toast.LENGTH_SHORT);
+                        toast.show();
+                    }
+                })
+                .show();
     }
 
     private boolean isPlayServicesConfigured() {

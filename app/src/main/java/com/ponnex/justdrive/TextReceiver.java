@@ -18,8 +18,8 @@ public class TextReceiver extends BroadcastReceiver {
 
     SmsMessage[] msgs;
     String msg_from;
-    String msg = TelephonyService.msg + "\n--This is an automated SMS--";
-    private String TAG = "com.ponnex.justdrive.TextReceiver";
+    String msg = CallerService.msg + "\n--This is an automated SMS--";
+    private String TAG = "com.ponnex.justdrive.Telephony.TextReceiver";
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -28,7 +28,7 @@ public class TextReceiver extends BroadcastReceiver {
         String isMsgFrom = (mSharedPreference1.getString("isMsgfrom", null));
 
         Log.d(TAG, "message received");
-        if (TelephonyService.autoreply) {
+        if (CallerService.autoreply) {
             if (intent.getAction().equals("android.provider.Telephony.SMS_RECEIVED")) {
                 Log.d(TAG, "SMS received");
                 // gets the message

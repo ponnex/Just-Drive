@@ -18,6 +18,8 @@ import android.widget.EditText;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.prefs.MaterialEditTextPreference;
+import com.ponnex.justdrive.R;
+
 import android.preference.CheckBoxPreference;
 
 /**

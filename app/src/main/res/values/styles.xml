@@ -17,7 +17,9 @@
         <item name="android:backgroundDimEnabled">false</item>
     </style>
 
-    <!-- Orange -->
+    <style name="AppCompatAlertDialogStyle" parent="Theme.AppCompat" />
+
+    <!-- Color -->
     <color name="primary">#FF5722</color>
     <color name="primaryDark">#E64A19</color>
     <color name="accent">#FF6E40</color>
