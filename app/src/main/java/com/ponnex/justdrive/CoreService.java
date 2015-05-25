@@ -51,6 +51,12 @@ public class CoreService extends Service implements GoogleApiClient.ConnectionCa
                 .addOnConnectionFailedListener(this)
                 .build();
 
+        Intent intent = new Intent(this, ActivityRecognition.class);
+        pendingIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+    @Override
+    public int onStartCommand(Intent intent,int flags,int startId){
         SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         Boolean isSwitch = (mSharedPreference.getBoolean("switch", true));
 
@@ -72,12 +78,6 @@ public class CoreService extends Service implements GoogleApiClient.ConnectionCa
             notificationManager.cancel(1);
         }
 
-        Intent intent = new Intent(this, ActivityRecognition.class);
-        pendingIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-    }
-
-    @Override
-    public int onStartCommand(Intent intent,int flags,int startId){
         //keep the service running
         return Service.START_STICKY;
     }
@@ -160,7 +160,7 @@ public class CoreService extends Service implements GoogleApiClient.ConnectionCa
                 getSystemService(Context.NOTIFICATION_SERVICE);
 
         // Build the notification and post it
-        notifyManager.notify(1, builder.build());
+        notifyManager.notify(2, builder.build());
     }
 
     @Override
@@ -170,10 +170,7 @@ public class CoreService extends Service implements GoogleApiClient.ConnectionCa
 
         PendingIntent restartServicePendingIntent = PendingIntent.getService(getApplicationContext(), 1, restartServiceIntent, PendingIntent.FLAG_ONE_SHOT);
         AlarmManager alarmService = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
-        alarmService.set(
-                AlarmManager.ELAPSED_REALTIME,
-                SystemClock.elapsedRealtime() + 1000,
-                restartServicePendingIntent);
+        alarmService.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 1000, restartServicePendingIntent);
 
         super.onTaskRemoved(rootIntent);
     }
@@ -207,7 +204,7 @@ public class CoreService extends Service implements GoogleApiClient.ConnectionCa
                 stopService(new Intent(CoreService.this, SpeedService.class));
 
                 NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                notificationManager.cancel(1);
+                notificationManager.cancel(2);
             }
         }
     }

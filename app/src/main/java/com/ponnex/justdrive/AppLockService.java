@@ -2,6 +2,7 @@ package com.ponnex.justdrive;
 
 import android.app.ActivityManager;
 import android.app.AlarmManager;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -18,7 +19,6 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import java.util.List;
@@ -30,10 +30,8 @@ import java.util.TreeMap;
  */
 
 public class AppLockService extends Service {
-
     LockerThread lockerThread;
     boolean isInterrupted;
-    private LocalBroadcastManager broadcastManager;
     private String TAG = "com.ponnex.justdrive.AppLockService";
 
     @Override
@@ -43,44 +41,19 @@ public class AppLockService extends Service {
     public void onCreate() {
         super.onCreate();
         Log.i(TAG + "_ALS", "Created");
-        isInterrupted = false;
-        lockerThread = new LockerThread();
-        lockerThread.start();
-
-        broadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG + "_ALS", "onStartCommand");
         super.onStartCommand(intent, flags, startId);
+        isInterrupted = false;
+        lockerThread = new LockerThread();
+        lockerThread.start();
         return START_STICKY;
     }
 
-    @Override
-    public void onDestroy() {
-        isInterrupted = true;
-        Log.i(TAG + "_ALS", "Destroy");
-        super.onDestroy();
-        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.cancel(0);
-    }
-
-    @Override
-    public void onTaskRemoved(Intent rootIntent) {
-        Intent restartServiceIntent = new Intent(getApplicationContext(), this.getClass());
-        restartServiceIntent.setPackage(getPackageName());
-
-        PendingIntent restartServicePendingIntent = PendingIntent.getService(getApplicationContext(), 1, restartServiceIntent, PendingIntent.FLAG_ONE_SHOT);
-        AlarmManager alarmService = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
-        alarmService.set(
-                AlarmManager.ELAPSED_REALTIME,
-                SystemClock.elapsedRealtime() + 1000,
-                restartServicePendingIntent);
-
-        super.onTaskRemoved(rootIntent);
-    }
-
+    @SuppressWarnings("deprecation")
     class LockerThread extends Thread {
         private String getTopActivityPkgName() {
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -104,8 +77,9 @@ public class AppLockService extends Service {
             }
             else {
                 ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-                List<ActivityManager.RunningTaskInfo> runTask = activityManager.getRunningTasks(1);
-                return runTask.get(0).topActivity.getPackageName();
+                //List<ActivityManager.RunningTaskInfo> runTask = activityManager.getRunningTasks(1);
+                //return runTask.get(0).topActivity.getPackageName();
+                return activityManager.getRunningTasks(1).get(0).topActivity.getPackageName();
             }
         }
 
@@ -138,7 +112,6 @@ public class AppLockService extends Service {
 
                     } else {
                         Log.d(TAG, runPkgName + " process is exclude!");
-                        isDismiss(true);
                     }
 
                     Log.d(TAG, "================== CYCLE ====================");
@@ -154,7 +127,7 @@ public class AppLockService extends Service {
     }
 
     private void LockNotification() {
-        Log.d(TAG + "_ALS","LockNotification");
+        Log.d(TAG + "_ALS", "LockNotification");
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext());
 
         Intent intent = new Intent(getApplicationContext(), AboutDialog.class);
@@ -176,20 +149,25 @@ public class AppLockService extends Service {
         notifyManager.notify(0, builder.build());
     }
 
-    public void isDismiss(Boolean testbutton) {
-        Intent intent = new Intent("com.bloxt.ponnex.guard.dissmisslockdialog");
-        intent.putExtra("isDismiss", testbutton);
-        broadcastManager.sendBroadcast(intent);
+    @Override
+    public void onDestroy() {
+        isInterrupted = true;
+        Log.i(TAG + "_ALS", "Destroy");
+        super.onDestroy();
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.cancel(0);
     }
 
-    private boolean isServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        Intent restartServiceIntent = new Intent(getApplicationContext(), this.getClass());
+        restartServiceIntent.setPackage(getPackageName());
+
+        PendingIntent restartServicePendingIntent = PendingIntent.getService(getApplicationContext(), 1, restartServiceIntent, PendingIntent.FLAG_ONE_SHOT);
+        AlarmManager alarmService = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+        alarmService.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 1000, restartServicePendingIntent);
+
+        super.onTaskRemoved(rootIntent);
     }
 
     public boolean isSystemApp(String packageName) {
@@ -208,4 +186,33 @@ public class AppLockService extends Service {
             return false;
         }
     }
+
+    private boolean isServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /*
+    @SuppressWarnings("deprecation")
+    public boolean isScreenOn() {
+        if (Build.VERSION.SDK_INT>=20) {
+            DisplayManager dm = (DisplayManager) getApplicationContext().getSystemService(Context.DISPLAY_SERVICE);
+            for (Display display : dm.getDisplays()) {
+                if (display.getState() != Display.STATE_OFF) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        else {
+            PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+            return powerManager.isScreenOn();
+        }
+    }
+    */
 }

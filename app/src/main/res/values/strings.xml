@@ -22,9 +22,9 @@
     <string name="justdriveenable">Just Drive is Enabled</string>
     <string name="justdrivedisable">Just Drive is Disabled</string>
 
-    <string name="dialog_title">"App Locked"</string>
+    <string name="dialog_title">"Access Denied"</string>
     <string name="dialog_message">No text, tweet, Facebook update, or email is worth your life so put the phone down and <i>Just Drive</i>.\n\n<i>Just Drive</i> lock this app for your own safety, It will be enabled later after you drive.</string>
-    <string name="about_title">Are you driving?</string>
-    <string name="about_message">For your own safety, <i>Just Drive</i> locked selected applications while taking care of all incoming calls and text messages while you are driving.</string>
+    <string name="about_title">App Lock</string>
+    <string name="about_message">Are you driving? For your own safety, <i>Just Drive</i> locked selected applications while taking care of all incoming calls and text messages while you are driving.</string>
     <string name="notification_message">For your own safety, <i>Just Drive</i> locked selected applications.</string>
 </resources>

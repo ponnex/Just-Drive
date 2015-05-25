@@ -21,7 +21,6 @@ import android.widget.TextView;
 
 public class AboutDialog extends Service {
     AlertDialog alertDialog;
-    private LocalBroadcastManager broadcastManager;
     private String TAG = "com.ponnex.justdrive.AboutDialog";
 
     @Override
@@ -33,20 +32,22 @@ public class AboutDialog extends Service {
     public void onCreate() {
         Log.i(TAG, "AboutDialog Created");
         super.onCreate();
+    }
 
-        broadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.i(TAG, "AboutDialog onStartCommand");
+        super.onStartCommand(intent, flags, startId);
 
-        if(isServiceRunning(LockDialog.class)){
-            isDismiss(true);
+        if(isServiceRunning(LockDialog.class)) {
+            Intent homeIntent = new Intent();
+            homeIntent.setAction(Intent.ACTION_MAIN);
+            homeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            homeIntent.addCategory(Intent.CATEGORY_HOME);
+            getApplicationContext().startActivity(homeIntent);
+
+            stopService(new Intent(AboutDialog.this, LockDialog.class));
         }
-
-        // Go to the Home screen
-        Intent homeIntent = new Intent();
-        homeIntent.setAction(Intent.ACTION_MAIN);
-        homeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        homeIntent.addCategory(Intent.CATEGORY_HOME);
-        getApplicationContext().startActivity(homeIntent);
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(getApplicationContext(), R.style.AppCompatAlertDialogStyle));
         alertDialog = builder.create();
@@ -56,28 +57,20 @@ public class AboutDialog extends Service {
         alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "DISMISS", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                //dismiss dialog
-                dialog.cancel();
-                //stop this service
-                stopSelf();
+                stopService(new Intent(AboutDialog.this, AboutDialog.class));
             }
         });
         alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "NOT DRIVING?", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                stopService(new Intent(AboutDialog.this, AboutDialog.class));
 
                 //test speed
                 //test screen
                 startService(new Intent(AboutDialog.this, SpeedService.class));
-
-                //dismiss dialog
-                dialog.cancel();
-                //stop this service
-                stopSelf();
             }
         });
-        alertDialog.getWindow().setType(
-                WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         alertDialog.show();
 
         final int accentcolor = getApplicationContext().getResources().getColor(R.color.accent);
@@ -90,12 +83,15 @@ public class AboutDialog extends Service {
 
         Button positive = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
         positive.setTextColor(accentcolor);
+
+        return START_STICKY;
     }
 
-    public void isDismiss(Boolean testbutton) {
-        Intent intent = new Intent("com.bloxt.ponnex.guard.dissmisslockdialog");
-        intent.putExtra("isDismiss", testbutton);
-        broadcastManager.sendBroadcast(intent);
+    @Override
+    public void onDestroy() {
+        Log.i(TAG, "AboutDialog Destroy");
+        alertDialog.dismiss();
+        super.onDestroy();
     }
 
     private boolean isServiceRunning(Class<?> serviceClass) {
@@ -106,18 +102,5 @@ public class AboutDialog extends Service {
             }
         }
         return false;
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i(TAG, "AboutDialog onStartCommand");
-        super.onStartCommand(intent, flags, startId);
-        return START_STICKY;
-    }
-
-    @Override
-    public void onDestroy() {
-        Log.i(TAG, "AboutDialog Destroy");
-        super.onDestroy();
     }
 }

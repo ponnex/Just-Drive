@@ -2,7 +2,6 @@ package com.ponnex.justdrive;
 
 import android.app.ActivityManager;
 import android.app.IntentService;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -115,9 +114,6 @@ public class ActivityRecognition extends IntentService {
     private void stopAppLock() {
         if(isServiceRunning(AppLockService.class)) {
             stopService(new Intent(ActivityRecognition.this, AppLockService.class));
-            if(isServiceRunning(LockDialog.class)) {
-                stopService(new Intent(ActivityRecognition.this, LockDialog.class));
-            }
         }
         if(isServiceRunning(CallerService.class)){
             stopService(new Intent(ActivityRecognition.this, CallerService.class));
@@ -140,25 +136,6 @@ public class ActivityRecognition extends IntentService {
         }
         return false;
     }
-
-    /*
-    @SuppressWarnings("deprecation")
-    public boolean isScreenOn() {
-        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        return powerManager.isScreenOn();
-    }
-
-    @TargetApi(20)
-    public boolean isScreenOnAPI20 () {
-        DisplayManager dm = (DisplayManager) getApplicationContext().getSystemService(Context.DISPLAY_SERVICE);
-        for (Display display : dm.getDisplays()) {
-            if (display.getState() != Display.STATE_OFF) {
-                return true;
-            }
-        }
-        return false;
-    }
-    */
 
     @Override
     public void onDestroy(){

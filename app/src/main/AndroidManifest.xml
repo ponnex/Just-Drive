@@ -60,19 +60,17 @@
             android:name=".ActivityRecognition"
             android:exported="false" />
 
-        <service android:name=".AppLockService" />
+        <service android:name=".AppLockService"/>
+
+        <service android:name=".CoreService" />
 
         <service android:name=".SpeedService" />
-
-        <service android:name=".CoreService"/>
 
         <service android:name=".AboutDialog" />
 
         <service android:name=".LockDialog" />
 
         <service android:name=".CallerService" />
-
-        <receiver android:name=".Notification" />
 
         <receiver android:name=".TextReceiver">
             <intent-filter>

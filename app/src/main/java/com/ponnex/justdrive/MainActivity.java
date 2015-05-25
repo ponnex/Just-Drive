@@ -3,6 +3,7 @@ package com.ponnex.justdrive;
 import android.app.ActivityManager;
 import android.app.Dialog;
 import android.app.Fragment;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -236,26 +237,44 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 .callback(new MaterialDialog.ButtonCallback() {
                     @Override
                     public void onPositive(MaterialDialog dialog) {
-                        SharedPreferences isDebug = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                        SharedPreferences.Editor editor = isDebug.edit();
-                        editor.putBoolean("isDebug", true);
-                        editor.apply();
+                        SharedPreferences mSharedPreference = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                        Boolean isSwitch = (mSharedPreference.getBoolean("switch", true));
+                        if (isSwitch) {
+                            SharedPreferences isDebug = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                            SharedPreferences.Editor editor = isDebug.edit();
+                            editor.putBoolean("isDebug", true);
+                            editor.apply();
 
-                        Toast toast;
-                        toast = Toast.makeText(getApplicationContext(), "Starting Debugging Mode", Toast.LENGTH_SHORT);
-                        toast.show();
+                            Toast toast;
+                            toast = Toast.makeText(getApplicationContext(), "Starting Debugging Mode", Toast.LENGTH_SHORT);
+                            toast.show();
+                        } else {
+                            Toast toast;
+                            toast = Toast.makeText(getApplicationContext(), "Enable Just Drive Services First", Toast.LENGTH_SHORT);
+                            toast.show();
+                        }
+
+
                     }
 
                     @Override
                     public void onNegative(MaterialDialog dialog) {
-                        SharedPreferences isDebug = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                        SharedPreferences.Editor editor = isDebug.edit();
-                        editor.putBoolean("isDebug", false);
-                        editor.apply();
+                        SharedPreferences mSharedPreference = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                        Boolean isSwitch = (mSharedPreference.getBoolean("switch", true));
+                        if (isSwitch) {
+                            SharedPreferences isDebug = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                            SharedPreferences.Editor editor = isDebug.edit();
+                            editor.putBoolean("isDebug", false);
+                            editor.apply();
 
-                        Toast toast;
-                        toast = Toast.makeText(getApplicationContext(), "Stopping Debugging Mode", Toast.LENGTH_SHORT);
-                        toast.show();
+                            Toast toast;
+                            toast = Toast.makeText(getApplicationContext(), "Stopping Debugging Mode", Toast.LENGTH_SHORT);
+                            toast.show();
+                        } else {
+                            Toast toast;
+                            toast = Toast.makeText(getApplicationContext(), "Enable Just Drive Services First", Toast.LENGTH_SHORT);
+                            toast.show();
+                        }
                     }
                 })
                 .show();
