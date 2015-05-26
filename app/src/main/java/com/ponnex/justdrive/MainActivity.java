@@ -1,25 +1,19 @@
 package com.ponnex.justdrive;
 
-import android.app.ActivityManager;
 import android.app.Dialog;
 import android.app.Fragment;
-import android.app.NotificationManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
-import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.gms.common.ConnectionResult;
@@ -32,12 +26,10 @@ import com.nispok.snackbar.SnackbarManager;
  */
 
 public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
-
     private View view1;
     private View view2;
     private boolean isFirstImage;
     static boolean active = false;
-    private Integer color;
 
     private String TAG = "com.ponnex.justdrive.MainActivity";
 
@@ -76,11 +68,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             view1.setVisibility(View.INVISIBLE);
             view2.setVisibility(View.VISIBLE);
         }
-
-        TypedValue typedValue = new TypedValue();
-        Resources.Theme themecolor = getTheme();
-        themecolor.resolveAttribute(R.attr.colorAccent, typedValue, true);
-        color = typedValue.data;
 
         view1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -127,35 +114,22 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             editor.putBoolean("isFirstRun", false);
             editor.apply();
         }
-
     }
 
     public void ShowSnackbar(Integer text){
+        final int accentcolor = getApplicationContext().getResources().getColor(R.color.accent);
         SnackbarManager.show(
                 Snackbar.with(MainActivity.this)
                         .position(Snackbar.SnackbarPosition.TOP)
                         .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
                         .textColor(Color.parseColor("#FFFFFF"))
-                        .color(color)
+                        .color(accentcolor)
                         .text(text)
                 , (android.view.ViewGroup) findViewById(R.id.main_frame));
     }
 
-    private boolean isServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     @Override
     public void onStart() {
-        if (isServiceRunning(LockDialog.class)){
-            stopService(new Intent(MainActivity.this, LockDialog.class));
-        }
         super.onStart();
         active = true;
     }
@@ -199,11 +173,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             AboutDialog();
             return true;
         }
-
-        if(item.getItemId() == R.id.debug) {
-            DebugDialog();
-            return true;
-        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -224,59 +193,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 .positiveText(R.string.dismiss)
                 .content(getString(R.string.about_body))
                 .contentLineSpacing(1.6f)
-                .show();
-    }
-
-    private void DebugDialog(){
-        new MaterialDialog.Builder(this)
-                .title(R.string.debuggingmode)
-                .positiveText(R.string.start)
-                .negativeText(R.string.stop)
-                .content("Start Debugging Mode")
-                .contentLineSpacing(1.6f)
-                .callback(new MaterialDialog.ButtonCallback() {
-                    @Override
-                    public void onPositive(MaterialDialog dialog) {
-                        SharedPreferences mSharedPreference = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                        Boolean isSwitch = (mSharedPreference.getBoolean("switch", true));
-                        if (isSwitch) {
-                            SharedPreferences isDebug = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                            SharedPreferences.Editor editor = isDebug.edit();
-                            editor.putBoolean("isDebug", true);
-                            editor.apply();
-
-                            Toast toast;
-                            toast = Toast.makeText(getApplicationContext(), "Starting Debugging Mode", Toast.LENGTH_SHORT);
-                            toast.show();
-                        } else {
-                            Toast toast;
-                            toast = Toast.makeText(getApplicationContext(), "Enable Just Drive Services First", Toast.LENGTH_SHORT);
-                            toast.show();
-                        }
-
-
-                    }
-
-                    @Override
-                    public void onNegative(MaterialDialog dialog) {
-                        SharedPreferences mSharedPreference = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                        Boolean isSwitch = (mSharedPreference.getBoolean("switch", true));
-                        if (isSwitch) {
-                            SharedPreferences isDebug = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                            SharedPreferences.Editor editor = isDebug.edit();
-                            editor.putBoolean("isDebug", false);
-                            editor.apply();
-
-                            Toast toast;
-                            toast = Toast.makeText(getApplicationContext(), "Stopping Debugging Mode", Toast.LENGTH_SHORT);
-                            toast.show();
-                        } else {
-                            Toast toast;
-                            toast = Toast.makeText(getApplicationContext(), "Enable Just Drive Services First", Toast.LENGTH_SHORT);
-                            toast.show();
-                        }
-                    }
-                })
                 .show();
     }
 

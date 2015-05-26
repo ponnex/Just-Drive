@@ -1,8 +1,6 @@
 package com.ponnex.justdrive;
 
-import android.app.ActivityManager;
 import android.app.AlarmManager;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
@@ -12,7 +10,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -66,35 +63,12 @@ public class CoreService extends Service implements GoogleApiClient.ConnectionCa
         if (!isSwitch) {
             ServiceOff();
         }
-
-        SharedPreferences mSharedPreference1 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        Boolean isDebug =(mSharedPreference1.getBoolean("isDebug", false));
-
-        if(isDebug){
-            DebugNotification();
-        }
-        else {
-            NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            notificationManager.cancel(1);
-        }
-
         //keep the service running
         return Service.START_STICKY;
     }
 
     public void ServiceOn(){
         mGoogleApiClient.connect();
-
-        SharedPreferences mSharedPreference1 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        Boolean isDebug =(mSharedPreference1.getBoolean("isDebug", false));
-
-        if(isDebug){
-            DebugNotification();
-        }
-        else {
-            NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            notificationManager.cancel(1);
-        }
     }
 
     public void ServiceOff(){
@@ -104,12 +78,7 @@ public class CoreService extends Service implements GoogleApiClient.ConnectionCa
             mGoogleApiClient.disconnect();
 
             stopService(new Intent(CoreService.this, AppLockService.class));
-            stopService(new Intent(CoreService.this, LockDialog.class));
             stopService(new Intent(CoreService.this, CallerService.class));
-            stopService(new Intent(CoreService.this, SpeedService.class));
-
-            NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            notificationManager.cancel(1);
         }
     }
 
@@ -140,29 +109,6 @@ public class CoreService extends Service implements GoogleApiClient.ConnectionCa
         }
     }
 
-    private void DebugNotification() {
-        Log.d(TAG + "_DebugNotification", "Triggered");
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext());
-
-        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getService(getApplicationContext(), 0, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
-
-        // Set the title, text, and icon
-        builder.setContentTitle(getString(R.string.app_name))
-                .setContentText("Debugging Mode")
-                .setSmallIcon(R.drawable.ic_debug)
-                .setOngoing(true)
-                .setContentIntent(pendingIntent);
-
-        // Get an instance of the Notification Manager
-        NotificationManager notifyManager = (NotificationManager)
-                getSystemService(Context.NOTIFICATION_SERVICE);
-
-        // Build the notification and post it
-        notifyManager.notify(2, builder.build());
-    }
-
     @Override
     public void onTaskRemoved(Intent rootIntent){
         Intent restartServiceIntent = new Intent(getApplicationContext(), this.getClass());
@@ -186,25 +132,6 @@ public class CoreService extends Service implements GoogleApiClient.ConnectionCa
             if(!isSwitch) {
                 //disconnect
                 ServiceOff();
-            }
-        }
-
-        if(key.equals("isDebug")){
-            SharedPreferences mSharedPreference1 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            Boolean isDebug =(mSharedPreference1.getBoolean("isDebug", false));
-
-            if(isDebug){
-                DebugNotification();
-            }
-            else {
-
-                stopService(new Intent(CoreService.this, AppLockService.class));
-                stopService(new Intent(CoreService.this, LockDialog.class));
-                stopService(new Intent(CoreService.this, CallerService.class));
-                stopService(new Intent(CoreService.this, SpeedService.class));
-
-                NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                notificationManager.cancel(2);
             }
         }
     }

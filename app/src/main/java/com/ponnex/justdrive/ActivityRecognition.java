@@ -31,38 +31,27 @@ public class ActivityRecognition extends IntentService {
     public void onCreate() {
         super.onCreate();
         Log.d(TAG + "_ARIS", "Created");
-        SharedPreferences mSharedPreference1 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        Boolean isDebug =(mSharedPreference1.getBoolean("isDebug", false));
-
-        if(isDebug){
-            //start applock service
-            startAppLock();
-            Log.d(TAG + "_ARIS", "Debug Mode running");
-        } else {
-            //disable applock service
-            stopAppLock();
-            Log.d(TAG + "_ARIS", "Debug Mode stopping");
-        }
     }
 
     @Override
     protected void onHandleIntent(Intent intent) {
+
+        //////////DEBUG ONLY//////////
+        //start applock service
+        startAppLock();
+        ////////////////////////////
+
         if (ActivityRecognitionResult.hasResult(intent)) {
-            ActivityRecognitionResult result =
-                    ActivityRecognitionResult.extractResult(intent);
+            ActivityRecognitionResult result = ActivityRecognitionResult.extractResult(intent);
             DetectedActivity mostProbableActivity = result.getMostProbableActivity();
             int confidence = mostProbableActivity.getConfidence();
             int activityType = mostProbableActivity.getType();
 
-            SharedPreferences mSharedPreference = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            Boolean isFirstRun=(mSharedPreference.getBoolean("isFirstRun", true));
-
-            SharedPreferences mSharedPreference1 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            Boolean isDebug =(mSharedPreference1.getBoolean("isDebug", false));
-
-            if (!isFirstRun && switchstate() && !isDebug) {
+            if (switchstate()) {
                 String activityName = getNameFromType(activityType);
                 Log.d(TAG + "_ARIS", "Activity: " + activityName + ", Confidence: " + confidence + "% ");
+
+                /* DO NOT DELETE
                 if (confidence >= 75) {
                     if (activityName.equals("In Vehicle") || activityName.equals("On Bicycle")) {
                         //start applock service
@@ -76,6 +65,7 @@ public class ActivityRecognition extends IntentService {
                         stopAppLock();
                     }
                 }
+                */
             }
         }
     }

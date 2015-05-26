@@ -56,19 +56,11 @@
             </intent-filter>
         </activity>
 
-        <service
-            android:name=".ActivityRecognition"
-            android:exported="false" />
+        <service android:name=".ActivityRecognition" android:exported="false" />
 
-        <service android:name=".AppLockService"/>
+        <service android:name=".AppLockService" />
 
         <service android:name=".CoreService" />
-
-        <service android:name=".SpeedService" />
-
-        <service android:name=".AboutDialog" />
-
-        <service android:name=".LockDialog" />
 
         <service android:name=".CallerService" />
 
