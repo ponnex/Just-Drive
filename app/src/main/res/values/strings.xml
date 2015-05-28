@@ -3,8 +3,8 @@
 
     <string name="app_name">Just Drive</string>
 	<string name="hello_world">Hello world!</string>
-    <string name="debuggingmode">Debug</string>
-    <string name="debugmode_on">Debugging Mode Activated</string>
+    <string name="debug_on">Debug ON</string>
+    <string name="debug_off">Debug OFF</string>
     <string name="about">About</string>
     <string name="about_body">Just Drive aims for lesser vehicle accidents by preventing texting, use, and distractions to those that are driving. Using the newest ActivityRecognitionAPI
         (com.google.android.gms:play-services-location:7.0.0) by Google to detect your activity if you\'re in a vehicle or not, it then display a lockscreen that will only be deactivated when Just Drive will

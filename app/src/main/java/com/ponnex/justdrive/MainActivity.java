@@ -1,7 +1,9 @@
 package com.ponnex.justdrive;
 
+import android.app.ActivityManager;
 import android.app.Dialog;
 import android.app.Fragment;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -173,7 +175,47 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             AboutDialog();
             return true;
         }
+        if (item.getItemId() == R.id.debug_on) {
+            SharedPreferences debug = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            SharedPreferences.Editor editor = debug.edit();
+            editor.putBoolean("debug", true);
+            editor.apply();
+
+            if(!isServiceRunning(AppLockService.class)) {
+                startService(new Intent(MainActivity.this, AppLockService.class));
+            }
+            if(!isServiceRunning(CallerService.class)){
+                startService(new Intent(MainActivity.this, CallerService.class));
+            }
+
+            return true;
+        }
+        if (item.getItemId() == R.id.debug_off) {
+            SharedPreferences debug = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            SharedPreferences.Editor editor = debug.edit();
+            editor.putBoolean("debug", false);
+            editor.apply();
+
+            if (isServiceRunning(AppLockService.class)) {
+                stopService(new Intent(MainActivity.this, AppLockService.class));
+            }
+            if (isServiceRunning(CallerService.class)) {
+                stopService(new Intent(MainActivity.this, CallerService.class));
+            }
+
+            return true;
+        }
         return super.onOptionsItemSelected(item);
+    }
+
+    private boolean isServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

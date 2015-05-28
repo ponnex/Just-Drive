@@ -1,17 +1,20 @@
 package com.ponnex.justdrive;
 
+import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ServiceInfo;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 
@@ -21,11 +24,10 @@ import com.google.android.gms.common.api.GoogleApiClient;
 
 public class CoreService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,SharedPreferences.OnSharedPreferenceChangeListener {
 
-    private static final int MILLIS_PER_SEC = 0;
-    private static final int DETECTION_INT_SEC = 0;
-    private static final int DETECTION_INT_MILLIS = MILLIS_PER_SEC * DETECTION_INT_SEC; //change to variable type next update -- let user pick detection time from a drop down menu, will be added to Debugging Mode
+    private static final int DETECTION_INT_MILLIS = 0;
     private GoogleApiClient mGoogleApiClient;
-    private PendingIntent pendingIntent;
+    private GPSManager gpsManager = null;
+    private PendingIntent mActivityDetectionPendingIntent;
     private String TAG = "com.ponnex.justdrive.CoreService";
 
     @Override
@@ -42,25 +44,23 @@ public class CoreService extends Service implements GoogleApiClient.ConnectionCa
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         prefs.registerOnSharedPreferenceChangeListener(this);
 
+        buildGoogleApiClient();
+    }
+
+    protected synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(com.google.android.gms.location.ActivityRecognition.API)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
+                .addApi(ActivityRecognition.API)
                 .build();
-
-        Intent intent = new Intent(this, ActivityRecognition.class);
-        pendingIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     @Override
     public int onStartCommand(Intent intent,int flags,int startId){
-        SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        Boolean isSwitch = (mSharedPreference.getBoolean("switch", true));
-
-        if (isSwitch) {
+        if (switchstate()) {
             ServiceOn();
         }
-        if (!isSwitch) {
+        if (!switchstate()) {
             ServiceOff();
         }
         //keep the service running
@@ -69,28 +69,57 @@ public class CoreService extends Service implements GoogleApiClient.ConnectionCa
 
     public void ServiceOn(){
         mGoogleApiClient.connect();
+
+        SharedPreferences mSharedPreference = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        Boolean debug = (mSharedPreference.getBoolean("debug", false));
+        if (debug) {
+
+            if (!isServiceRunning(AppLockService.class)) {
+                startService(new Intent(CoreService.this, AppLockService.class));
+            }
+            if (!isServiceRunning(CallerService.class)) {
+                startService(new Intent(CoreService.this, CallerService.class));
+            }
+        }
     }
 
     public void ServiceOff(){
         if (mGoogleApiClient.isConnected()) {
             Log.d(TAG, "Disconnected");
-            com.google.android.gms.location.ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(mGoogleApiClient, pendingIntent);
+            ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(mGoogleApiClient, getActivityDetectionPendingIntent());
             mGoogleApiClient.disconnect();
 
             stopService(new Intent(CoreService.this, AppLockService.class));
             stopService(new Intent(CoreService.this, CallerService.class));
+
+            if(gpsManager!=null){
+                gpsManager.stopListening();
+                gpsManager.setGPSCallback(null);
+                gpsManager = null;
+            }
         }
+    }
+
+    private boolean isServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
     public void onConnected(Bundle bundle) {
-        com.google.android.gms.location.ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(mGoogleApiClient, DETECTION_INT_MILLIS, pendingIntent);
+        ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(mGoogleApiClient, DETECTION_INT_MILLIS, getActivityDetectionPendingIntent());
         Log.d(TAG, "Connected");
     }
 
     @Override
     public void onConnectionSuspended(int i) {
         Log.d(TAG, "Suspended");
+        mGoogleApiClient.connect();
     }
 
     @Override
@@ -99,37 +128,66 @@ public class CoreService extends Service implements GoogleApiClient.ConnectionCa
         mGoogleApiClient.connect();
     }
 
+    private PendingIntent getActivityDetectionPendingIntent() {
+        // Reuse the PendingIntent if we already have it.
+        if (mActivityDetectionPendingIntent != null) {
+            return mActivityDetectionPendingIntent;
+        }
+
+        Intent intent = new Intent(this, ActivityRecognition.class);
+        return PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
     @Override
     public void onDestroy(){
         super.onDestroy();
         Log.d(TAG, "CS Destroyed");
         if(mGoogleApiClient.isConnected()) {
-            com.google.android.gms.location.ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(mGoogleApiClient, pendingIntent);
+            ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(mGoogleApiClient, getActivityDetectionPendingIntent());
             mGoogleApiClient.disconnect();
+        }
+
+        if (switchstate()) {
+            Intent restartServiceIntent = new Intent(getApplicationContext(), this.getClass());
+            restartServiceIntent.setPackage(getPackageName());
+
+            PendingIntent restartServicePendingIntent = PendingIntent.getService(getApplicationContext(), 1, restartServiceIntent, PendingIntent.FLAG_ONE_SHOT);
+            AlarmManager alarmService = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+            alarmService.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 1000, restartServicePendingIntent);
         }
     }
 
     @Override
-    public void onTaskRemoved(Intent rootIntent){
-        Intent restartServiceIntent = new Intent(getApplicationContext(), this.getClass());
+    public void onTaskRemoved(Intent rootIntent) {
+        Intent restartServiceIntent = new Intent(getApplicationContext(),
+                this.getClass());
         restartServiceIntent.setPackage(getPackageName());
 
-        PendingIntent restartServicePendingIntent = PendingIntent.getService(getApplicationContext(), 1, restartServiceIntent, PendingIntent.FLAG_ONE_SHOT);
-        AlarmManager alarmService = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
-        alarmService.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 1000, restartServicePendingIntent);
-
+        PendingIntent restartServicePendingIntent = PendingIntent.getService(
+                getApplicationContext(), 1, restartServiceIntent,
+                PendingIntent.FLAG_ONE_SHOT);
+        AlarmManager alarmService = (AlarmManager) getApplicationContext()
+                .getSystemService(Context.ALARM_SERVICE);
+        alarmService.set(AlarmManager.ELAPSED_REALTIME,
+                SystemClock.elapsedRealtime() + 500,
+                restartServicePendingIntent);
         super.onTaskRemoved(rootIntent);
+    }
+
+    private boolean switchstate(){
+        Boolean isSwitch;
+        SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        isSwitch = (mSharedPreference.getBoolean("switch", true));
+        return isSwitch;
     }
 
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals("switch")) {
-            SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            Boolean isSwitch = (mSharedPreference.getBoolean("switch", true));
-            if(isSwitch) {
+            if(switchstate()) {
                 //connect
                 ServiceOn();
             }
-            if(!isSwitch) {
+            if(!switchstate()) {
                 //disconnect
                 ServiceOff();
             }

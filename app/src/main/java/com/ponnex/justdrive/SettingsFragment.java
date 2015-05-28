@@ -1,6 +1,5 @@
 package com.ponnex.justdrive;
 
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;

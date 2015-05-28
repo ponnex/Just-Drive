@@ -35,37 +35,36 @@ public class ActivityRecognition extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-
-        //////////DEBUG ONLY//////////
-        //start applock service
-        startAppLock();
-        ////////////////////////////
-
         if (ActivityRecognitionResult.hasResult(intent)) {
             ActivityRecognitionResult result = ActivityRecognitionResult.extractResult(intent);
             DetectedActivity mostProbableActivity = result.getMostProbableActivity();
             int confidence = mostProbableActivity.getConfidence();
             int activityType = mostProbableActivity.getType();
 
-            if (switchstate()) {
-                String activityName = getNameFromType(activityType);
-                Log.d(TAG + "_ARIS", "Activity: " + activityName + ", Confidence: " + confidence + "% ");
+            SharedPreferences mSharedPreference = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            Boolean debug = (mSharedPreference.getBoolean("debug", false));
 
-                /* DO NOT DELETE
-                if (confidence >= 75) {
-                    if (activityName.equals("In Vehicle") || activityName.equals("On Bicycle")) {
+            if (switchstate() && !debug) {
+                String activityName = getNameFromType(activityType);
+                Log.d(TAG + "_HAS RESULT -->", activityName + ", " + confidence + "% ");
+
+                if (activityName.equals("In Vehicle") || activityName.equals("On Bicycle")) {
+                    if (confidence >= 75) {
                         //start applock service
                         startAppLock();
                     }
                 }
 
-                if (confidence >= 50) {
-                    if (activityName.equals("Still") || activityName.equals("On Foot") || activityName.equals("Running") || activityName.equals("Walking")) {
-                        //disable applock service
+                else if (activityName.equals("Still") || activityName.equals("On Foot") || activityName.equals("Running") || activityName.equals("Walking")) {
+                    if (confidence >= 50) {
+                        // /disable applock service
                         stopAppLock();
                     }
                 }
-                */
+
+                else {
+                    Log.d(TAG, "UNKNOWN OR TILTING");
+                }
             }
         }
     }

@@ -84,7 +84,9 @@ public class AppLockService extends Service implements GPSCallback {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG + "_ALS", "onStartCommand");
         super.onStartCommand(intent, flags, startId);
-        mHandler.postDelayed(looperTask, 100);
+        if(switchstate() && !mHandler.hasMessages(0) && isScreenOn()) {
+            mHandler.postDelayed(looperTask, 100);
+        }
         return START_STICKY;
     }
 
@@ -94,11 +96,15 @@ public class AppLockService extends Service implements GPSCallback {
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
                 Log.i(TAG, "Screen ON");
-                mHandler.postDelayed(looperTask, 100);
+                if(!mHandler.hasMessages(0)) {
+                    mHandler.postDelayed(looperTask, 100);
+                }
             }
             if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
                 Log.i(TAG, "Screen OFF");
-                mHandler.removeCallbacks(looperTask);
+                if(mHandler.hasMessages(0)) {
+                    mHandler.removeCallbacks(looperTask);
+                }
             }
         }
     }
@@ -138,6 +144,13 @@ public class AppLockService extends Service implements GPSCallback {
             mHandler.postDelayed(looperTask, 1500);
         }
     };
+
+    private boolean switchstate(){
+        Boolean isSwitch;
+        SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        isSwitch = (mSharedPreference.getBoolean("switch", true));
+        return isSwitch;
+    }
 
     private class AppLockTask extends AsyncTask<Void, Void, Void> {
         protected Void doInBackground(Void... params) {
@@ -381,17 +394,20 @@ public class AppLockService extends Service implements GPSCallback {
                 Speedmessage.setGravity(Gravity.CENTER);
             }
         }
-
     }
 
     private void LockNotification() {
         Log.d(TAG + "_ALS", "LockNotification");
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext());
 
+        Intent intent = new Intent(AppLockService.this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
         // Set the title, text, and icon
         builder.setContentTitle(getString(R.string.app_name))
                 .setContentText("App Lock Enabled")
                 .setSmallIcon(R.drawable.ic_applock)
+                .setContentIntent(pendingIntent)
                 .setOngoing(true);
 
         // Get an instance of the Notification Manager
@@ -412,19 +428,34 @@ public class AppLockService extends Service implements GPSCallback {
         if (mScreenReceiver != null)
             unregisterReceiver(mScreenReceiver);
 
+        if(LOCKshowing) {
+            LockalertDialog.dismiss();
+        }
+        if(ABOUTshowing) {
+            AboutalertDialog.dismiss();
+        }
+        if(SPEEDshowing) {
+            SpeedalertDialog.dismiss();
+        }
+
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         notificationManager.cancel(0);
     }
 
     @Override
     public void onTaskRemoved(Intent rootIntent) {
-        Intent restartServiceIntent = new Intent(getApplicationContext(), this.getClass());
+        Intent restartServiceIntent = new Intent(getApplicationContext(),
+                this.getClass());
         restartServiceIntent.setPackage(getPackageName());
 
-        PendingIntent restartServicePendingIntent = PendingIntent.getService(getApplicationContext(), 1, restartServiceIntent, PendingIntent.FLAG_ONE_SHOT);
-        AlarmManager alarmService = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
-        alarmService.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 1000, restartServicePendingIntent);
-
+        PendingIntent restartServicePendingIntent = PendingIntent.getService(
+                getApplicationContext(), 1, restartServiceIntent,
+                PendingIntent.FLAG_ONE_SHOT);
+        AlarmManager alarmService = (AlarmManager) getApplicationContext()
+                .getSystemService(Context.ALARM_SERVICE);
+        alarmService.set(AlarmManager.ELAPSED_REALTIME,
+                SystemClock.elapsedRealtime() + 500,
+                restartServicePendingIntent);
         super.onTaskRemoved(rootIntent);
     }
 
@@ -442,6 +473,22 @@ public class AppLockService extends Service implements GPSCallback {
                     .equals(targetPkgInfo.signatures[0]));
         } catch (PackageManager.NameNotFoundException e) {
             return false;
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    public boolean isScreenOn() {
+        if (Build.VERSION.SDK_INT >= 20) {
+            DisplayManager dm = (DisplayManager) getApplicationContext().getSystemService(Context.DISPLAY_SERVICE);
+            for (Display display : dm.getDisplays()) {
+                if (display.getState() != Display.STATE_OFF) {
+                    return true;
+                }
+            }
+            return false;
+        } else {
+            PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+            return powerManager.isScreenOn();
         }
     }
 
