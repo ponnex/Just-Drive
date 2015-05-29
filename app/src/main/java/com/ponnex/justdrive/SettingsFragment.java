@@ -11,8 +11,12 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
 import android.util.TypedValue;
+import android.widget.AbsListView;
+import android.widget.ListView;
 
 import com.jenzz.materialpreference.SwitchPreference;
+import com.melnykov.fab.FloatingActionButton;
+import com.melnykov.fab.ScrollDirectionListener;
 import com.nispok.snackbar.Snackbar;
 import com.nispok.snackbar.SnackbarManager;
 
@@ -153,6 +157,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
                         .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
                         .textColor(Color.parseColor("#FFFFFF"))
                         .color(color)
+                        .swipeToDismiss(false)
                         .text(text)
                 , (android.view.ViewGroup) getActivity().findViewById(R.id.main_frame));
     }

@@ -20,10 +20,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.Button;
+import android.widget.ListView;
+import android.widget.ScrollView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.melnykov.fab.FloatingActionButton;
+import com.melnykov.fab.ScrollDirectionListener;
 import com.nispok.snackbar.Snackbar;
 import com.nispok.snackbar.SnackbarManager;
 
@@ -32,8 +36,8 @@ import com.nispok.snackbar.SnackbarManager;
  */
 
 public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
-    private View view1;
-    private View view2;
+    private FloatingActionButton fab1;
+    private FloatingActionButton fab2;
     private boolean isFirstImage;
     static boolean active = false;
     AlertDialog alertDialog;
@@ -82,16 +86,16 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             showDialog();
         }
 
-        view1 = (View) findViewById(R.id.fab_main1);
-        view2 = (View) findViewById(R.id.fab_main2);
-        view2.setVisibility(View.GONE);
+        fab1 = (FloatingActionButton) findViewById(R.id.fab_main1);
+        fab2 = (FloatingActionButton) findViewById(R.id.fab_main2);
+        fab2.setVisibility(View.GONE);
 
         if (!isSwitch) {
-            view1.setVisibility(View.INVISIBLE);
-            view2.setVisibility(View.VISIBLE);
+            fab1.setVisibility(View.INVISIBLE);
+            fab2.setVisibility(View.VISIBLE);
         }
 
-        view1.setOnClickListener(new View.OnClickListener() {
+        fab1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 isFirstImage = true;
@@ -104,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             }
         });
 
-        view2.setOnClickListener(new View.OnClickListener() {
+        fab2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 isFirstImage = false;
@@ -138,6 +142,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                         .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
                         .textColor(Color.parseColor("#FFFFFF"))
                         .color(accentcolor)
+                        .swipeToDismiss(false)
                         .text(text)
                 , (android.view.ViewGroup) findViewById(R.id.main_frame));
     }
@@ -156,8 +161,8 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
     private void applyRotation(float start, float end) {
         // Find the center of image
-        float centerX = view1.getWidth() / 2.0f;
-        float centerY = view1.getHeight() / 2.0f;
+        float centerX = fab1.getWidth() / 2.0f;
+        float centerY = fab2.getHeight() / 2.0f;
 
         // Create a new 3D rotation with the supplied parameter
         // The animation listener is used to trigger the next animation
@@ -166,12 +171,12 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         rotation.setDuration(200);
         rotation.setFillAfter(true);
         rotation.setInterpolator(new AccelerateInterpolator());
-        rotation.setAnimationListener(new DisplayNextView(isFirstImage, view1, view2));
+        rotation.setAnimationListener(new DisplayNextView(isFirstImage, fab1, fab2));
 
         if (isFirstImage) {
-            view1.startAnimation(rotation);
+            fab1.startAnimation(rotation);
         } else {
-            view2.startAnimation(rotation);
+            fab2.startAnimation(rotation);
         }
     }
 

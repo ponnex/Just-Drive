@@ -9,7 +9,6 @@
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-
     </FrameLayout>
 
     <FrameLayout android:id="@+id/main_frame"
@@ -22,7 +21,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_margin="16dp"
-            android:src="@drawable/ic_bloxtoff"
+            android:src="@drawable/ic_off"
             fab:fab_colorNormal="?attr/colorAccent"
             fab:fab_colorPressed="?attr/color"
             fab:fab_colorRipple="?attr/colorAccent" />
@@ -33,7 +32,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_margin="16dp"
-            android:src="@drawable/ic_bloxton"
+            android:src="@drawable/ic_on"
             fab:fab_colorNormal="?attr/color"
             fab:fab_colorPressed="?attr/colorAccent"
             fab:fab_colorRipple="?attr/color" />
