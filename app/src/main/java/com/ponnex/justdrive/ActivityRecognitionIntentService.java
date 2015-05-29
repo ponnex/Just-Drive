@@ -15,16 +15,12 @@ import com.google.android.gms.location.DetectedActivity;
  * Created by ramos on 4/13/2015.
  */
 
-public class ActivityRecognition extends IntentService {
+public class ActivityRecognitionIntentService extends IntentService {
 
-    private String TAG = "com.ponnex.justdrive.ActivityRecognition";
+    protected static String TAG = "com.ponnex.justdrive.ActivityRecognitionIntentService";
 
-    public ActivityRecognition(String name) {
-        super(name);
-    }
-
-    public ActivityRecognition() {
-        super("Activity Recognition");
+    public ActivityRecognitionIntentService() {
+        super(TAG);
     }
 
     @Override
@@ -93,27 +89,25 @@ public class ActivityRecognition extends IntentService {
 
     private void startAppLock() {
         if(!isServiceRunning(AppLockService.class)) {
-            startService(new Intent(ActivityRecognition.this, AppLockService.class));
+            startService(new Intent(ActivityRecognitionIntentService.this, AppLockService.class));
         }
         if(!isServiceRunning(CallerService.class)){
-            startService(new Intent(ActivityRecognition.this, CallerService.class));
+            startService(new Intent(ActivityRecognitionIntentService.this, CallerService.class));
         }
     }
 
     private void stopAppLock() {
         if(isServiceRunning(AppLockService.class)) {
-            stopService(new Intent(ActivityRecognition.this, AppLockService.class));
+            stopService(new Intent(ActivityRecognitionIntentService.this, AppLockService.class));
         }
         if(isServiceRunning(CallerService.class)){
-            stopService(new Intent(ActivityRecognition.this, CallerService.class));
+            stopService(new Intent(ActivityRecognitionIntentService.this, CallerService.class));
         }
     }
 
     private boolean switchstate(){
-        Boolean isSwitch;
         SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        isSwitch = (mSharedPreference.getBoolean("switch", true));
-        return isSwitch;
+        return (mSharedPreference.getBoolean("switch", true));
     }
 
     private boolean isServiceRunning(Class<?> serviceClass) {

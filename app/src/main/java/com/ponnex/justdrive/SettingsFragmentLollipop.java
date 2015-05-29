@@ -96,18 +96,11 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
                     editor.apply();
 
                     getActivity().startService(new Intent(getActivity(), CoreService.class));
-                    getActivity().startService(new Intent(getActivity(), ActivityRecognition.class));
+                    getActivity().startService(new Intent(getActivity(), ActivityRecognitionIntentService.class));
 
                     getPreferenceScreen().findPreference("switch").setSummary("Enabled");
 
-                    SnackbarManager.show(
-                            Snackbar.with(getActivity())
-                                    .position(Snackbar.SnackbarPosition.TOP)
-                                    .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
-                                    .textColor(Color.parseColor("#FFFFFF"))
-                                    .color(color)
-                                    .text("Just Drive is Enabled")
-                            , (android.view.ViewGroup) getActivity().findViewById(R.id.main_frame));
+                    ShowSnackbar(R.string.justdriveenable);
                 }
                 if (newValue.toString().equals("false")) {
                     SharedPreferences isSwitchup = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -117,19 +110,7 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
 
                     getPreferenceScreen().findPreference("switch").setSummary("Disabled");
 
-                    SnackbarManager.show(
-                            Snackbar.with(getActivity())
-                                    .position(Snackbar.SnackbarPosition.TOP)
-                                    .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
-                                    .textColor(Color.parseColor("#FFFFFF"))
-                                    .color(color)
-                                    .text("Just Drive is Disabled")
-                            , (android.view.ViewGroup) getActivity().findViewById(R.id.main_frame));
-
-                    SharedPreferences isCountup2 = PreferenceManager.getDefaultSharedPreferences(getActivity());
-                    SharedPreferences.Editor editor2 = isCountup2.edit();
-                    editor2.putInt("isCount", 0);
-                    editor2.apply();
+                    ShowSnackbar(R.string.justdrivedisable);
                 }
                 return true;
             }
@@ -164,6 +145,17 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
                 return true;
             }
         });
+    }
+
+    public void ShowSnackbar(Integer text){
+        SnackbarManager.show(
+                Snackbar.with(getActivity())
+                        .position(Snackbar.SnackbarPosition.TOP)
+                        .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
+                        .textColor(Color.parseColor("#FFFFFF"))
+                        .color(color)
+                        .text(text)
+                , (android.view.ViewGroup) getActivity().findViewById(R.id.main_frame));
     }
 
     @Override

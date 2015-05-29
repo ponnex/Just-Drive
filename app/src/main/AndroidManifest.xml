@@ -56,7 +56,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".ActivityRecognition" android:exported="false" />
+        <service android:name=".ActivityRecognitionIntentService" android:exported="false"/>
 
         <service android:name=".AppLockService" />
 

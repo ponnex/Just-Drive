@@ -95,7 +95,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
                     editor.apply();
 
                     getActivity().startService(new Intent(getActivity(), CoreService.class));
-                    getActivity().startService(new Intent(getActivity(), ActivityRecognition.class));
+                    getActivity().startService(new Intent(getActivity(), ActivityRecognitionIntentService.class));
 
                     getPreferenceScreen().findPreference("switch").setSummary("Enabled");
 
@@ -110,11 +110,6 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
                     getPreferenceScreen().findPreference("switch").setSummary("Disabled");
 
                     ShowSnackbar(R.string.justdrivedisable);
-
-                    SharedPreferences isCountup2 = PreferenceManager.getDefaultSharedPreferences(getActivity());
-                    SharedPreferences.Editor editor2 = isCountup2.edit();
-                    editor2.putInt("isCount", 0);
-                    editor2.apply();
                 }
                 return true;
             }
@@ -174,15 +169,17 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         active = false;
     }
 
+    private boolean switchstate(){
+        SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getActivity());
+        return (mSharedPreference.getBoolean("switch", true));
+    }
+
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals("switch")) {
-            SharedPreferences mSharedPreference = PreferenceManager.getDefaultSharedPreferences(getActivity());
-            Boolean isSwitch = (mSharedPreference.getBoolean("switch", true));
-
             switchbloxt = (SwitchPreference) getPreferenceManager().findPreference("switch");
-            switchbloxt.setChecked(isSwitch);
+            switchbloxt.setChecked(switchstate());
 
-            if(isSwitch){
+            if(switchstate()){
                 getPreferenceScreen().findPreference("switch").setSummary("Enabled");
             }
             else{

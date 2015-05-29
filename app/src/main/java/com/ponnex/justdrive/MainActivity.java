@@ -4,18 +4,22 @@ import android.app.ActivityManager;
 import android.app.Dialog;
 import android.app.Fragment;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.internal.view.ContextThemeWrapper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
+import android.widget.Button;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.gms.common.ConnectionResult;
@@ -32,6 +36,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     private View view2;
     private boolean isFirstImage;
     static boolean active = false;
+    AlertDialog alertDialog;
 
     private String TAG = "com.ponnex.justdrive.MainActivity";
 
@@ -62,6 +67,21 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             }
         }
 
+        SharedPreferences mSharedPreference1 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        Boolean isDebug = (mSharedPreference1.getBoolean("debug", false));
+
+        if(isDebug) {
+            startService(new Intent(MainActivity.this, AppLockService.class));
+            startService(new Intent(MainActivity.this, CallerService.class));
+        } else {
+            stopService(new Intent(MainActivity.this, AppLockService.class));
+            stopService(new Intent(MainActivity.this, CallerService.class));
+        }
+
+        if(Build.VERSION.SDK_INT >= 21) {
+            showDialog();
+        }
+
         view1 = (View) findViewById(R.id.fab_main1);
         view2 = (View) findViewById(R.id.fab_main2);
         view2.setVisibility(View.GONE);
@@ -81,12 +101,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 editor.apply();
 
                 ShowSnackbar(R.string.justdrivedisable);
-
-                SharedPreferences isCountup2 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                SharedPreferences.Editor editor2 = isCountup2.edit();
-                editor2.putInt("isCount", 0);
-                editor2.apply();
-
             }
         });
 
@@ -100,10 +114,8 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 editor.apply();
 
                 startService(new Intent(MainActivity.this, CoreService.class));
-                startService(new Intent(MainActivity.this, ActivityRecognition.class));
 
                 ShowSnackbar(R.string.justdriveenable);
-
             }
 
         });
@@ -218,14 +230,40 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         return false;
     }
 
+    private void showDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getApplicationContext());
+        alertDialog = builder.create();
+        alertDialog.setTitle(getText(R.string.lollipop_title));
+        alertDialog.setMessage(getText(R.string.lollipop_message));
+        alertDialog.setCanceledOnTouchOutside(false);
+        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "CONFIGURE", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Intent intent = new Intent();
+                intent.setAction("android.settings.ACCESSIBILITY_SETTINGS");
+                startActivity(intent);
+            }
+        });
+        alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "CANCEL", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                MainActivity.this.finish();
+            }
+        });
+        alertDialog.show();
+
+        final int accentcolor = getApplicationContext().getResources().getColor(R.color.accent);
+
+        Button positive = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        positive.setTextColor(accentcolor);
+
+        Button negative = alertDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
+        negative.setTextColor(accentcolor);
+    }
+
     @Override
     protected void onDestroy() {
-        SharedPreferences mSharedPreference = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        Boolean isSwitch = (mSharedPreference.getBoolean("switch", true));
-
-        if (!isSwitch) {
-            stopService(new Intent(this, CoreService.class));
-        }
         super.onDestroy();
     }
 
@@ -247,7 +285,12 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             case ConnectionResult.SERVICE_INVALID:
             case ConnectionResult.SERVICE_MISSING:
             case ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED:
-                Dialog dialog = GooglePlayServicesUtil.getErrorDialog(googlePlayServicesCheck, this, 0);
+                Dialog dialog = GooglePlayServicesUtil.getErrorDialog(googlePlayServicesCheck, this, 0, new DialogInterface.OnCancelListener() {
+                    @Override
+                    public void onCancel(DialogInterface dialog) {
+                        MainActivity.this.finish();
+                    }
+                });
                 dialog.show();
         }
         return false;

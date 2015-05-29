@@ -7,22 +7,23 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.ServiceInfo;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
+import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
+import com.google.android.gms.location.ActivityRecognition;
 
 /**
  * Created by ramos on 4/14/2015.
  */
 
-public class CoreService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,SharedPreferences.OnSharedPreferenceChangeListener {
+public class CoreService extends Service implements ConnectionCallbacks, OnConnectionFailedListener,SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final int DETECTION_INT_MILLIS = 0;
     private GoogleApiClient mGoogleApiClient;
@@ -69,18 +70,6 @@ public class CoreService extends Service implements GoogleApiClient.ConnectionCa
 
     public void ServiceOn(){
         mGoogleApiClient.connect();
-
-        SharedPreferences mSharedPreference = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        Boolean debug = (mSharedPreference.getBoolean("debug", false));
-        if (debug) {
-
-            if (!isServiceRunning(AppLockService.class)) {
-                startService(new Intent(CoreService.this, AppLockService.class));
-            }
-            if (!isServiceRunning(CallerService.class)) {
-                startService(new Intent(CoreService.this, CallerService.class));
-            }
-        }
     }
 
     public void ServiceOff(){
@@ -133,8 +122,7 @@ public class CoreService extends Service implements GoogleApiClient.ConnectionCa
         if (mActivityDetectionPendingIntent != null) {
             return mActivityDetectionPendingIntent;
         }
-
-        Intent intent = new Intent(this, ActivityRecognition.class);
+        Intent intent = new Intent(this, ActivityRecognitionIntentService.class);
         return PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
@@ -150,10 +138,6 @@ public class CoreService extends Service implements GoogleApiClient.ConnectionCa
         if (switchstate()) {
             Intent restartServiceIntent = new Intent(getApplicationContext(), this.getClass());
             restartServiceIntent.setPackage(getPackageName());
-
-            PendingIntent restartServicePendingIntent = PendingIntent.getService(getApplicationContext(), 1, restartServiceIntent, PendingIntent.FLAG_ONE_SHOT);
-            AlarmManager alarmService = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
-            alarmService.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 1000, restartServicePendingIntent);
         }
     }
 
@@ -175,10 +159,8 @@ public class CoreService extends Service implements GoogleApiClient.ConnectionCa
     }
 
     private boolean switchstate(){
-        Boolean isSwitch;
         SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        isSwitch = (mSharedPreference.getBoolean("switch", true));
-        return isSwitch;
+        return (mSharedPreference.getBoolean("switch", true));
     }
 
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
