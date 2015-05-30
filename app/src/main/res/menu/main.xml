@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.ponnex.justdrive.MainActivity">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/about"
-        android:title="@string/about" />
+        android:title="@string/about"
+        app:showAsAction="never" />
     <item
         android:id="@+id/debug_on"
-        android:title="@string/debug_on" />
+        android:title="@string/debug_on"
+        app:showAsAction="never" />
     <item
         android:id="@+id/debug_off"
-        android:title="@string/debug_off" />
+        android:title="@string/debug_off"
+        app:showAsAction="never" />
 </menu>

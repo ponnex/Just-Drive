@@ -11,6 +11,8 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
 import android.preference.SwitchPreference;
+import android.support.design.widget.Snackbar;
+import android.view.View;
 
 import com.afollestad.materialdialogs.prefs.MaterialEditTextPreference;
 
@@ -132,12 +134,7 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
                     editor.putBoolean("switch", true);
                     editor.apply();
 
-                    getActivity().startService(new Intent(getActivity(), CoreService.class));
-                    getActivity().startService(new Intent(getActivity(), ActivityRecognitionIntentService.class));
-
                     getPreferenceScreen().findPreference("switch").setSummary("Enabled");
-
-                    ShowSnackbar(R.string.justdriveenable);
                 }
                 if (newValue.toString().equals("false")) {
                     SharedPreferences isSwitchup = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -146,8 +143,6 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
                     editor.apply();
 
                     getPreferenceScreen().findPreference("switch").setSummary("Disabled");
-
-                    ShowSnackbar(R.string.justdrivedisable);
                 }
                 return true;
             }
@@ -182,12 +177,6 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
                 return true;
             }
         });
-    }
-
-    public void ShowSnackbar(Integer text){
-        android.support.design.widget.Snackbar
-                .make(getActivity().findViewById(R.id.layout_main), text, android.support.design.widget.Snackbar.LENGTH_SHORT)
-                .show();
     }
 
     @Override

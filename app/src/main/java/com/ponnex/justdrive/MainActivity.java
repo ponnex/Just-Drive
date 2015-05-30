@@ -1,5 +1,7 @@
 package com.ponnex.justdrive;
 
+import android.animation.AnimatorInflater;
+import android.animation.ObjectAnimator;
 import android.app.ActivityManager;
 import android.app.Dialog;
 import android.app.Fragment;
@@ -12,8 +14,13 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -29,11 +36,12 @@ import android.support.design.widget.Snackbar;
  * Created by ramos on 4/15/2015.
  */
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
     private FloatingActionButton fab;
     private boolean fab_state;
     static boolean active = false;
     AlertDialog alertDialog;
+    private DrawerLayout mDrawerLayout;
 
     private String TAG = "com.ponnex.justdrive.MainActivity";
 
@@ -41,6 +49,23 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        prefs.registerOnSharedPreferenceChangeListener(this);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        final ActionBar ab = getSupportActionBar();
+        ab.setHomeAsUpIndicator(R.drawable.ic_menu);
+        ab.setDisplayHomeAsUpEnabled(true);
+
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        if (navigationView != null) {
+            setupDrawerContent(navigationView);
+        }
 
         Fragment existingFragment = getFragmentManager().findFragmentById(R.id.container);
         if (existingFragment == null || !existingFragment.getClass().equals(SettingsFragment.class) || !existingFragment.getClass().equals(SettingsFragmentLollipop.class)) {
@@ -115,26 +140,16 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(fab_state) {
-                    fab.setImageResource(R.drawable.ic_off);
                     SharedPreferences switchPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                     SharedPreferences.Editor editor = switchPref.edit();
                     editor.putBoolean("switch", false);
                     editor.apply();
-
-                    ShowSnackbar(R.string.justdrivedisable);
-                    fab_state = false;
                 }
                 else {
-                    fab.setImageResource(R.drawable.ic_on);
                     SharedPreferences switchPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                     SharedPreferences.Editor editor = switchPref.edit();
                     editor.putBoolean("switch", true);
                     editor.apply();
-
-                    startService(new Intent(MainActivity.this, CoreService.class));
-
-                    ShowSnackbar(R.string.justdriveenable);
-                    fab_state = true;
                 }
             }
         });
@@ -150,10 +165,23 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void setupDrawerContent(NavigationView navigationView) {
+        navigationView.setNavigationItemSelectedListener(
+                new NavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(MenuItem menuItem) {
+                        menuItem.setChecked(true);
+                        mDrawerLayout.closeDrawers();
+                        return true;
+                    }
+                });
+    }
+
     public void ShowSnackbar(Integer text){
-        Snackbar
-                .make(findViewById(R.id.layout_main), text, Snackbar.LENGTH_SHORT)
-                .show();
+        Snackbar snackbar = Snackbar.make(findViewById(R.id.layout_main), text, Snackbar.LENGTH_SHORT);
+            View view = snackbar.getView();
+            view.setBackgroundColor(getResources().getColor(R.color.accent));
+            snackbar.show();
     }
 
     @Override
@@ -171,44 +199,44 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
-        return super.onCreateOptionsMenu(menu);
+        return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.about) {
-            AboutDialog();
-            return true;
-        }
-        if (item.getItemId() == R.id.debug_on) {
-            SharedPreferences debug = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            SharedPreferences.Editor editor = debug.edit();
-            editor.putBoolean("debug", true);
-            editor.apply();
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                mDrawerLayout.openDrawer(GravityCompat.START);
+                return true;
+            case R.id.about:
+                AboutDialog();
+                return true;
+            case R.id.debug_on:
+                SharedPreferences debug = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                SharedPreferences.Editor editor = debug.edit();
+                editor.putBoolean("debug", true);
+                editor.apply();
 
-            if(!isServiceRunning(AppLockService.class)) {
-                startService(new Intent(MainActivity.this, AppLockService.class));
-            }
-            if(!isServiceRunning(CallerService.class)){
-                startService(new Intent(MainActivity.this, CallerService.class));
-            }
+                if(!isServiceRunning(AppLockService.class)) {
+                    startService(new Intent(MainActivity.this, AppLockService.class));
+                }
+                if(!isServiceRunning(CallerService.class)){
+                    startService(new Intent(MainActivity.this, CallerService.class));
+                }
+                return true;
+            case R.id.debug_off:
+                SharedPreferences debug1 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                SharedPreferences.Editor editor1 = debug1.edit();
+                editor1.putBoolean("debug", false);
+                editor1.apply();
 
-            return true;
-        }
-        if (item.getItemId() == R.id.debug_off) {
-            SharedPreferences debug = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            SharedPreferences.Editor editor = debug.edit();
-            editor.putBoolean("debug", false);
-            editor.apply();
-
-            if (isServiceRunning(AppLockService.class)) {
-                stopService(new Intent(MainActivity.this, AppLockService.class));
-            }
-            if (isServiceRunning(CallerService.class)) {
-                stopService(new Intent(MainActivity.this, CallerService.class));
-            }
-
-            return true;
+                if (isServiceRunning(AppLockService.class)) {
+                    stopService(new Intent(MainActivity.this, AppLockService.class));
+                }
+                if (isServiceRunning(CallerService.class)) {
+                    stopService(new Intent(MainActivity.this, CallerService.class));
+                }
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -287,5 +315,34 @@ public class MainActivity extends AppCompatActivity {
                 dialog.show();
         }
         return false;
+    }
+
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals("switch")) {
+            SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            Boolean isSwitch = (mSharedPreference.getBoolean("switch", true));
+
+            if(isSwitch) {
+                fab.setImageResource(R.drawable.ic_on);
+                ObjectAnimator anim = (ObjectAnimator) AnimatorInflater.loadAnimator(getApplicationContext(), R.animator.flipping);
+                anim.setTarget(fab);
+                anim.setDuration(500);
+                anim.start();
+
+                ShowSnackbar(R.string.justdriveenable);
+                fab_state = true;
+            } else {
+                fab.setImageResource(R.drawable.ic_off);
+                ObjectAnimator anim = (ObjectAnimator) AnimatorInflater.loadAnimator(getApplicationContext(), R.animator.flipping);
+                anim.setTarget(fab);
+                anim.setDuration(500);
+                anim.start();
+
+                startService(new Intent(MainActivity.this, CoreService.class));
+
+                ShowSnackbar(R.string.justdrivedisable);
+                fab_state = false;
+            }
+        }
     }
 }

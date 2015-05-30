@@ -1,20 +1,16 @@
 <resources>
 
     <!-- Styles -->
-    <style name="AppTheme" parent="Base.Theme.AppCompat.Light.DarkActionBar">
+    <style name="Theme.JustDrive" parent="Base.Theme.JustDrive">
+    </style>
+
+    <style name="Base.Theme.JustDrive" parent="Theme.AppCompat.NoActionBar">
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryDark">@color/primaryDark</item>
         <item name="colorAccent">@color/accent</item>
-        <item name="color">@color/fab</item>
     </style>
 
-    <style name="AppCompatAlertDialogStyle" parent="Theme.AppCompat.Light.Dialog.Alert" />
-
-    <!-- Color -->
-    <color name="primary">#FF5722</color>
-    <color name="primaryDark">#E64A19</color>
-    <color name="accent">#FF6E40</color>
-    <color name="fab">#FF3D00</color>
+    <style name="AppCompatAlertDialogStyle" parent="Theme.AppCompat" />
 
 </resources>
 

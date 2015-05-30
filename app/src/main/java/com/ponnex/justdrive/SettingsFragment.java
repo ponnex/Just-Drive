@@ -7,6 +7,8 @@ import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
+import android.support.design.widget.Snackbar;
+import android.view.View;
 
 import com.afollestad.materialdialogs.prefs.MaterialEditTextPreference;
 import com.jenzz.materialpreference.CheckBoxPreference;
@@ -125,18 +127,12 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
             public boolean onPreferenceChange(Preference preference, Object newValue) {
 
                 if (newValue.toString().equals("true")) {
-
                     SharedPreferences isSwitchup = PreferenceManager.getDefaultSharedPreferences(getActivity());
                     SharedPreferences.Editor editor = isSwitchup.edit();
                     editor.putBoolean("switch", true);
                     editor.apply();
 
-                    getActivity().startService(new Intent(getActivity(), CoreService.class));
-                    getActivity().startService(new Intent(getActivity(), ActivityRecognitionIntentService.class));
-
                     getPreferenceScreen().findPreference("switch").setSummary("Enabled");
-
-                    ShowSnackbar(R.string.justdriveenable);
                 }
                 if (newValue.toString().equals("false")) {
                     SharedPreferences isSwitchup = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -145,8 +141,6 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
                     editor.apply();
 
                     getPreferenceScreen().findPreference("switch").setSummary("Disabled");
-
-                    ShowSnackbar(R.string.justdrivedisable);
                 }
                 return true;
             }
@@ -181,12 +175,6 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
                 return true;
             }
         });
-    }
-
-    public void ShowSnackbar(Integer text){
-        android.support.design.widget.Snackbar
-                .make(getActivity().findViewById(R.id.layout_main), text, android.support.design.widget.Snackbar.LENGTH_SHORT)
-                .show();
     }
 
     @Override
