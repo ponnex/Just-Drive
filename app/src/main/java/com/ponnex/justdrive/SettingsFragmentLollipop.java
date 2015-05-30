@@ -128,7 +128,6 @@ public class SettingsFragmentLollipop extends PreferenceFragment implements Shar
             public boolean onPreferenceChange(Preference preference, Object newValue) {
 
                 if (newValue.toString().equals("true")) {
-
                     SharedPreferences isSwitchup = PreferenceManager.getDefaultSharedPreferences(getActivity());
                     SharedPreferences.Editor editor = isSwitchup.edit();
                     editor.putBoolean("switch", true);
