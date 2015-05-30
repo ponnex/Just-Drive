@@ -7,38 +7,31 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.internal.view.ContextThemeWrapper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.AccelerateInterpolator;
 import android.widget.Button;
-import android.widget.ListView;
-import android.widget.ScrollView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.melnykov.fab.FloatingActionButton;
-import com.melnykov.fab.ScrollDirectionListener;
-import com.nispok.snackbar.Snackbar;
-import com.nispok.snackbar.SnackbarManager;
+import android.support.design.widget.Snackbar;
 
 /**
  * Created by ramos on 4/15/2015.
  */
 
-public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
-    private FloatingActionButton fab1;
-    private FloatingActionButton fab2;
-    private boolean isFirstImage;
+public class MainActivity extends AppCompatActivity {
+    private FloatingActionButton fab;
+    private boolean fab_state;
     static boolean active = false;
     AlertDialog alertDialog;
 
@@ -49,9 +42,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        prefs.registerOnSharedPreferenceChangeListener(this);
-
         Fragment existingFragment = getFragmentManager().findFragmentById(R.id.container);
         if (existingFragment == null || !existingFragment.getClass().equals(SettingsFragment.class) || !existingFragment.getClass().equals(SettingsFragmentLollipop.class)) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -60,6 +50,34 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 getFragmentManager().beginTransaction().replace(R.id.container, new SettingsFragment()).commit();
             }
         }
+
+        PackageManager pm = getPackageManager();
+        boolean hasTelephony = pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
+
+        if(!hasTelephony) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getApplicationContext());
+            alertDialog = builder.create();
+            alertDialog.setTitle("DEVICE DOESN'T HAVE TELEPHONY FEATURES");
+            alertDialog.setMessage("Just Drive works on devices with telephony features only");
+            alertDialog.setCanceledOnTouchOutside(false);
+            alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                    MainActivity.this.finish();
+                }
+            });
+            alertDialog.show();
+
+            final int accentcolor = getApplicationContext().getResources().getColor(R.color.accent);
+
+            Button positive = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+            positive.setTextColor(accentcolor);
+
+            Button negative = alertDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
+            negative.setTextColor(accentcolor);
+        }
+
         SharedPreferences mSharedPreference = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         Boolean isSwitch = (mSharedPreference.getBoolean("switch", true));
 
@@ -85,44 +103,42 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         if(Build.VERSION.SDK_INT >= 21) {
             showDialog();
         }
-
-        fab1 = (FloatingActionButton) findViewById(R.id.fab_main1);
-        fab2 = (FloatingActionButton) findViewById(R.id.fab_main2);
-        fab2.setVisibility(View.GONE);
-
-        if (!isSwitch) {
-            fab1.setVisibility(View.INVISIBLE);
-            fab2.setVisibility(View.VISIBLE);
+        fab = (FloatingActionButton) findViewById(R.id.fab);
+        if (isSwitch) {
+            fab.setImageResource(R.drawable.ic_on);
+            fab_state = true;
+        } else {
+            fab.setImageResource(R.drawable.ic_off);
+            fab_state = false;
         }
-
-        fab1.setOnClickListener(new View.OnClickListener() {
+        fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                isFirstImage = true;
-                SharedPreferences switchPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                SharedPreferences.Editor editor = switchPref.edit();
-                editor.putBoolean("switch", false);
-                editor.apply();
+                if(fab_state) {
+                    fab.setImageResource(R.drawable.ic_off);
+                    SharedPreferences switchPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                    SharedPreferences.Editor editor = switchPref.edit();
+                    editor.putBoolean("switch", false);
+                    editor.apply();
 
-                ShowSnackbar(R.string.justdrivedisable);
+                    ShowSnackbar(R.string.justdrivedisable);
+                    fab_state = false;
+                }
+                else {
+                    fab.setImageResource(R.drawable.ic_on);
+                    SharedPreferences switchPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                    SharedPreferences.Editor editor = switchPref.edit();
+                    editor.putBoolean("switch", true);
+                    editor.apply();
+
+                    startService(new Intent(MainActivity.this, CoreService.class));
+
+                    ShowSnackbar(R.string.justdriveenable);
+                    fab_state = true;
+                }
             }
         });
 
-        fab2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                isFirstImage = false;
-                SharedPreferences switchPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                SharedPreferences.Editor editor = switchPref.edit();
-                editor.putBoolean("switch", true);
-                editor.apply();
-
-                startService(new Intent(MainActivity.this, CoreService.class));
-
-                ShowSnackbar(R.string.justdriveenable);
-            }
-
-        });
         SharedPreferences mSharedPreference2 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         Boolean isFirstRun = (mSharedPreference2.getBoolean("isFirstRun", true));
 
@@ -135,16 +151,9 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     }
 
     public void ShowSnackbar(Integer text){
-        final int accentcolor = getApplicationContext().getResources().getColor(R.color.accent);
-        SnackbarManager.show(
-                Snackbar.with(MainActivity.this)
-                        .position(Snackbar.SnackbarPosition.TOP)
-                        .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
-                        .textColor(Color.parseColor("#FFFFFF"))
-                        .color(accentcolor)
-                        .swipeToDismiss(false)
-                        .text(text)
-                , (android.view.ViewGroup) findViewById(R.id.main_frame));
+        Snackbar
+                .make(findViewById(R.id.layout_main), text, Snackbar.LENGTH_SHORT)
+                .show();
     }
 
     @Override
@@ -157,27 +166,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     public void onStop() {
         super.onStop();
         active = false;
-    }
-
-    private void applyRotation(float start, float end) {
-        // Find the center of image
-        float centerX = fab1.getWidth() / 2.0f;
-        float centerY = fab2.getHeight() / 2.0f;
-
-        // Create a new 3D rotation with the supplied parameter
-        // The animation listener is used to trigger the next animation
-        final Flip3dAnimation rotation =
-                new Flip3dAnimation(start, end, centerX, centerY);
-        rotation.setDuration(200);
-        rotation.setFillAfter(true);
-        rotation.setInterpolator(new AccelerateInterpolator());
-        rotation.setAnimationListener(new DisplayNextView(isFirstImage, fab1, fab2));
-
-        if (isFirstImage) {
-            fab1.startAnimation(rotation);
-        } else {
-            fab2.startAnimation(rotation);
-        }
     }
 
     @Override
@@ -299,12 +287,5 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 dialog.show();
         }
         return false;
-    }
-
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals("switch")) {
-            applyRotation(0, 90);
-            isFirstImage = !isFirstImage;
-        }
     }
 }

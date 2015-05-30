@@ -1,24 +1,16 @@
 package com.ponnex.justdrive;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
+import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
-import android.telephony.TelephonyManager;
-import android.util.TypedValue;
-import android.widget.AbsListView;
-import android.widget.ListView;
 
+import com.afollestad.materialdialogs.prefs.MaterialEditTextPreference;
+import com.jenzz.materialpreference.CheckBoxPreference;
 import com.jenzz.materialpreference.SwitchPreference;
-import com.melnykov.fab.FloatingActionButton;
-import com.melnykov.fab.ScrollDirectionListener;
-import com.nispok.snackbar.Snackbar;
-import com.nispok.snackbar.SnackbarManager;
 
 /**
  * Created by ramos on 4/15/2015.
@@ -27,28 +19,21 @@ import com.nispok.snackbar.SnackbarManager;
 public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener{
     SharedPreferences prefs;
     private SwitchPreference switchbloxt;
-    static String mPhoneNumber;
     static boolean active = false;
-    private Integer color;
 
     private String TAG = "com.ponnex.justdrive.SettingsFragment";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
+        CheckBoxPreference checkbloxtautoReplyCalls;
+        CheckBoxPreference checkbloxtautoReply;
+
         super.onCreate(savedInstanceState);
         prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         addPreferencesFromResource(R.xml.prefs);
 
         getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
-
-        TelephonyManager mManager =(TelephonyManager)getActivity().getSystemService(Context.TELEPHONY_SERVICE);
-        mPhoneNumber =  mManager.getLine1Number();
-
-        SharedPreferences isPhoneNumber = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        SharedPreferences.Editor editor = isPhoneNumber.edit();
-        editor.putString("PhoneNumber", mPhoneNumber);
-        editor.apply();
 
         SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getActivity());
         Boolean isSwitch = (mSharedPreference.getBoolean("switch", true));
@@ -82,10 +67,58 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
                     "Disable reading caller ID of incoming phone calls");
         }
 
-        TypedValue typedValue = new TypedValue();
-        Resources.Theme themecolor = getActivity().getTheme();
-        themecolor.resolveAttribute(R.attr.colorAccent, typedValue, true);
-        color = typedValue.data;
+        SharedPreferences mSharedPreference4 = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        Boolean isautoReplyCalls = (mSharedPreference4.getBoolean("autoReplyCalls", true));
+
+        SharedPreferences mSharedPreference5 = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        Boolean isautoReply = (mSharedPreference5.getBoolean("autoReply", true));
+
+        SharedPreferences mSharedPreference6= PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String isMsg=(mSharedPreference6.getString("msg", "I am driving right now, I will contact you later."));
+
+        if (isautoReplyCalls){
+            getPreferenceScreen().findPreference("autoReplyCalls").setSummary("Reply incoming calls with SMS");
+        }
+        else {
+            getPreferenceScreen().findPreference("autoReplyCalls").setSummary("Disabled");
+        }
+
+        if (isautoReply){
+            getPreferenceScreen().findPreference("autoReply").setSummary("Reply text messages with SMS");
+        }
+        else {
+            getPreferenceScreen().findPreference("autoReply").setSummary("Disabled");
+        }
+
+        getPreferenceScreen().findPreference("msg").setSummary("''" + isMsg + " --This is an automated SMS--''");
+
+        checkbloxtautoReplyCalls = (CheckBoxPreference) getPreferenceManager().findPreference("autoReplyCalls");
+        checkbloxtautoReplyCalls.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+
+                if (newValue.toString().equals("true")) {
+                    getPreferenceScreen().findPreference("autoReplyCalls").setSummary("Reply incoming calls with SMS");
+                }
+                if (newValue.toString().equals("false")) {
+                    getPreferenceScreen().findPreference("autoReplyCalls").setSummary("Disabled");
+                }
+                return true;
+            }
+        });
+
+        checkbloxtautoReply = (CheckBoxPreference) getPreferenceManager().findPreference("autoReply");
+        checkbloxtautoReply.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+
+                if (newValue.toString().equals("true")) {
+                    getPreferenceScreen().findPreference("autoReply").setSummary("Reply text messages with SMS");
+                }
+                if (newValue.toString().equals("false")) {
+                    getPreferenceScreen().findPreference("autoReply").setSummary("Disabled");
+                }
+                return true;
+            }
+        });
 
         switchbloxt = (SwitchPreference) getPreferenceManager().findPreference("switch");
         switchbloxt.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
@@ -151,15 +184,9 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     }
 
     public void ShowSnackbar(Integer text){
-        SnackbarManager.show(
-                Snackbar.with(getActivity())
-                        .position(Snackbar.SnackbarPosition.TOP)
-                        .duration(Snackbar.SnackbarDuration.LENGTH_SHORT)
-                        .textColor(Color.parseColor("#FFFFFF"))
-                        .color(color)
-                        .swipeToDismiss(false)
-                        .text(text)
-                , (android.view.ViewGroup) getActivity().findViewById(R.id.main_frame));
+        android.support.design.widget.Snackbar
+                .make(getActivity().findViewById(R.id.layout_main), text, android.support.design.widget.Snackbar.LENGTH_SHORT)
+                .show();
     }
 
     @Override
@@ -172,6 +199,34 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     public void onStop() {
         super.onStop();
         active = false;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        getPreferenceManager().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
+
+        try {
+            for (int i = 0; i < getPreferenceScreen().getPreferenceCount(); ++i) {
+                Preference preference = getPreferenceScreen().getPreference(i);
+                if (preference instanceof PreferenceGroup) {
+                    PreferenceGroup preferenceGroup = (PreferenceGroup) preference;
+                    for (int j = 0; j < preferenceGroup.getPreferenceCount(); ++j) {
+                        updatePreference(preferenceGroup.getPreference(j));
+                    }
+                } else {
+                    updatePreference(preference);
+                }
+            }
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        getPreferenceManager().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
+        super.onPause();
     }
 
     private boolean switchstate(){
@@ -189,6 +244,18 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
             }
             else{
                 getPreferenceScreen().findPreference("switch").setSummary("Disabled");
+            }
+        }
+        updatePreference(findPreference(key));
+    }
+
+    private void updatePreference(Preference preference) {
+        if (preference instanceof MaterialEditTextPreference) {
+            MaterialEditTextPreference editbloxtmsg = (MaterialEditTextPreference) preference;
+            preference.setSummary("''" + editbloxtmsg.getText() + " --This is an automated SMS--''");
+
+            if (editbloxtmsg.getText() == null || editbloxtmsg.getText().equals("")) {
+                preference.setSummary("''I am driving right now, I will contact you later. --This is an automated SMS--''");
             }
         }
     }

@@ -7,6 +7,11 @@
             android:summary="Enabled"
             android:title="Just Drive Services"
             android:enabled="true" />
+        <com.jenzz.materialpreference.SwitchPreference
+            android:defaultValue="true"
+            android:key="startonboot"
+            android:summary="Start service on boot"
+            android:title="Run On Startup" />
     </com.jenzz.materialpreference.PreferenceCategory>
     <com.jenzz.materialpreference.PreferenceCategory android:title="Phone and Messaging">
         <com.jenzz.materialpreference.SwitchPreference
@@ -14,21 +19,25 @@
             android:key="phone"
             android:summary="Read caller ID of incoming phone calls"
             android:title="Phone Calls" />
-        <com.jenzz.materialpreference.Preference android:title="Reply with SMS"
-            android:enabled="true"
-            android:key="replySMS"
-            android:summary="Send incoming Calls and Text Messages with an SMS">
-            <intent
-                android:action="android.intent.action.MAIN"
-                android:targetPackage="com.ponnex.justdrive"
-                android:targetClass="com.ponnex.justdrive.ReplySMSActivity" />
-        </com.jenzz.materialpreference.Preference>
-    </com.jenzz.materialpreference.PreferenceCategory>
-    <com.jenzz.materialpreference.PreferenceCategory android:title="Other">
-        <com.jenzz.materialpreference.SwitchPreference
+        <com.jenzz.materialpreference.CheckBoxPreference
             android:defaultValue="true"
-            android:key="startonboot"
-            android:summary="Start service on boot"
-            android:title="Run On Startup" />
+            android:key="autoReplyCalls"
+            android:summary="Reply incoming calls with SMS"
+            android:title="Auto Reply Calls" />
+        <com.jenzz.materialpreference.CheckBoxPreference
+            android:defaultValue="false"
+            android:key="autoReply"
+            android:summary="Disabled"
+            android:title="Auto Reply SMS" />
+        <com.afollestad.materialdialogs.prefs.MaterialEditTextPreference
+            android:key="msg"
+            android:summary="I am driving right now, I will contact you later. --This is an automated SMS--"
+            android:title="Auto Reply Message"
+            android:persistent="true"
+            android:hint="Enter your auto reply message here"
+            android:dialogTitle="Auto Reply Message"
+            android:dialogMessage="Feel free to customize your auto reply message, or clear to restore default message."
+            android:layout="@layout/preference_custom"
+            android:inputType="textPersonName" />
     </com.jenzz.materialpreference.PreferenceCategory>
 </PreferenceScreen>

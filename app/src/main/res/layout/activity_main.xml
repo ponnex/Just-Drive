@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:fab="http://schemas.android.com/apk/res-auto"
     android:id="@+id/layout_main"
     android:layout_width="match_parent"
@@ -8,34 +8,14 @@
     <FrameLayout
         android:id="@+id/container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-    </FrameLayout>
+        android:layout_height="match_parent" />
 
-    <FrameLayout android:id="@+id/main_frame"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_gravity="bottom|end"
+        fab:fabSize="normal"
+        fab:rippleColor="?attr/color" />
 
-        <com.melnykov.fab.FloatingActionButton
-            android:id="@+id/fab_main2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="16dp"
-            android:src="@drawable/ic_off"
-            fab:fab_colorNormal="?attr/colorAccent"
-            fab:fab_colorPressed="?attr/color"
-            fab:fab_colorRipple="?attr/colorAccent" />
-
-        <com.melnykov.fab.FloatingActionButton
-            android:id="@+id/fab_main1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="16dp"
-            android:src="@drawable/ic_on"
-            fab:fab_colorNormal="?attr/color"
-            fab:fab_colorPressed="?attr/colorAccent"
-            fab:fab_colorRipple="?attr/color" />
-
-        </FrameLayout>
-</RelativeLayout>
+</android.support.design.widget.CoordinatorLayout>

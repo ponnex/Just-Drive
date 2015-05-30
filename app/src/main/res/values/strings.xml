@@ -6,19 +6,14 @@
     <string name="debug_on">Debug ON</string>
     <string name="debug_off">Debug OFF</string>
     <string name="about">About</string>
-    <string name="about_body">Just Drive aims for lesser vehicle accidents by preventing texting, use, and distractions to those that are driving. Using the newest ActivityRecognitionAPI
-        (com.google.android.gms:play-services-location:7.0.0) by Google to detect your activity if you\'re in a vehicle or not, it then display a lockscreen that will only be deactivated when Just Drive will
-        detect that you are not driving. Although there will be a HeadsUp notification that will prompt you if you are a passenger or a driver before activating the lockscreen. This app also turn your
-        notification volume off (unless you\'re using wired or bluetooth headset), Send an automated text to those who are trying to reach you while driving, and use Text-to-Speech API to read incoming
-        contact or number of those that are calling. You can even customize your own Auto reply Message! </string>
+    <string name="about_body">Just Drive knows if you\'re in a vehicle or not while maintaining low battery consumption and taking care of all incoming phone calls and text messages.
+        It also display an app lock to selected applications to minimize usage of device will driving. The app lock will be deactivated automatically and/or through an on-screen test to prove that you are not driving.</string>
     <string name="start">START</string>
     <string name="stop">STOP</string>
     <string name="dismiss">DISMISS</string>
     <string name="button_update">UPDATE</string>
-    <string name="updateplayservicestitle">Update Google Play services</string>
+    <string name="updateplayservicestitle">Update Google Play Services</string>
     <string name="updateplayservicestmessage">This app won\'t run unless you update Google Play services.</string>
-    <string name="enternumber">Unfortunately, Just Drive can\'t find your mobile number</string>
-    <string name="phonenumber">Phone Number</string>
     <string name="justdriveenable">Just Drive is Enabled</string>
     <string name="justdrivedisable">Just Drive is Disabled</string>
 
