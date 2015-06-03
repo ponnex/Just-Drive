@@ -45,10 +45,10 @@ public class ActivityRecognitionIntentService extends IntentService {
                 Log.d(TAG + "_HAS RESULT -->", activityName + ", " + confidence + "% ");
 
                 if (activityName.equals("In Vehicle") || activityName.equals("On Bicycle")) {
-                    if (confidence >= 80) {
+                    if (confidence >= 60) {
                         SharedPreferences mSharedPreference1 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                         Integer count = (mSharedPreference1.getInt("count", 0));
-                        if(count < 3) {
+                        if(count <= 3) {
                             SharedPreferences isFirstRun_write = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                             SharedPreferences.Editor editor = isFirstRun_write.edit();
                             editor.putInt("count", count + 1);
@@ -108,7 +108,7 @@ public class ActivityRecognitionIntentService extends IntentService {
         if(!isServiceRunning(AppLockService.class)) {
             startService(new Intent(ActivityRecognitionIntentService.this, AppLockService.class));
         }
-        if(!isServiceRunning(CallerService.class)){
+        if(!isServiceRunning(CallerService.class)) {
             startService(new Intent(ActivityRecognitionIntentService.this, CallerService.class));
         }
     }
@@ -117,7 +117,7 @@ public class ActivityRecognitionIntentService extends IntentService {
         if(isServiceRunning(AppLockService.class)) {
             stopService(new Intent(ActivityRecognitionIntentService.this, AppLockService.class));
         }
-        if(isServiceRunning(CallerService.class)){
+        if(isServiceRunning(CallerService.class)) {
             stopService(new Intent(ActivityRecognitionIntentService.this, CallerService.class));
         }
     }

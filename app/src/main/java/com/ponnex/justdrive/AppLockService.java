@@ -2,6 +2,7 @@ package com.ponnex.justdrive;
 
 import android.app.ActivityManager;
 import android.app.AlarmManager;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -27,6 +28,7 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.internal.view.ContextThemeWrapper;
 import android.util.Log;
@@ -79,6 +81,7 @@ public class AppLockService extends Service implements GPSCallback {
         registerReceiver(mScreenReceiver, filter);
 
         Log.i(TAG + "_ALS", "Created");
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(speedReceiver, new IntentFilter("com.ponnex.justdrive.StopSpeedNotification"));
     }
 
     @Override
@@ -109,6 +112,21 @@ public class AppLockService extends Service implements GPSCallback {
             }
         }
     }
+
+    private BroadcastReceiver speedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Boolean isSpeed = intent.getBooleanExtra("isStop", false);
+            if(isSpeed) {
+                if(gpsManager!=null){
+                    gpsManager.stopListening();
+                    gpsManager.setGPSCallback(null);
+                    gpsManager = null;
+                }
+                LockNotification();
+            }
+        }
+    };
 
     @SuppressWarnings("deprecation")
     private String getTopActivityPkgName() {
@@ -311,11 +329,20 @@ public class AppLockService extends Service implements GPSCallback {
         final AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(getApplicationContext(), R.style.AppCompatAlertDialogStyle));
         SpeedalertDialog = builder.create();
         SpeedalertDialog.setTitle("Speed Test");
-        SpeedalertDialog.setMessage("Reading Current Speed...");
+        SpeedalertDialog.setMessage("Reading Current Speed..." + "\n This may take awhile, depending on the availability of GPS satellite on your area.");
         SpeedalertDialog.setCanceledOnTouchOutside(false);
         SpeedalertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "BACKGROUND", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                SpeedNotification();
+
+                // Go to the Home screen
+                Intent homeIntent = new Intent();
+                homeIntent.setAction(Intent.ACTION_MAIN);
+                homeIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                homeIntent.addCategory(Intent.CATEGORY_HOME);
+                getApplicationContext().startActivity(homeIntent);
+
                 background = true;
                 dialog.dismiss();
             }
@@ -323,9 +350,11 @@ public class AppLockService extends Service implements GPSCallback {
         SpeedalertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "CANCEL", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                gpsManager.stopListening();
-                gpsManager.setGPSCallback(null);
-                gpsManager = null;
+                if(gpsManager!=null){
+                    gpsManager.stopListening();
+                    gpsManager.setGPSCallback(null);
+                    gpsManager = null;
+                }
                 dialog.dismiss();
             }
         });
@@ -333,9 +362,11 @@ public class AppLockService extends Service implements GPSCallback {
             @Override
             public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
                 if (keyCode == KeyEvent.KEYCODE_BACK) {
-                    gpsManager.stopListening();
-                    gpsManager.setGPSCallback(null);
-                    gpsManager = null;
+                    if(gpsManager!=null){
+                        gpsManager.stopListening();
+                        gpsManager.setGPSCallback(null);
+                        gpsManager = null;
+                    }
                     dialog.cancel();
                 }
                 return false;
@@ -371,22 +402,23 @@ public class AppLockService extends Service implements GPSCallback {
         if(location.hasSpeed()) {
             speed = roundDecimal(convertSpeed(location.getSpeed()), 2);
 
-            if(speed >= 30){
+            if(speed >= 30.00){
                 speedString = "Current Speed: " + speed + " KM" + "\n\nJust Drive detected that you are running in a NON-SAFE speed.";
 
                 TextView Speedmessage = (TextView) SpeedalertDialog.findViewById(android.R.id.message);
                 Speedmessage.setText(speedString);
-                Speedmessage.setGravity(Gravity.CENTER);
 
                 stopService(new Intent(AppLockService.this, AppLockService.class));
                 stopService(new Intent(AppLockService.this, CallerService.class));
 
-            } else {
+            } else if(speed < 30.00) {
                 speedString = "Current Speed: " + speed + " KM" + "\n\nJust Drive detected that you are running in a SAFE speed.  \n" + "Sorry for the inconvenient";
 
                 TextView Speedmessage = (TextView) SpeedalertDialog.findViewById(android.R.id.message);
                 Speedmessage.setText(speedString);
-                Speedmessage.setGravity(Gravity.CENTER);
+            } else {
+                TextView Speedmessage = (TextView) SpeedalertDialog.findViewById(android.R.id.message);
+                Speedmessage.setText("Couldn't read your current speed");
             }
         }
     }
@@ -395,7 +427,7 @@ public class AppLockService extends Service implements GPSCallback {
         Log.d(TAG + "_ALS", "LockNotification");
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext());
 
-        Intent intent = new Intent(AppLockService.this, AppLockService.class);
+        Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra("key","launch_about");
         PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
@@ -414,6 +446,36 @@ public class AppLockService extends Service implements GPSCallback {
         notifyManager.notify(0, builder.build());
     }
 
+    void SpeedNotification() {
+        Log.d(TAG + "_ALS", "SpeedNotification");
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext());
+
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra("key","launch_speed");
+        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        // Set the title, text, and icon
+        builder.setContentTitle(getString(R.string.app_name))
+                .setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE)
+                .setContentText("Reading Current Speed..." + "\n This may take awhile, depending on the availability of GPS satellite on your area.")
+                .setSmallIcon(R.drawable.ic_applock)
+                .setContentIntent(pendingIntent)
+                .addAction(R.drawable.ic_stop, "", stopSpeedNotification())
+                .setOngoing(true);
+
+        // Get an instance of the Notification Manager
+        NotificationManager notifyManager = (NotificationManager)
+                getSystemService(Context.NOTIFICATION_SERVICE);
+
+        // Build the notification and post it
+        notifyManager.notify(0, builder.build());
+    }
+
+    PendingIntent stopSpeedNotification() {
+        Intent intent = new Intent(getBaseContext(), StopSpeedNotification.class);
+        return PendingIntent.getBroadcast(getApplicationContext(), 0, intent, 0);
+    }
+
     @Override
     public void onDestroy() {
         Log.i(TAG + "_ALS", "Destroy");
@@ -421,8 +483,15 @@ public class AppLockService extends Service implements GPSCallback {
 
         mHandler.removeCallbacks(looperTask);
 
-        if (mScreenReceiver != null)
+        if(gpsManager!=null){
+            gpsManager.stopListening();
+            gpsManager.setGPSCallback(null);
+            gpsManager = null;
+        }
+
+        if (mScreenReceiver != null) {
             unregisterReceiver(mScreenReceiver);
+        }
 
         if(LOCKshowing) {
             LockalertDialog.dismiss();
@@ -500,5 +569,4 @@ public class AppLockService extends Service implements GPSCallback {
 
         return value;
     }
-
 }

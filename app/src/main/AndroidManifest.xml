@@ -62,6 +62,8 @@
 
         <service android:name=".CallerService" />
 
+        <receiver android:name=".StopSpeedNotification" />
+
         <receiver android:name=".TextReceiver">
             <intent-filter>
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
