@@ -400,9 +400,14 @@ public class AppLockService extends Service implements GPSCallback {
         location.getLatitude();
         location.getLongitude();
         if(location.hasSpeed()) {
+
             speed = roundDecimal(convertSpeed(location.getSpeed()), 2);
 
             if(speed >= 30.00){
+                if (!SPEEDshowing) {
+                    SpeedDialog();
+                }
+
                 speedString = "Current Speed: " + speed + " KM" + "\n\nJust Drive detected that you are running in a NON-SAFE speed.";
 
                 TextView Speedmessage = (TextView) SpeedalertDialog.findViewById(android.R.id.message);
@@ -412,6 +417,10 @@ public class AppLockService extends Service implements GPSCallback {
                 stopService(new Intent(AppLockService.this, CallerService.class));
 
             } else if(speed < 30.00) {
+                if (!SPEEDshowing) {
+                    SpeedDialog();
+                }
+
                 speedString = "Current Speed: " + speed + " KM" + "\n\nJust Drive detected that you are running in a SAFE speed.  \n" + "Sorry for the inconvenient";
 
                 TextView Speedmessage = (TextView) SpeedalertDialog.findViewById(android.R.id.message);
@@ -451,7 +460,7 @@ public class AppLockService extends Service implements GPSCallback {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext());
 
         Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra("key","launch_speed");
+        intent.putExtra("key", "launch_speed");
         PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         // Set the title, text, and icon
@@ -460,7 +469,7 @@ public class AppLockService extends Service implements GPSCallback {
                 .setContentText("Reading Current Speed..." + "\n This may take awhile, depending on the availability of GPS satellite on your area.")
                 .setSmallIcon(R.drawable.ic_applock)
                 .setContentIntent(pendingIntent)
-                .addAction(R.drawable.ic_stop, "", stopSpeedNotification())
+                .addAction(R.drawable.ic_stop, "Stop", stopSpeedNotification())
                 .setOngoing(true);
 
         // Get an instance of the Notification Manager
