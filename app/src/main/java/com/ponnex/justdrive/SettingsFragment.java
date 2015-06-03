@@ -1,14 +1,11 @@
 package com.ponnex.justdrive;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
-import android.support.design.widget.Snackbar;
-import android.view.View;
 
 import com.afollestad.materialdialogs.prefs.MaterialEditTextPreference;
 import com.jenzz.materialpreference.CheckBoxPreference;

@@ -1,11 +1,14 @@
 package com.ponnex.justdrive;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
 import android.util.Log;
@@ -16,6 +19,7 @@ import android.util.Log;
 
 public class TextReceiver extends BroadcastReceiver {
 
+    Context context;
     SmsMessage[] msgs;
     String msg_from;
     String msg = CallerService.msg + "\n--This is an automated SMS--";
@@ -24,7 +28,7 @@ public class TextReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        SharedPreferences mSharedPreference1= PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences mSharedPreference1 = PreferenceManager.getDefaultSharedPreferences(context);
         String isMsgFrom = (mSharedPreference1.getString("isMsgfrom", null));
 
         Log.d(TAG, "message received");
@@ -47,11 +51,12 @@ public class TextReceiver extends BroadcastReceiver {
                             msg_from = msgs[i].getOriginatingAddress();
 
                             Log.d(TAG, "SMS Previous: " + isMsgFrom);
-                            Log.d(TAG,"SMS Received: " + msg_from);
+                            Log.d(TAG, "SMS Received: " + msg_from);
 
                             SmsManager smsManager = SmsManager.getDefault();
                             if (!msg_from.equals(isMsgFrom)) {
                                 smsManager.sendTextMessage(msg_from, null, msg, null, null);
+                                MessageNotification(msg_from);
                             }
                         }
 
@@ -66,5 +71,26 @@ public class TextReceiver extends BroadcastReceiver {
                 }
             }
         }
+    }
+
+    private void MessageNotification(String msg_from) {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
+
+        Intent intent = new Intent(context, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        // Set the title, text, and icon
+        builder.setContentTitle(context.getString(R.string.app_name))
+                .setContentText("Auto Reply Message sent to " + msg_from)
+                .setSmallIcon(R.drawable.ic_message_sent)
+                .setContentIntent(pendingIntent)
+                .setOngoing(true);
+
+        // Get an instance of the Notification Manager
+        NotificationManager notifyManager = (NotificationManager)
+                context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        // Build the notification and post it
+        notifyManager.notify(3, builder.build());
     }
 }

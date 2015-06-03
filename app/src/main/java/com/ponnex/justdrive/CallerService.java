@@ -1,6 +1,7 @@
 package com.ponnex.justdrive;
 
 import android.app.AlarmManager;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.bluetooth.BluetoothA2dp;
@@ -21,6 +22,7 @@ import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.speech.tts.TextToSpeech;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.PhoneStateListener;
 import android.telephony.SmsManager;
@@ -60,6 +62,8 @@ public class CallerService extends Service {
     private boolean bluetoothstate = false;
 
     private String getCallNumber = null;
+
+    private int checkIt = 0;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -183,21 +187,22 @@ public class CallerService extends Service {
                         for (int i = 0; i < incomingNumber.length(); i++) {
                             getCallNumber = getCallNumber + incomingNumber.charAt(i);
                         }
-
-                        SmsManager smsManager = SmsManager.getDefault();
-                        smsManager.sendTextMessage(getCallNumber, null, msg + "\n--This is an automated SMS--", null, null);
-
-                        //for testing
-                        Log.e(TAG + "Incoming Call number: ", getCallNumber);
+                        checkIt = 1;
                     }
 
                     if (state == TelephonyManager.CALL_STATE_IDLE) {
                         Log.d(TAG + "Phone State Auto Reply Calls", "Idle");
-
+                        if(checkIt == 1){ //when the call is not received == missed call
+                            SmsManager smsManager = SmsManager.getDefault();
+                            smsManager.sendTextMessage(getCallNumber, null, msg + "\n--This is an automated SMS--", null, null);
+                            MessageNotification(getCallNumber);
+                        }
                     }
 
                     if (state == TelephonyManager.CALL_STATE_OFFHOOK) {
                         Log.d(TAG + "Phone State Auto Reply Calls", "Offhook");
+                        // Call received
+                        checkIt = 0;
                     }
                 }
 
@@ -206,6 +211,27 @@ public class CallerService extends Service {
 
         //run until stopped
         return START_STICKY;
+    }
+
+    private void MessageNotification(String msg_from) {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext());
+
+        Intent intent = new Intent(CallerService.this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        // Set the title, text, and icon
+        builder.setContentTitle(getString(R.string.app_name))
+                .setContentText("Auto Reply Message sent to " + msg_from)
+                .setSmallIcon(R.drawable.ic_message_sent)
+                .setContentIntent(pendingIntent)
+                .setOngoing(true);
+
+        // Get an instance of the Notification Manager
+        NotificationManager notifyManager = (NotificationManager)
+                getSystemService(Context.NOTIFICATION_SERVICE);
+
+        // Build the notification and post it
+        notifyManager.notify(3, builder.build());
     }
 
     //Identify if headset is connected

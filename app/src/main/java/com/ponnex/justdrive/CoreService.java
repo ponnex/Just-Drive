@@ -86,6 +86,11 @@ public class CoreService extends Service implements ConnectionCallbacks, OnConne
                 gpsManager.setGPSCallback(null);
                 gpsManager = null;
             }
+
+            SharedPreferences isFirstRun_write = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            SharedPreferences.Editor editor = isFirstRun_write.edit();
+            editor.putInt("count", 0);
+            editor.apply();
         }
     }
 

@@ -20,6 +20,7 @@ import android.hardware.display.DisplayManager;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -253,13 +254,11 @@ public class AppLockService extends Service implements GPSCallback {
         LockalertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         LockalertDialog.show();
 
-        final int accentcolor = getApplicationContext().getResources().getColor(R.color.accent);
-
         Button positive = LockalertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
-        positive.setTextColor(accentcolor);
+        positive.setTextColor(getResources().getColor(R.color.accent));
 
         Button negative = LockalertDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
-        negative.setTextColor(accentcolor);
+        negative.setTextColor(getResources().getColor(R.color.accent));
     }
 
     private void AboutDialog() {
@@ -301,13 +300,11 @@ public class AppLockService extends Service implements GPSCallback {
         AboutalertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         AboutalertDialog.show();
 
-        final int accentcolor = getApplicationContext().getResources().getColor(R.color.accent);
-
         Button negative = AboutalertDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
-        negative.setTextColor(accentcolor);
+        negative.setTextColor(getResources().getColor(R.color.accent));
 
         Button positive = AboutalertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
-        positive.setTextColor(accentcolor);
+        positive.setTextColor(getResources().getColor(R.color.accent));
     }
 
     private void SpeedDialog() {
@@ -360,13 +357,11 @@ public class AppLockService extends Service implements GPSCallback {
                 WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         SpeedalertDialog.show();
 
-        final int accentcolor = getApplicationContext().getResources().getColor(R.color.accent);
-
         Button Speedpositive = SpeedalertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
-        Speedpositive.setTextColor(accentcolor);
+        Speedpositive.setTextColor(getResources().getColor(R.color.accent));
 
         Button Speednegative = SpeedalertDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
-        Speednegative.setTextColor(accentcolor);
+        Speednegative.setTextColor(getResources().getColor(R.color.accent));
     }
 
     @Override
@@ -400,7 +395,8 @@ public class AppLockService extends Service implements GPSCallback {
         Log.d(TAG + "_ALS", "LockNotification");
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext());
 
-        Intent intent = new Intent(AppLockService.this, MainActivity.class);
+        Intent intent = new Intent(AppLockService.this, AppLockService.class);
+        intent.putExtra("key","launch_about");
         PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         // Set the title, text, and icon

@@ -2,10 +2,7 @@ package com.ponnex.justdrive;
 
 import android.animation.AnimatorInflater;
 import android.animation.ObjectAnimator;
-import android.app.ActivityManager;
 import android.app.Dialog;
-import android.app.Fragment;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,20 +11,11 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
-import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import android.support.design.widget.Snackbar;
@@ -36,45 +24,25 @@ import android.support.design.widget.Snackbar;
  * Created by ramos on 4/15/2015.
  */
 
-public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
+public class MainActivity extends BaseActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
     private FloatingActionButton fab;
     private boolean fab_state;
-    static boolean active = false;
-    AlertDialog alertDialog;
-    private DrawerLayout mDrawerLayout;
+    private AlertDialog alertDialog;
 
     private String TAG = "com.ponnex.justdrive.MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+
+        if (Build.VERSION.SDK_INT >= 21) {
+            setContentView(R.layout.activity_main_lollipop);
+        } else {
+            setContentView(R.layout.activity_main);
+        }
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         prefs.registerOnSharedPreferenceChangeListener(this);
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        final ActionBar ab = getSupportActionBar();
-        ab.setHomeAsUpIndicator(R.drawable.ic_menu);
-        ab.setDisplayHomeAsUpEnabled(true);
-
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        if (navigationView != null) {
-            setupDrawerContent(navigationView);
-        }
-
-        Fragment existingFragment = getFragmentManager().findFragmentById(R.id.container);
-        if (existingFragment == null || !existingFragment.getClass().equals(SettingsFragment.class) || !existingFragment.getClass().equals(SettingsFragmentLollipop.class)) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                getFragmentManager().beginTransaction().replace(R.id.container, new SettingsFragmentLollipop()).commit();
-            } else {
-                getFragmentManager().beginTransaction().replace(R.id.container, new SettingsFragment()).commit();
-            }
-        }
 
         PackageManager pm = getPackageManager();
         boolean hasTelephony = pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
@@ -94,13 +62,11 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             });
             alertDialog.show();
 
-            final int accentcolor = getApplicationContext().getResources().getColor(R.color.accent);
-
             Button positive = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
-            positive.setTextColor(accentcolor);
+            positive.setTextColor(getResources().getColor(R.color.accent));
 
             Button negative = alertDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
-            negative.setTextColor(accentcolor);
+            negative.setTextColor(getResources().getColor(R.color.accent));
         }
 
         SharedPreferences mSharedPreference = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -124,6 +90,8 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             stopService(new Intent(MainActivity.this, AppLockService.class));
             stopService(new Intent(MainActivity.this, CallerService.class));
         }
+
+        overridePendingTransition(0, 0);
 
         if(Build.VERSION.SDK_INT >= 21) {
             showDialog();
@@ -165,90 +133,30 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         }
     }
 
-    private void setupDrawerContent(NavigationView navigationView) {
-        navigationView.setNavigationItemSelectedListener(
-                new NavigationView.OnNavigationItemSelectedListener() {
-                    @Override
-                    public boolean onNavigationItemSelected(MenuItem menuItem) {
-                        menuItem.setChecked(true);
-                        mDrawerLayout.closeDrawers();
-                        return true;
-                    }
-                });
+    @Override
+    protected int getSelfNavDrawerItem() {
+        return NAVDRAWER_ITEM_HOME;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onResume() {
+        SharedPreferences NavItem = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        SharedPreferences.Editor editor = NavItem.edit();
+        editor.putInt("NavItem", NAVDRAWER_ITEM_HOME);
+        editor.apply();
+        super.onResume();
     }
 
     public void ShowSnackbar(Integer text){
         Snackbar snackbar = Snackbar.make(findViewById(R.id.layout_main), text, Snackbar.LENGTH_SHORT);
-            View view = snackbar.getView();
-            view.setBackgroundColor(getResources().getColor(R.color.accent));
-            snackbar.show();
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        active = true;
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        active = false;
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                mDrawerLayout.openDrawer(GravityCompat.START);
-                return true;
-            case R.id.about:
-                AboutDialog();
-                return true;
-            case R.id.debug_on:
-                SharedPreferences debug = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                SharedPreferences.Editor editor = debug.edit();
-                editor.putBoolean("debug", true);
-                editor.apply();
-
-                if(!isServiceRunning(AppLockService.class)) {
-                    startService(new Intent(MainActivity.this, AppLockService.class));
-                }
-                if(!isServiceRunning(CallerService.class)){
-                    startService(new Intent(MainActivity.this, CallerService.class));
-                }
-                return true;
-            case R.id.debug_off:
-                SharedPreferences debug1 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                SharedPreferences.Editor editor1 = debug1.edit();
-                editor1.putBoolean("debug", false);
-                editor1.apply();
-
-                if (isServiceRunning(AppLockService.class)) {
-                    stopService(new Intent(MainActivity.this, AppLockService.class));
-                }
-                if (isServiceRunning(CallerService.class)) {
-                    stopService(new Intent(MainActivity.this, CallerService.class));
-                }
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    private boolean isServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
+        View view = snackbar.getView();
+        view.setBackgroundColor(getResources().getColor(R.color.accent));
+        snackbar.show();
     }
 
     private void showDialog() {
@@ -281,20 +189,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
         Button negative = alertDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
         negative.setTextColor(accentcolor);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-    }
-
-    private void AboutDialog(){
-        new MaterialDialog.Builder(this)
-                .title(R.string.about)
-                .positiveText(R.string.dismiss)
-                .content(getString(R.string.about_body))
-                .contentLineSpacing(1.6f)
-                .show();
     }
 
     private boolean isPlayServicesConfigured() {

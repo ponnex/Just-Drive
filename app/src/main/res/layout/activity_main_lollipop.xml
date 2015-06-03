@@ -28,9 +28,7 @@
 
         </android.support.design.widget.AppBarLayout>
 
-        <!--- start of layout -->
-
-        <fragment class="com.ponnex.justdrive.SettingsFragment"
+        <fragment class="com.ponnex.justdrive.SettingsFragmentLollipop"
             android:id="@+id/preference"
             android:layout_marginTop="?attr/actionBarSize"
             android:layout_width="match_parent"
@@ -41,8 +39,6 @@
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:layout_gravity="bottom|end" />
-
-        <!--- end of layout -->
 
     </android.support.design.widget.CoordinatorLayout>
 

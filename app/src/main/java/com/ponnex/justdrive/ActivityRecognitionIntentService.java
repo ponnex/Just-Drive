@@ -45,20 +45,37 @@ public class ActivityRecognitionIntentService extends IntentService {
                 Log.d(TAG + "_HAS RESULT -->", activityName + ", " + confidence + "% ");
 
                 if (activityName.equals("In Vehicle") || activityName.equals("On Bicycle")) {
-                    if (confidence >= 75) {
-                        //start applock service
-                        startAppLock();
-                    }
-                }
+                    if (confidence >= 80) {
+                        SharedPreferences mSharedPreference1 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                        Integer count = (mSharedPreference1.getInt("count", 0));
+                        if(count < 3) {
+                            SharedPreferences isFirstRun_write = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                            SharedPreferences.Editor editor = isFirstRun_write.edit();
+                            editor.putInt("count", count + 1);
+                            editor.apply();
 
-                else if (activityName.equals("Still") || activityName.equals("On Foot") || activityName.equals("Running") || activityName.equals("Walking")) {
+                            Log.d(TAG, "inVehicle count = " + count);
+                        } else {
+                            SharedPreferences isFirstRun_write = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                            SharedPreferences.Editor editor = isFirstRun_write.edit();
+                            editor.putInt("count", 0);
+                            editor.apply();
+
+                            //start applock service
+                            startAppLock();
+                        }
+                    }
+                } else if (activityName.equals("Still") || activityName.equals("On Foot") || activityName.equals("Running") || activityName.equals("Walking")) {
                     if (confidence >= 50) {
+                        SharedPreferences isFirstRun_write = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                        SharedPreferences.Editor editor = isFirstRun_write.edit();
+                        editor.putInt("count", 0);
+                        editor.apply();
+
                         // /disable applock service
                         stopAppLock();
                     }
-                }
-
-                else {
+                } else {
                     Log.d(TAG, "UNKNOWN OR TILTING");
                 }
             }
