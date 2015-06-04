@@ -3,6 +3,7 @@ package com.ponnex.justdrive;
 import android.animation.AnimatorInflater;
 import android.animation.ObjectAnimator;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -18,7 +19,8 @@ import android.widget.Button;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
-import android.support.design.widget.Snackbar;
+import com.squareup.leakcanary.LeakCanary;
+import com.squareup.leakcanary.RefWatcher;
 
 /**
  * Created by ramos on 4/15/2015.
@@ -34,6 +36,7 @@ public class MainActivity extends BaseActivity implements SharedPreferences.OnSh
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        LeakCanary.install(getApplication());
 
         if (Build.VERSION.SDK_INT >= 21) {
             setContentView(R.layout.activity_main_lollipop);
@@ -90,8 +93,6 @@ public class MainActivity extends BaseActivity implements SharedPreferences.OnSh
             stopService(new Intent(MainActivity.this, AppLockService.class));
             stopService(new Intent(MainActivity.this, CallerService.class));
         }
-
-        overridePendingTransition(0, 0);
 
         if(Build.VERSION.SDK_INT >= 21) {
             showDialog();
@@ -150,13 +151,6 @@ public class MainActivity extends BaseActivity implements SharedPreferences.OnSh
         editor.putInt("NavItem", NAVDRAWER_ITEM_HOME);
         editor.apply();
         super.onResume();
-    }
-
-    public void ShowSnackbar(Integer text){
-        Snackbar snackbar = Snackbar.make(findViewById(R.id.layout_main), text, Snackbar.LENGTH_SHORT);
-        View view = snackbar.getView();
-        view.setBackgroundColor(getResources().getColor(R.color.accent));
-        snackbar.show();
     }
 
     private void showDialog() {
@@ -223,7 +217,6 @@ public class MainActivity extends BaseActivity implements SharedPreferences.OnSh
                 anim.setDuration(500);
                 anim.start();
 
-                ShowSnackbar(R.string.justdriveenable);
                 fab_state = true;
             } else {
                 fab.setImageResource(R.drawable.ic_off);
@@ -234,7 +227,6 @@ public class MainActivity extends BaseActivity implements SharedPreferences.OnSh
 
                 startService(new Intent(MainActivity.this, CoreService.class));
 
-                ShowSnackbar(R.string.justdrivedisable);
                 fab_state = false;
             }
         }

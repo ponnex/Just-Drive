@@ -1,6 +1,5 @@
 package com.ponnex.justdrive;
 
-import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -29,6 +28,7 @@ public class CoreService extends Service implements ConnectionCallbacks, OnConne
     private GoogleApiClient mGoogleApiClient;
     private GPSManager gpsManager = null;
     private PendingIntent mActivityDetectionPendingIntent;
+
     private String TAG = "com.ponnex.justdrive.CoreService";
 
     @Override
@@ -122,7 +122,7 @@ public class CoreService extends Service implements ConnectionCallbacks, OnConne
     }
 
     @Override
-    public void onDestroy(){
+    public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "CS Destroyed");
         if(mGoogleApiClient.isConnected()) {
@@ -153,7 +153,7 @@ public class CoreService extends Service implements ConnectionCallbacks, OnConne
         super.onTaskRemoved(rootIntent);
     }
 
-    private boolean switchstate(){
+    private boolean switchstate() {
         SharedPreferences mSharedPreference= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         return (mSharedPreference.getBoolean("switch", true));
     }

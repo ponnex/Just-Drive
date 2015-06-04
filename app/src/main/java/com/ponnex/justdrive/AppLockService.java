@@ -21,7 +21,6 @@ import android.hardware.display.DisplayManager;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -33,7 +32,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.internal.view.ContextThemeWrapper;
 import android.util.Log;
 import android.view.Display;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -455,7 +453,7 @@ public class AppLockService extends Service implements GPSCallback {
         notifyManager.notify(0, builder.build());
     }
 
-    void SpeedNotification() {
+    private void SpeedNotification() {
         Log.d(TAG + "_ALS", "SpeedNotification");
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext());
 

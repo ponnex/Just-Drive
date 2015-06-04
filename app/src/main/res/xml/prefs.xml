@@ -19,12 +19,12 @@
             android:key="phone"
             android:summary="Read caller ID of incoming phone calls"
             android:title="Phone Calls" />
-        <com.jenzz.materialpreference.CheckBoxPreference
+        <com.jenzz.materialpreference.SwitchPreference
             android:defaultValue="true"
             android:key="autoReplyCalls"
             android:summary="Reply incoming calls with SMS"
             android:title="Auto Reply Calls" />
-        <com.jenzz.materialpreference.CheckBoxPreference
+        <com.jenzz.materialpreference.SwitchPreference
             android:defaultValue="false"
             android:key="autoReply"
             android:summary="Disabled"

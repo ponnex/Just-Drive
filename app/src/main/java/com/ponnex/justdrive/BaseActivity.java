@@ -16,6 +16,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.squareup.leakcanary.LeakCanary;
+
 /**
  * Created by EmmanuelFrancis on 6/1/2015.
  */
@@ -37,6 +39,7 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        LeakCanary.install(getApplication());
         mHandler = new Handler();
     }
 
@@ -113,11 +116,16 @@ public class BaseActivity extends AppCompatActivity {
                 editor1.putBoolean("debug", false);
                 editor1.apply();
 
-                if (isServiceRunning(AppLockService.class)) {
-                    stopService(new Intent(BaseActivity.this, AppLockService.class));
-                }
-                if (isServiceRunning(CallerService.class)) {
-                    stopService(new Intent(BaseActivity.this, CallerService.class));
+                SharedPreferences mSharedPreference = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                Boolean debug2 = (mSharedPreference.getBoolean("debug", false));
+
+                if(debug2) {
+                    if (isServiceRunning(AppLockService.class)) {
+                        stopService(new Intent(BaseActivity.this, AppLockService.class));
+                    }
+                    if (isServiceRunning(CallerService.class)) {
+                        stopService(new Intent(BaseActivity.this, CallerService.class));
+                    }
                 }
                 return true;
         }
@@ -153,6 +161,7 @@ public class BaseActivity extends AppCompatActivity {
                                     editor.putInt("NavItem", NAVDRAWER_ITEM_HOME);
                                     editor.apply();
 
+                                    menuItem.setChecked(true);
                                     mDrawerLayout.closeDrawers();
                                     return true;
                                 case R.id.navigation_about:
@@ -170,6 +179,7 @@ public class BaseActivity extends AppCompatActivity {
                                     editor1.putInt("NavItem", NAVDRAWER_ITEM_ABOUT);
                                     editor1.apply();
 
+                                    menuItem.setChecked(true);
                                     mDrawerLayout.closeDrawers();
                                     return true;
                             }
@@ -177,6 +187,12 @@ public class BaseActivity extends AppCompatActivity {
                         return true;
                     }
                 });
+    }
+
+    @Override
+    protected void onResume() {
+        invalidateOptionsMenu();
+        super.onResume();
     }
 
     private boolean isServiceRunning(Class<?> serviceClass) {

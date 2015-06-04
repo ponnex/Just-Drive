@@ -89,8 +89,14 @@ public class CallerService extends Service {
         //get audio service
         final AudioManager current = (AudioManager) this
                 .getSystemService(Context.AUDIO_SERVICE);
+
         //get and store the users current sound mode
         audioMode = current.getRingerMode();
+        SharedPreferences audio = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        SharedPreferences.Editor editor = audio.edit();
+        editor.putInt("audioMode", audioMode);
+        editor.apply();
+
         //get the preferences
         getPrefs = PreferenceManager
                 .getDefaultSharedPreferences(getBaseContext());
@@ -369,9 +375,12 @@ public class CallerService extends Service {
     }
 
     void soundMode() {
-        if (audioMode == 1) {
+        SharedPreferences mSharedPreference = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        Integer audio = (mSharedPreference.getInt("audioMode", 2));
+
+        if (audio == 1) {
             vibrate();
-        } else if (audioMode == 2) {
+        } else if (audio == 2) {
             normal();
         } else {
             silent();

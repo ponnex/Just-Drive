@@ -6,9 +6,16 @@ import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceGroup;
 import android.preference.PreferenceManager;
+import android.support.design.widget.FloatingActionButton;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
+import android.widget.AbsListView;
+import android.widget.ListView;
 
 import com.afollestad.materialdialogs.prefs.MaterialEditTextPreference;
-import com.jenzz.materialpreference.CheckBoxPreference;
 import com.jenzz.materialpreference.SwitchPreference;
 
 /**
@@ -18,16 +25,9 @@ import com.jenzz.materialpreference.SwitchPreference;
 public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener{
     SharedPreferences prefs;
     private SwitchPreference switchbloxt;
-    static boolean active = false;
-
-    private String TAG = "com.ponnex.justdrive.SettingsFragment";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-
-        CheckBoxPreference checkbloxtautoReplyCalls;
-        CheckBoxPreference checkbloxtautoReply;
-
         super.onCreate(savedInstanceState);
         prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         addPreferencesFromResource(R.xml.prefs);
@@ -91,8 +91,8 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
 
         getPreferenceScreen().findPreference("msg").setSummary("''" + isMsg + " --This is an automated SMS--''");
 
-        checkbloxtautoReplyCalls = (CheckBoxPreference) getPreferenceManager().findPreference("autoReplyCalls");
-        checkbloxtautoReplyCalls.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+        switchbloxt = (SwitchPreference) getPreferenceManager().findPreference("autoReplyCalls");
+        switchbloxt.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             public boolean onPreferenceChange(Preference preference, Object newValue) {
 
                 if (newValue.toString().equals("true")) {
@@ -105,8 +105,8 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
             }
         });
 
-        checkbloxtautoReply = (CheckBoxPreference) getPreferenceManager().findPreference("autoReply");
-        checkbloxtautoReply.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+        switchbloxt = (SwitchPreference) getPreferenceManager().findPreference("autoReply");
+        switchbloxt.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             public boolean onPreferenceChange(Preference preference, Object newValue) {
 
                 if (newValue.toString().equals("true")) {
@@ -175,15 +175,34 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        active = true;
-    }
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-    @Override
-    public void onStop() {
-        super.onStop();
-        active = false;
+        super.onCreateView(inflater, container, savedInstanceState);
+
+        View view = inflater.inflate(R.layout.listview_layout, container, false);
+        ListView lv = (ListView) view.findViewById(android.R.id.list);
+        lv.setOnScrollListener(new AbsListView.OnScrollListener() {
+            private int mLastFirstVisibleItem;
+
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                if (mLastFirstVisibleItem < firstVisibleItem) {
+                    FloatingActionButton floatingActionButton = (FloatingActionButton) getActivity().findViewById(R.id.fab);
+                    floatingActionButton.animate().translationY(floatingActionButton.getHeight() + 16).setInterpolator(new AccelerateInterpolator(2)).start();
+                }
+                if (mLastFirstVisibleItem > firstVisibleItem) {
+                    FloatingActionButton floatingActionButton = (FloatingActionButton) getActivity().findViewById(R.id.fab);
+                    floatingActionButton.animate().translationY(0).setInterpolator(new DecelerateInterpolator(2)).start();
+                }
+                mLastFirstVisibleItem = firstVisibleItem;
+            }
+        });
+        return view;
     }
 
     @Override

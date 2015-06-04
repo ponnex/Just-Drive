@@ -3,7 +3,6 @@
 
     <string name="app_name">Just Drive</string>
     <string name="title_about">About</string>
-	<string name="app_version">Version </string>
     <string name="debug_on">Debug ON</string>
     <string name="debug_off">Debug OFF</string>
     <string name="about">About</string>

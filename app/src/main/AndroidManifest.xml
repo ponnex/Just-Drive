@@ -12,6 +12,7 @@
 
     <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" /> //use google Activity Recognition API to read user activity
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" /> //to know if device is on boot or rebooting
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/> //for GPS or SpeedService
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions" /> //to know what app is launching for API 21(Lollipop)
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/> //To display an alert dialog outside activity
     <uses-permission android:name="android.permission.READ_PHONE_STATE" /> //read call state
@@ -20,12 +21,6 @@
     <uses-permission android:name="android.permission.BLUETOOTH" /> //get bluetooth state if it is connected to bluetooth headset
     <uses-permission android:name="android.permission.GET_TASKS" /> //to know what app is launching for API less than 21(Lollipop)
     <uses-permission android:name="android.permission.SEND_SMS" /> //send sms as part of app core features
-
-    //for GPS or SpeedService
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
     <uses-feature android:name="android.hardware.telephony"
         android:required="true"/>

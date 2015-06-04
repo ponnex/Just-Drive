@@ -1,20 +1,17 @@
 package com.ponnex.justdrive;
 
 import android.content.Context;
-import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-
-import java.util.List;
+import android.util.Log;
 
 /**
  * Created by EmmanuelFrancis on 5/24/2015.
  */
+
 public class GPSManager {
-    private static final int gpsMinTime = 500;
-    private static final int gpsMinDistance = 0;
 
     private static LocationManager locationManager = null;
     private static LocationListener locationListener = null;
@@ -55,29 +52,8 @@ public class GPSManager {
         if (GPSManager.locationManager == null) {
             GPSManager.locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         }
-
-        final Criteria criteria = new Criteria();
-
-        criteria.setAccuracy(Criteria.ACCURACY_FINE);
-        criteria.setSpeedRequired(true);
-        criteria.setAltitudeRequired(false);
-        criteria.setBearingRequired(false);
-        criteria.setCostAllowed(true);
-        criteria.setPowerRequirement(Criteria.POWER_LOW);
-
-        final String bestProvider = GPSManager.locationManager.getBestProvider(criteria, true);
-
-        if (bestProvider != null && bestProvider.length() > 0) {
-            GPSManager.locationManager.requestLocationUpdates(bestProvider, GPSManager.gpsMinTime,
-                    GPSManager.gpsMinDistance, GPSManager.locationListener);
-        } else {
-            final List<String> providers = GPSManager.locationManager.getProviders(true);
-
-            for (final String provider : providers) {
-                GPSManager.locationManager.requestLocationUpdates(provider, GPSManager.gpsMinTime,
-                        GPSManager.gpsMinDistance, GPSManager.locationListener);
-            }
-        }
+        GPSManager.locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, GPSManager.locationListener);
+        GPSManager.locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER , 0, 0, GPSManager.locationListener);
     }
 
     public void stopListening() {
@@ -89,7 +65,7 @@ public class GPSManager {
             GPSManager.locationManager = null;
         }
         catch (final Exception ex) {
-
+            Log.d("GPSManager", "Error removing updates");
         }
     }
 }
