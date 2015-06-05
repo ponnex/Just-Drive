@@ -7,7 +7,6 @@ import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -26,7 +25,11 @@ public class BaseActivity extends AppCompatActivity {
 
     private DrawerLayout mDrawerLayout;
 
-    private CoordinatorLayout coordinatorLayout;
+    private View coordinatorLayout;
+
+    private View mLoadingView;
+
+    private int mShortAnimationDuration;
 
     protected static final int NAVDRAWER_ITEM_HOME = R.id.navigation_home;
     protected static final int NAVDRAWER_ITEM_ABOUT = R.id.navigation_about;
@@ -36,6 +39,8 @@ public class BaseActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        mShortAnimationDuration = getResources().getInteger(
+                android.R.integer.config_shortAnimTime);
         super.onCreate(savedInstanceState);
     }
 
@@ -61,12 +66,9 @@ public class BaseActivity extends AppCompatActivity {
             setupDrawerContent(navigationView);
         }
 
-        coordinatorLayout = (CoordinatorLayout)findViewById(R.id.layout_main);
-        coordinatorLayout.setAlpha(0f);
-        coordinatorLayout.animate()
-                .alpha(1f)
-                .setDuration(250)
-                .setListener(null);
+        coordinatorLayout = findViewById(R.id.layout_main);
+
+        mLoadingView = findViewById(R.id.loading_spinner);
     }
 
     @Override
@@ -74,6 +76,10 @@ public class BaseActivity extends AppCompatActivity {
         if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
             mDrawerLayout.closeDrawers();
         } else {
+            coordinatorLayout.animate()
+                    .alpha(0f)
+                    .setDuration(mShortAnimationDuration)
+                    .setListener(null);
             super.onBackPressed();
         }
     }
@@ -104,6 +110,7 @@ public class BaseActivity extends AppCompatActivity {
                 Intent intent = new Intent(BaseActivity.this, AboutActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
+                return true;
             case R.id.debug_on:
                 SharedPreferences debug = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                 SharedPreferences.Editor editor = debug.edit();
@@ -164,11 +171,12 @@ public class BaseActivity extends AppCompatActivity {
                         } else {
                             switch (menuItem.getItemId()) {
                                 case R.id.navigation_home:
-                                    coordinatorLayout = (CoordinatorLayout)findViewById(R.id.layout_main);
                                     coordinatorLayout.animate()
                                             .alpha(0f)
-                                            .setDuration(250)
+                                            .setDuration(mShortAnimationDuration)
                                             .setListener(null);
+
+                                    mLoadingView.setVisibility(View.VISIBLE);
 
                                     mDrawerLayout.setDrawerListener(new DrawerLayout.DrawerListener() {
                                         @Override
@@ -203,11 +211,12 @@ public class BaseActivity extends AppCompatActivity {
                                     mDrawerLayout.closeDrawers();
                                     return true;
                                 case R.id.navigation_about:
-                                    coordinatorLayout = (CoordinatorLayout)findViewById(R.id.layout_main);
                                     coordinatorLayout.animate()
                                             .alpha(0f)
-                                            .setDuration(250)
+                                            .setDuration(mShortAnimationDuration)
                                             .setListener(null);
+
+                                    mLoadingView.setVisibility(View.VISIBLE);
 
                                     mDrawerLayout.setDrawerListener(new DrawerLayout.DrawerListener() {
                                         @Override
@@ -251,6 +260,16 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         invalidateOptionsMenu();
+
+        coordinatorLayout.setAlpha(0f);
+        coordinatorLayout.animate()
+                .alpha(1f)
+                .setDuration(mShortAnimationDuration)
+                .setListener(null);
+
+        mLoadingView = findViewById(R.id.loading_spinner);
+        mLoadingView.setVisibility(View.GONE);
+
         super.onResume();
     }
 

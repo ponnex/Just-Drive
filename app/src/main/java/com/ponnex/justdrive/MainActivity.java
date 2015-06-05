@@ -10,7 +10,6 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.os.Bundle;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -154,9 +153,6 @@ public class MainActivity extends BaseActivity implements SharedPreferences.OnSh
         SharedPreferences.Editor editor = NavItem.edit();
         editor.putInt("NavItem", NAVDRAWER_ITEM_HOME);
         editor.apply();
-
-        CoordinatorLayout coordinatorLayout = (CoordinatorLayout)findViewById(R.id.layout_main);
-        coordinatorLayout.setAlpha(1f);
 
         super.onResume();
     }
