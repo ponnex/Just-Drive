@@ -56,10 +56,11 @@ public class AppLockService extends Service implements GPSCallback {
     boolean ABOUTshowing = false;
     boolean SPEEDshowing = false;
     boolean showdialog = false;
+    boolean getSpeedfromfuse = false;
     private BroadcastReceiver mScreenReceiver;
 
     private GPSManager gpsManager = null;
-    private double speed = 0.0;
+    private float speed;
     String speedString;
 
     private String TAG = "com.ponnex.justdrive.AppLockService";
@@ -80,6 +81,7 @@ public class AppLockService extends Service implements GPSCallback {
 
         Log.i(TAG + "_ALS", "Created");
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(speedReceiver, new IntentFilter("com.ponnex.justdrive.StopSpeedNotification"));
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(getspeedReceiver, new IntentFilter("com.bloxt.ponnex.guard.CoreService"));
     }
 
     @Override
@@ -121,7 +123,45 @@ public class AppLockService extends Service implements GPSCallback {
                     gpsManager.setGPSCallback(null);
                     gpsManager = null;
                 }
+                getSpeedfromfuse = false;
                 LockNotification();
+            }
+        }
+    };
+
+    private BroadcastReceiver getspeedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Float isSpeed = intent.getFloatExtra("setSpeed", 0);
+            if(getSpeedfromfuse) {
+                if (isSpeed != 0) {
+                    if (isSpeed >= 30) {
+                        if (!SPEEDshowing) {
+                            SpeedDialog();
+                        }
+
+                        speedString = "Current Speed(setSpeed): " + isSpeed + " KM" + "\n\nJust Drive detected that you are running in a NON-SAFE speed.";
+
+                        TextView Speedmessage = (TextView) SpeedalertDialog.findViewById(android.R.id.message);
+                        Speedmessage.setText(speedString);
+
+                        stopService(new Intent(AppLockService.this, AppLockService.class));
+                        stopService(new Intent(AppLockService.this, CallerService.class));
+
+                    } else if (isSpeed < 30) {
+                        if (!SPEEDshowing) {
+                            SpeedDialog();
+                        }
+
+                        speedString = "Current Speed(setSpeed): " + isSpeed + " KM" + "\n\nJust Drive detected that you are running in a SAFE speed.  \n" + "Sorry for the inconvenient";
+
+                        TextView Speedmessage = (TextView) SpeedalertDialog.findViewById(android.R.id.message);
+                        Speedmessage.setText(speedString);
+                    } else {
+                        TextView Speedmessage = (TextView) SpeedalertDialog.findViewById(android.R.id.message);
+                        Speedmessage.setText("Couldn't read your current speed");
+                    }
+                }
             }
         }
     };
@@ -196,6 +236,9 @@ public class AppLockService extends Service implements GPSCallback {
                     showdialog = false;
                     if(LOCKshowing) {
                         LockalertDialog.dismiss();
+                    }
+                    if(ABOUTshowing) {
+                        AboutalertDialog.dismiss();
                     }
                 }
             }
@@ -296,6 +339,8 @@ public class AppLockService extends Service implements GPSCallback {
                 if (!SPEEDshowing) {
                     SpeedDialog();
                 }
+                getSpeedfromfuse = true;
+
                 gpsManager = new GPSManager();
                 gpsManager.startListening(getApplicationContext());
                 gpsManager.setGPSCallback(AppLockService.this);
@@ -348,26 +393,13 @@ public class AppLockService extends Service implements GPSCallback {
         SpeedalertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "CANCEL", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                if(gpsManager!=null){
+                if (gpsManager != null) {
                     gpsManager.stopListening();
                     gpsManager.setGPSCallback(null);
                     gpsManager = null;
                 }
+                getSpeedfromfuse = false;
                 dialog.dismiss();
-            }
-        });
-        SpeedalertDialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
-            @Override
-            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
-                if (keyCode == KeyEvent.KEYCODE_BACK) {
-                    if(gpsManager!=null){
-                        gpsManager.stopListening();
-                        gpsManager.setGPSCallback(null);
-                        gpsManager = null;
-                    }
-                    dialog.cancel();
-                }
-                return false;
             }
         });
         SpeedalertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
@@ -395,13 +427,17 @@ public class AppLockService extends Service implements GPSCallback {
 
     @Override
     public void onGPSUpdate(Location location) {
+
+        SharedPreferences mSharedPreference = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        Float setSpeed = (mSharedPreference.getFloat("setSpeed", 0));
+
         location.getLatitude();
         location.getLongitude();
-        if(location.hasSpeed()) {
 
+        if(location.hasSpeed()) {
             speed = roundDecimal(convertSpeed(location.getSpeed()), 2);
 
-            if(speed >= 30.00){
+            if(speed >= 30){
                 if (!SPEEDshowing) {
                     SpeedDialog();
                 }
@@ -414,7 +450,7 @@ public class AppLockService extends Service implements GPSCallback {
                 stopService(new Intent(AppLockService.this, AppLockService.class));
                 stopService(new Intent(AppLockService.this, CallerService.class));
 
-            } else if(speed < 30.00) {
+            } else if(speed < 30) {
                 if (!SPEEDshowing) {
                     SpeedDialog();
                 }
@@ -490,6 +526,8 @@ public class AppLockService extends Service implements GPSCallback {
 
         mHandler.removeCallbacks(looperTask);
 
+        getSpeedfromfuse = false;
+
         if(gpsManager!=null){
             gpsManager.stopListening();
             gpsManager.setGPSCallback(null);
@@ -564,15 +602,15 @@ public class AppLockService extends Service implements GPSCallback {
         }
     }
 
-    private double convertSpeed(double speed){
-        return ((speed * 3600) * 0.001); // to kilometers
+    private float convertSpeed(float speed){
+        return (float)((speed * 3600) * 0.001); // to kilo meters
     }
 
-    private double roundDecimal(double value, final int decimalPlace) {
+    private float roundDecimal(float value, final int decimalPlace) {
         BigDecimal bd = new BigDecimal(value);
 
         bd = bd.setScale(decimalPlace, RoundingMode.HALF_UP);
-        value = bd.doubleValue();
+        value = bd.floatValue();
 
         return value;
     }

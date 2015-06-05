@@ -65,8 +65,8 @@ public class TextReceiver extends BroadcastReceiver {
                         editor.putString("isMsgfrom", msg_from);
                         editor.apply();
 
-                    } catch (Exception e) {
-                        Log.d("Exception caught", e.getMessage());
+                    } catch (NullPointerException e) {
+                        Log.d(TAG, "Can't Send Message");
                     }
                 }
             }

@@ -35,8 +35,6 @@ import java.util.Locale;
  */
 
 public class CallerService extends Service {
-    //the sound mode of the user's phone
-    private static int audioMode;
     //autoreply
     public static boolean autoreply = false;
     //auto-reply message
@@ -86,17 +84,6 @@ public class CallerService extends Service {
     @SuppressWarnings("deprecation")
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        //get audio service
-        final AudioManager current = (AudioManager) this
-                .getSystemService(Context.AUDIO_SERVICE);
-
-        //get and store the users current sound mode
-        audioMode = current.getRingerMode();
-        SharedPreferences audio = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        SharedPreferences.Editor editor = audio.edit();
-        editor.putInt("audioMode", audioMode);
-        editor.apply();
-
         //get the preferences
         getPrefs = PreferenceManager
                 .getDefaultSharedPreferences(getBaseContext());

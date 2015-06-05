@@ -6,6 +6,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.design.widget.CoordinatorLayout;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.widget.TextView;
@@ -53,6 +54,10 @@ public class AboutActivity extends BaseActivity {
         SharedPreferences.Editor editor = NavItem.edit();
         editor.putInt("NavItem", NAVDRAWER_ITEM_ABOUT);
         editor.apply();
+
+        CoordinatorLayout coordinatorLayout = (CoordinatorLayout)findViewById(R.id.layout_main);
+        coordinatorLayout.setAlpha(1f);
+
         super.onResume();
     }
 

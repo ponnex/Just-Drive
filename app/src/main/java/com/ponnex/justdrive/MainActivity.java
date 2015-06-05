@@ -3,7 +3,6 @@ package com.ponnex.justdrive;
 import android.animation.AnimatorInflater;
 import android.animation.ObjectAnimator;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -20,7 +20,6 @@ import android.widget.Button;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.squareup.leakcanary.LeakCanary;
-import com.squareup.leakcanary.RefWatcher;
 
 /**
  * Created by ramos on 4/15/2015.
@@ -97,7 +96,9 @@ public class MainActivity extends BaseActivity implements SharedPreferences.OnSh
         if(Build.VERSION.SDK_INT >= 21) {
             showDialog();
         }
+
         fab = (FloatingActionButton) findViewById(R.id.fab);
+
         if (isSwitch) {
             fab.setImageResource(R.drawable.ic_on);
             fab_state = true;
@@ -150,6 +151,10 @@ public class MainActivity extends BaseActivity implements SharedPreferences.OnSh
         SharedPreferences.Editor editor = NavItem.edit();
         editor.putInt("NavItem", NAVDRAWER_ITEM_HOME);
         editor.apply();
+
+        CoordinatorLayout coordinatorLayout = (CoordinatorLayout)findViewById(R.id.layout_main);
+        coordinatorLayout.setAlpha(1f);
+
         super.onResume();
     }
 

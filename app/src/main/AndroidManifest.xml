@@ -47,7 +47,8 @@
 
         <activity
             android:name=".AboutActivity"
-            android:label="@string/title_about" />
+            android:label="@string/title_about"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
 
         <service android:name=".ActivityRecognitionIntentService" android:exported="false"/>
 

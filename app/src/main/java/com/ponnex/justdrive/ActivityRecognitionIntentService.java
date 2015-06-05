@@ -5,6 +5,7 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.AudioManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -16,7 +17,6 @@ import com.google.android.gms.location.DetectedActivity;
  */
 
 public class ActivityRecognitionIntentService extends IntentService {
-
     protected static String TAG = "com.ponnex.justdrive.ActivityRecognitionIntentService";
 
     public ActivityRecognitionIntentService() {
@@ -110,6 +110,16 @@ public class ActivityRecognitionIntentService extends IntentService {
         }
         if(!isServiceRunning(CallerService.class)) {
             startService(new Intent(ActivityRecognitionIntentService.this, CallerService.class));
+            //get audio service
+            final AudioManager current = (AudioManager) this
+                    .getSystemService(Context.AUDIO_SERVICE);
+
+            //get and store the users current sound mode
+            int audioMode = current.getRingerMode();
+            SharedPreferences audio = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            SharedPreferences.Editor editor = audio.edit();
+            editor.putInt("audioMode", audioMode);
+            editor.apply();
         }
     }
 

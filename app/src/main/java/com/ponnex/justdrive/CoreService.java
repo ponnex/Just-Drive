@@ -6,10 +6,12 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -17,17 +19,31 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import com.google.android.gms.location.ActivityRecognition;
+import com.google.android.gms.location.FusedLocationProviderApi;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by ramos on 4/14/2015.
  */
 
-public class CoreService extends Service implements ConnectionCallbacks, OnConnectionFailedListener,SharedPreferences.OnSharedPreferenceChangeListener {
+public class CoreService extends Service implements ConnectionCallbacks, OnConnectionFailedListener,SharedPreferences.OnSharedPreferenceChangeListener, LocationListener {
 
     private static final int DETECTION_INT_MILLIS = 0;
     private GoogleApiClient mGoogleApiClient;
     private GPSManager gpsManager = null;
     private PendingIntent mActivityDetectionPendingIntent;
+    private LocalBroadcastManager broadcastManager;
+
+    private FusedLocationProviderApi fusedLocationProviderApi = LocationServices.FusedLocationApi;
+    private LocationRequest locationRequest;
+    private Location location;
+
+    private float speed;
 
     private String TAG = "com.ponnex.justdrive.CoreService";
 
@@ -42,8 +58,15 @@ public class CoreService extends Service implements ConnectionCallbacks, OnConne
 
         Log.d(TAG, "CS Created");
 
+       broadcastManager = LocalBroadcastManager.getInstance(getApplicationContext());
+
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         prefs.registerOnSharedPreferenceChangeListener(this);
+
+        locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setInterval(10000);
+        locationRequest.setFastestInterval(16);
 
         buildGoogleApiClient();
     }
@@ -53,6 +76,7 @@ public class CoreService extends Service implements ConnectionCallbacks, OnConne
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(ActivityRecognition.API)
+                .addApi(LocationServices.API)
                 .build();
     }
 
@@ -97,7 +121,29 @@ public class CoreService extends Service implements ConnectionCallbacks, OnConne
     @Override
     public void onConnected(Bundle bundle) {
         ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(mGoogleApiClient, DETECTION_INT_MILLIS, getActivityDetectionPendingIntent());
+
+        Location currentLocation = fusedLocationProviderApi.getLastLocation(mGoogleApiClient);
+        if (currentLocation != null) {
+            location = currentLocation;
+            getSpeed(location);
+
+        } else {
+            fusedLocationProviderApi.requestLocationUpdates(mGoogleApiClient, locationRequest, this);
+            // Schedule a Thread to unregister location listeners
+            Executors.newScheduledThreadPool(1).schedule(new Runnable() {
+                @Override
+                public void run() {
+                    fusedLocationProviderApi.removeLocationUpdates(mGoogleApiClient, CoreService.this);
+                }
+            }, 60000, TimeUnit.MILLISECONDS);
+        }
+
         Log.d(TAG, "Connected");
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        getSpeed(location);
     }
 
     @Override
@@ -151,6 +197,18 @@ public class CoreService extends Service implements ConnectionCallbacks, OnConne
                 SystemClock.elapsedRealtime() + 500,
                 restartServicePendingIntent);
         super.onTaskRemoved(rootIntent);
+    }
+
+    private void getSpeed(Location location) {
+        speed = location.getSpeed();
+        Log.d(TAG, "Speed: " + speed);
+        sendSpeed(speed);
+    }
+
+    public void sendSpeed (Float speed) {
+        Intent intent = new Intent("com.bloxt.ponnex.guard.CoreService");
+        intent.putExtra("setSpeed", speed);
+        broadcastManager.sendBroadcast(intent);
     }
 
     private boolean switchstate() {
