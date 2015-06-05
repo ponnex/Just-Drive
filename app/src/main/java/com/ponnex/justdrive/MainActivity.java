@@ -19,7 +19,6 @@ import android.widget.Button;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.squareup.leakcanary.LeakCanary;
 
 /**
  * Created by ramos on 4/15/2015.
@@ -35,7 +34,6 @@ public class MainActivity extends BaseActivity implements SharedPreferences.OnSh
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        LeakCanary.install(getApplication());
 
         if (Build.VERSION.SDK_INT >= 21) {
             setContentView(R.layout.activity_main_lollipop);
@@ -114,6 +112,11 @@ public class MainActivity extends BaseActivity implements SharedPreferences.OnSh
                     SharedPreferences.Editor editor = switchPref.edit();
                     editor.putBoolean("switch", false);
                     editor.apply();
+
+                    SharedPreferences debug = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                    SharedPreferences.Editor editor1 = debug.edit();
+                    editor1.putBoolean("debug", false);
+                    editor1.apply();
                 }
                 else {
                     SharedPreferences switchPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());

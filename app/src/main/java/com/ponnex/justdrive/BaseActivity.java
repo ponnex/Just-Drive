@@ -18,8 +18,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.squareup.leakcanary.LeakCanary;
-
 /**
  * Created by EmmanuelFrancis on 6/1/2015.
  */
@@ -39,7 +37,6 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        LeakCanary.install(getApplication());
     }
 
     @Override
@@ -131,16 +128,21 @@ public class BaseActivity extends AppCompatActivity {
                 }
                 return true;
             case R.id.debug_off:
-                SharedPreferences debug1 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                SharedPreferences.Editor editor1 = debug1.edit();
-                editor1.putBoolean("debug", false);
-                editor1.apply();
+                SharedPreferences mSharedPreference = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                Boolean debug2 = (mSharedPreference.getBoolean("debug", false));
 
-                if (isServiceRunning(AppLockService.class)) {
-                    stopService(new Intent(BaseActivity.this, AppLockService.class));
-                }
-                if (isServiceRunning(CallerService.class)) {
-                    stopService(new Intent(BaseActivity.this, CallerService.class));
+                if(debug2) {
+                    SharedPreferences debug1 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                    SharedPreferences.Editor editor1 = debug1.edit();
+                    editor1.putBoolean("debug", false);
+                    editor1.apply();
+
+                    if (isServiceRunning(AppLockService.class)) {
+                        stopService(new Intent(BaseActivity.this, AppLockService.class));
+                    }
+                    if (isServiceRunning(CallerService.class)) {
+                        stopService(new Intent(BaseActivity.this, CallerService.class));
+                    }
                 }
                 return true;
         }

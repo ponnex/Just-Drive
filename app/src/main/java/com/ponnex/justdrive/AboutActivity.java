@@ -11,8 +11,6 @@ import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.widget.TextView;
 
-import com.squareup.leakcanary.LeakCanary;
-
 /**
  * Created by EmmanuelFrancis on 6/1/2015.
  */
@@ -21,7 +19,6 @@ public class AboutActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        LeakCanary.install(getApplication());
         setContentView(R.layout.activity_about);
 
         TextView textView_version = (TextView)findViewById(R.id.version_name);
