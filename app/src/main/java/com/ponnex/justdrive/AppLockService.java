@@ -1,5 +1,6 @@
 package com.ponnex.justdrive;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.Notification;
@@ -21,6 +22,7 @@ import android.hardware.display.DisplayManager;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -30,12 +32,15 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.internal.view.ContextThemeWrapper;
+import android.telephony.SmsManager;
+import android.telephony.SmsMessage;
 import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -57,7 +62,7 @@ public class AppLockService extends Service implements GPSCallback {
     boolean SPEEDshowing = false;
     boolean showdialog = false;
     boolean getSpeedfromfuse = false;
-    private BroadcastReceiver mScreenReceiver;
+    private BroadcastReceiver mScreenReceiver, mTextReceiver;
 
     private GPSManager gpsManager = null;
     private float speed;
@@ -74,10 +79,13 @@ public class AppLockService extends Service implements GPSCallback {
         LockNotification();
 
         mScreenReceiver = new ScreenReceiver();
+        mTextReceiver = new TextReceiver();
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
+        filter.addAction("android.provider.Telephony.SMS_RECEIVED");
         registerReceiver(mScreenReceiver, filter);
+        registerReceiver(mTextReceiver, filter);
 
         Log.i(TAG + "_ALS", "Created");
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(speedReceiver, new IntentFilter("com.ponnex.justdrive.StopSpeedNotification"));
@@ -92,6 +100,140 @@ public class AppLockService extends Service implements GPSCallback {
             mHandler.postDelayed(looperTask, 100);
         }
         return START_STICKY;
+    }
+
+    private void SendMessage(final String msg_from) {
+        try {
+            String SENT = "sent";
+            String DELIVERED = "delivered";
+
+            SharedPreferences mSharedPreference6= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            String isMsg = (mSharedPreference6.getString("msg", "I am driving right now, I will contact you later."));
+            String msg = isMsg + "\n--This is an automated SMS--";
+
+            Intent sentIntent = new Intent(SENT);
+            PendingIntent sentPI = PendingIntent.getBroadcast(getApplicationContext(), 0, sentIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            Intent deliveryIntent = new Intent(DELIVERED);
+            PendingIntent deliverPI = PendingIntent.getBroadcast(getApplicationContext(), 0, deliveryIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            /* Register for SMS send action */
+            registerReceiver(new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    String result;
+
+                    switch (getResultCode()) {
+
+                        case Activity.RESULT_OK:
+                            result = "Sending Auto Reply Message...";
+                            Log.d(TAG + "TEXT", "Sending Failed: " + result);
+                            NotifyMessage("Sending Failed: " + result, "", false);
+                            break;
+                        case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
+                            result = "Message Sending failed";
+                            Log.d(TAG + "TEXT", "Sending Failed: " + result);
+                            NotifyMessage(result, "", false);
+                            break;
+                        case SmsManager.RESULT_ERROR_RADIO_OFF:
+                            result = "Radio is Off";
+                            Log.d(TAG + "TEXT", "Sending Failed: " + result);
+                            NotifyMessage("Sending Failed: " + result, "", false);
+                            break;
+                        case SmsManager.RESULT_ERROR_NULL_PDU:
+                            result = "No PDU defined";
+                            Log.d(TAG + "TEXT", "Sending Failed: " + result);
+                            NotifyMessage("Sending Failed: " + result, "", false);
+                            break;
+                        case SmsManager.RESULT_ERROR_NO_SERVICE:
+                            result = "Service is currently unavailable";
+                            Log.d(TAG + "TEXT", "Sending Failed: " + result);
+                            NotifyMessage("Sending Failed: " + result, "", false);
+                            break;
+                    }
+                }
+
+            }, new IntentFilter(SENT));
+            /* Register for Delivery event */
+            registerReceiver(new BroadcastReceiver() {
+
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    NotifyMessage("Auto Reply Message sent to ", msg_from, true);
+                    Log.d(TAG + "TEXT", "MessageNotification, DELIVERED");
+                }
+
+            }, new IntentFilter(DELIVERED));
+
+            /*Send SMS*/
+            SmsManager smsManager = SmsManager.getDefault();
+            smsManager.sendTextMessage(msg_from, null, msg, sentPI, deliverPI);
+            Log.d(TAG + "TEXT", "smsManager.sendTextMessage");
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            NotifyMessage(ex.getMessage(), "", false);
+        }
+    }
+
+    private final class TextReceiver extends BroadcastReceiver {
+        SmsMessage[] msgs;
+        String msg_from;
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            SharedPreferences mSharedPreference1 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            String isMsgFrom = (mSharedPreference1.getString("isMsgfrom", null));
+
+            SharedPreferences mSharedPreference5 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            Boolean isautoReply = (mSharedPreference5.getBoolean("autoReply", false));
+
+            Log.d(TAG + "TEXT", "message received");
+            if (intent.getAction().equals("android.provider.Telephony.SMS_RECEIVED")) {
+                if (isautoReply) {
+                    Log.d(TAG + "TEST", "SMS received");
+                    // gets the message
+                    Bundle bundle = intent.getExtras();
+                    if (bundle != null) {
+                        // ---retrieve the SMS message received---
+                        Log.d(TAG + "TEST", "Bundle != null");
+                        try {
+                            // gets the sender then sends a sms back
+                            Object[] pdus = (Object[]) bundle.get("pdus");
+                            msgs = new SmsMessage[pdus.length];
+
+                            for (int i = 0; i < msgs.length; i++) {
+                                msgs[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
+                                msg_from = msgs[i].getOriginatingAddress();
+
+                                if (!msg_from.equals(isMsgFrom) && msg_from != null) {
+                                    SendMessage(msg_from);
+                                }
+
+                                Log.d(TAG + "TEST", "SMS Previous: " + isMsgFrom);
+                                Log.d(TAG + "TEST", "SMS Received: " + msg_from);
+                            }
+
+                            SharedPreferences isMsgfrom = PreferenceManager.getDefaultSharedPreferences(context);
+                            SharedPreferences.Editor editor = isMsgfrom.edit();
+                            editor.putString("isMsgfrom", msg_from);
+                            editor.apply();
+
+                        } catch (Exception e) {
+                            Log.d("Exception caught", e.getMessage());
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void NotifyMessage(String result, String msg_from, boolean status) {
+        Intent intent = new Intent(this, MessageNotification.class);
+        intent.putExtra("From", msg_from);
+        intent.putExtra("Message", result);
+        intent.putExtra("Status", status);
+        startService(intent);
     }
 
     private final class ScreenReceiver extends BroadcastReceiver {
@@ -181,7 +323,7 @@ public class AppLockService extends Service implements GPSCallback {
                 for (UsageStats usageStats : stats) {
                     mySortedMap.put(usageStats.getLastTimeUsed(),usageStats);
                 }
-                if(mySortedMap != null && !mySortedMap.isEmpty()) {
+                if(!mySortedMap.isEmpty()) {
                     topPackageName =  mySortedMap.get(mySortedMap.lastKey()).getPackageName();
                 }
             }
@@ -339,11 +481,13 @@ public class AppLockService extends Service implements GPSCallback {
                 if (!SPEEDshowing) {
                     SpeedDialog();
                 }
-                getSpeedfromfuse = true;
+                if (gpsManager == null) {
+                    getSpeedfromfuse = true;
 
-                gpsManager = new GPSManager();
-                gpsManager.startListening(getApplicationContext());
-                gpsManager.setGPSCallback(AppLockService.this);
+                    gpsManager = new GPSManager();
+                    gpsManager.startListening(getApplicationContext());
+                    gpsManager.setGPSCallback(AppLockService.this);
+                }
             }
         });
         AboutalertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
@@ -536,6 +680,10 @@ public class AppLockService extends Service implements GPSCallback {
 
         if (mScreenReceiver != null) {
             unregisterReceiver(mScreenReceiver);
+        }
+
+        if (mTextReceiver != null) {
+            unregisterReceiver(mTextReceiver);
         }
 
         if(LOCKshowing) {

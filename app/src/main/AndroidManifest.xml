@@ -58,14 +58,9 @@
 
         <service android:name=".CallerService" />
 
-        <receiver android:name=".StopSpeedNotification" />
+        <service android:name=".MessageNotification" />
 
-        <receiver android:name=".TextReceiver">
-            <intent-filter>
-                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </receiver>
+        <receiver android:name=".StopSpeedNotification" />
 
         <receiver
             android:name=".Reboot" >

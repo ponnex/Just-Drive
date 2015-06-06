@@ -79,17 +79,6 @@ public class MainActivity extends BaseActivity implements SharedPreferences.OnSh
             }
         }
 
-        SharedPreferences mSharedPreference1 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        Boolean isDebug = (mSharedPreference1.getBoolean("debug", false));
-
-        if(isDebug) {
-            startService(new Intent(MainActivity.this, AppLockService.class));
-            startService(new Intent(MainActivity.this, CallerService.class));
-        } else {
-            stopService(new Intent(MainActivity.this, AppLockService.class));
-            stopService(new Intent(MainActivity.this, CallerService.class));
-        }
-
         if(Build.VERSION.SDK_INT >= 21) {
             showDialog();
         }

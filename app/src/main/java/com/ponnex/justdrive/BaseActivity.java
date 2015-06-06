@@ -67,6 +67,11 @@ public class BaseActivity extends AppCompatActivity {
         }
 
         coordinatorLayout = findViewById(R.id.layout_main);
+        coordinatorLayout.setAlpha(0f);
+        coordinatorLayout.animate()
+                .alpha(1f)
+                .setDuration(mShortAnimationDuration)
+                .setListener(null);
 
         mLoadingView = findViewById(R.id.loading_spinner);
     }
@@ -260,12 +265,6 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         invalidateOptionsMenu();
-
-        coordinatorLayout.setAlpha(0f);
-        coordinatorLayout.animate()
-                .alpha(1f)
-                .setDuration(mShortAnimationDuration)
-                .setListener(null);
 
         mLoadingView = findViewById(R.id.loading_spinner);
         mLoadingView.setVisibility(View.GONE);

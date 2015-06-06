@@ -26,11 +26,9 @@ public class AboutActivity extends BaseActivity {
 
         TextView textView_source = (TextView)findViewById(R.id.source);
         textView_source.setText(Html.fromHtml(
-                "Just Drive, created by" +
-                        "\n<b>Emmanuel Francis Ramos Jr.</b>" +
-                        "\n<a href=\'https://github.com/ponnex/Just-Drive\'>Github</a>&nbsp;&nbsp;" +
-                        "<a href=\'https://plus.google.com/+EmmanuelFrancisRamos\'>Google+</a>&nbsp;&nbsp;" +
-                        "<a href=\'https://www.linkedin.com/in/ponnex\'>LinkedIn</a>"));
+                "Developed by" +
+                        "<br /><b>Emmanuel Francis Ramos Jr.</b>" +
+                        "<br /><a href=\'https://github.com/ponnex/Just-Drive\'>Github</a>&nbsp;&nbsp; <a href=\'https://plus.google.com/+EmmanuelFrancisRamos\'>Google+</a>&nbsp;&nbsp; <a href=\'https://www.linkedin.com/in/ponnex\'>LinkedIn</a>"));
         textView_source.setMovementMethod(LinkMovementMethod.getInstance());
     }
 

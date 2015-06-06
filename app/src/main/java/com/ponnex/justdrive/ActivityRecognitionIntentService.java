@@ -44,7 +44,7 @@ public class ActivityRecognitionIntentService extends IntentService {
                 String activityName = getNameFromType(activityType);
                 Log.d(TAG + "_HAS RESULT -->", activityName + ", " + confidence + "% ");
 
-                if (activityName.equals("In Vehicle") || activityName.equals("On Bicycle")) {
+                if (activityName.equals("In Vehicle")) {
                     if (confidence >= 60) {
                         SharedPreferences mSharedPreference1 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                         Integer count = (mSharedPreference1.getInt("count", 0));
@@ -65,7 +65,7 @@ public class ActivityRecognitionIntentService extends IntentService {
                             startAppLock();
                         }
                     }
-                } else if (activityName.equals("Still") || activityName.equals("On Foot") || activityName.equals("Running") || activityName.equals("Walking")) {
+                } else if (activityName.equals("Still") || activityName.equals("On Foot") || activityName.equals("On Bicycle") || activityName.equals("Running") || activityName.equals("Walking")) {
                     if (confidence >= 50) {
                         SharedPreferences isFirstRun_write = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                         SharedPreferences.Editor editor = isFirstRun_write.edit();

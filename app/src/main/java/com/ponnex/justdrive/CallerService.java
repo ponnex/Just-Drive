@@ -1,5 +1,6 @@
 package com.ponnex.justdrive;
 
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -47,6 +48,10 @@ public class CallerService extends Service {
     private boolean phone;
     //prefs
     private SharedPreferences getPrefs;
+
+    static boolean ring = false;
+    static boolean callReceived = false;
+
     //text to speech
     TextToSpeech tts;
     PhoneStateListener psl;
@@ -60,8 +65,6 @@ public class CallerService extends Service {
     private boolean bluetoothstate = false;
 
     private String getCallNumber = null;
-
-    private int checkIt = 0;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -180,22 +183,26 @@ public class CallerService extends Service {
                         for (int i = 0; i < incomingNumber.length(); i++) {
                             getCallNumber = getCallNumber + incomingNumber.charAt(i);
                         }
-                        checkIt = 1;
+                        ring = true;
                     }
 
                     if (state == TelephonyManager.CALL_STATE_IDLE) {
                         Log.d(TAG + "Phone State Auto Reply Calls", "Idle");
-                        if(checkIt == 1){ //when the call is not received == missed call
-                            SmsManager smsManager = SmsManager.getDefault();
-                            smsManager.sendTextMessage(getCallNumber, null, msg + "\n--This is an automated SMS--", null, null);
-                            MessageNotification(getCallNumber);
+                        if(ring && !callReceived){ //when the call is not received == missed call
+                            SendMessage(getCallNumber);
+                            ring = false;
+                            Log.d(TAG, "ring = false, " + "SendMessage");
+                        } else {
+                            callReceived = false;
+                            Log.d(TAG, "callReceived = false");
                         }
                     }
 
                     if (state == TelephonyManager.CALL_STATE_OFFHOOK) {
                         Log.d(TAG + "Phone State Auto Reply Calls", "Offhook");
                         // Call received
-                        checkIt = 0;
+                        callReceived = true;
+                        Log.d(TAG, "callReceived = true");
                     }
                 }
 
@@ -206,25 +213,86 @@ public class CallerService extends Service {
         return START_STICKY;
     }
 
-    private void MessageNotification(String msg_from) {
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext());
+    private void SendMessage(final String msg_from) {
+        try {
+            String SENT = "sent";
+            String DELIVERED = "delivered";
 
-        Intent intent = new Intent(CallerService.this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            SharedPreferences mSharedPreference6= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            String isMsg = (mSharedPreference6.getString("msg", "I am driving right now, I will contact you later."));
+            String msg = isMsg + "\n--This is an automated SMS--";
 
-        // Set the title, text, and icon
-        builder.setContentTitle(getString(R.string.app_name))
-                .setContentText("Auto Reply Message sent to " + msg_from)
-                .setSmallIcon(R.drawable.ic_message_sent)
-                .setContentIntent(pendingIntent)
-                .setOngoing(true);
+            Intent sentIntent = new Intent(SENT);
+            PendingIntent sentPI = PendingIntent.getBroadcast(getApplicationContext(), 0, sentIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        // Get an instance of the Notification Manager
-        NotificationManager notifyManager = (NotificationManager)
-                getSystemService(Context.NOTIFICATION_SERVICE);
+            Intent deliveryIntent = new Intent(DELIVERED);
+            PendingIntent deliverPI = PendingIntent.getBroadcast(getApplicationContext(), 0, deliveryIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        // Build the notification and post it
-        notifyManager.notify(3, builder.build());
+            /* Register for SMS send action */
+            registerReceiver(new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    String result;
+
+                    switch (getResultCode()) {
+
+                        case Activity.RESULT_OK:
+                            result = "Sending Auto Reply Message...";
+                            Log.d(TAG + "TEXT", "Sending Failed: " + result);
+                            NotifyMessage("Sending Failed: " + result, "", false);
+                            break;
+                        case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
+                            result = "Message Sending failed";
+                            Log.d(TAG + "TEXT", "Sending Failed: " + result);
+                            NotifyMessage(result, "", false);
+                            break;
+                        case SmsManager.RESULT_ERROR_RADIO_OFF:
+                            result = "Radio is Off";
+                            Log.d(TAG + "TEXT", "Sending Failed: " + result);
+                            NotifyMessage("Sending Failed: " + result, "", false);
+                            break;
+                        case SmsManager.RESULT_ERROR_NULL_PDU:
+                            result = "No PDU defined";
+                            Log.d(TAG + "TEXT", "Sending Failed: " + result);
+                            NotifyMessage("Sending Failed: " + result, "", false);
+                            break;
+                        case SmsManager.RESULT_ERROR_NO_SERVICE:
+                            result = "Service is currently unavailable";
+                            Log.d(TAG + "TEXT", "Sending Failed: " + result);
+                            NotifyMessage("Sending Failed: " + result, "", false);
+                            break;
+                    }
+                }
+
+            }, new IntentFilter(SENT));
+            /* Register for Delivery event */
+            registerReceiver(new BroadcastReceiver() {
+
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    NotifyMessage("Auto Reply Message sent to ", msg_from, true);
+                    Log.d(TAG + "TEXT", "MessageNotification, DELIVERED");
+                }
+
+            }, new IntentFilter(DELIVERED));
+
+            /*Send SMS*/
+            SmsManager smsManager = SmsManager.getDefault();
+            smsManager.sendTextMessage(msg_from, null, msg, sentPI, deliverPI);
+            Log.d(TAG + "TEXT", "smsManager.sendTextMessage");
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            NotifyMessage(ex.getMessage(), "", false);
+        }
+    }
+
+    private void NotifyMessage(String result, String msg_from, boolean status) {
+        Intent intent = new Intent(this, MessageNotification.class);
+        intent.putExtra("From", msg_from);
+        intent.putExtra("Message", result);
+        intent.putExtra("Status", status);
+        startService(intent);
     }
 
     //Identify if headset is connected

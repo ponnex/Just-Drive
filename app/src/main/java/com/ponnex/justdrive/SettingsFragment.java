@@ -70,7 +70,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         Boolean isautoReplyCalls = (mSharedPreference4.getBoolean("autoReplyCalls", true));
 
         SharedPreferences mSharedPreference5 = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        Boolean isautoReply = (mSharedPreference5.getBoolean("autoReply", true));
+        Boolean isautoReply = (mSharedPreference5.getBoolean("autoReply", false));
 
         SharedPreferences mSharedPreference6= PreferenceManager.getDefaultSharedPreferences(getActivity());
         String isMsg=(mSharedPreference6.getString("msg", "I am driving right now, I will contact you later."));
