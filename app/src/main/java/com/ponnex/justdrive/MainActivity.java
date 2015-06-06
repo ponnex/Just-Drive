@@ -12,6 +12,7 @@ import android.preference.PreferenceManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.internal.view.ContextThemeWrapper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -47,7 +48,7 @@ public class MainActivity extends BaseActivity implements SharedPreferences.OnSh
         boolean hasTelephony = pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
 
         if(!hasTelephony) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getApplicationContext());
+            AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(getApplicationContext(), R.style.AppCompatAlertDialogStyle));
             alertDialog = builder.create();
             alertDialog.setTitle("DEVICE DOESN'T HAVE TELEPHONY FEATURES");
             alertDialog.setMessage("Just Drive works on devices with telephony features only");
@@ -142,7 +143,7 @@ public class MainActivity extends BaseActivity implements SharedPreferences.OnSh
     }
 
     private void showDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getApplicationContext());
+        AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(getApplicationContext(), R.style.AppCompatAlertDialogStyle));
         alertDialog = builder.create();
         alertDialog.setTitle(getText(R.string.lollipop_title));
         alertDialog.setMessage(getText(R.string.lollipop_message));
