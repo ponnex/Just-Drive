@@ -18,7 +18,7 @@ Will be working on the following features:
 • On-Screen test to disable app lock
 
 #Releases
-[###Check it out here###](https://github.com/ponnex/Just-Drive/releases)
+[Check it here](https://github.com/ponnex/Just-Drive/releases)
 
 CREDITS
 =======
