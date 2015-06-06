@@ -37,41 +37,17 @@ public class ActivityRecognitionIntentService extends IntentService {
             int confidence = mostProbableActivity.getConfidence();
             int activityType = mostProbableActivity.getType();
 
-            SharedPreferences mSharedPreference = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            Boolean debug = (mSharedPreference.getBoolean("debug", false));
-
-            if (switchstate() && !debug) {
+            if (switchstate()) {
                 String activityName = getNameFromType(activityType);
                 Log.d(TAG + "_HAS RESULT -->", activityName + ", " + confidence + "% ");
 
                 if (activityName.equals("In Vehicle")) {
-                    if (confidence >= 60) {
-                        SharedPreferences mSharedPreference1 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                        Integer count = (mSharedPreference1.getInt("count", 0));
-                        if(count <= 3) {
-                            SharedPreferences isFirstRun_write = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                            SharedPreferences.Editor editor = isFirstRun_write.edit();
-                            editor.putInt("count", count + 1);
-                            editor.apply();
-
-                            Log.d(TAG, "inVehicle count = " + count);
-                        } else {
-                            SharedPreferences isFirstRun_write = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                            SharedPreferences.Editor editor = isFirstRun_write.edit();
-                            editor.putInt("count", 0);
-                            editor.apply();
-
-                            //start applock service
-                            startAppLock();
-                        }
+                    if (confidence >= 90) {
+                        //start applock service
+                        startAppLock();
                     }
                 } else if (activityName.equals("Still") || activityName.equals("On Foot") || activityName.equals("On Bicycle") || activityName.equals("Running") || activityName.equals("Walking")) {
                     if (confidence >= 50) {
-                        SharedPreferences isFirstRun_write = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                        SharedPreferences.Editor editor = isFirstRun_write.edit();
-                        editor.putInt("count", 0);
-                        editor.apply();
-
                         // /disable applock service
                         stopAppLock();
                     }

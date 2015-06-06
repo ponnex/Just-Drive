@@ -5,12 +5,4 @@
         android:id="@+id/about"
         android:title="@string/about"
         app:showAsAction="never" />
-    <item
-        android:id="@+id/debug_on"
-        android:title="@string/debug_on"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/debug_off"
-        android:title="@string/debug_off"
-        app:showAsAction="never" />
 </menu>

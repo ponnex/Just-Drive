@@ -1,10 +1,7 @@
 package com.ponnex.justdrive;
 
-import android.app.ActivityManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.media.AudioManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
@@ -115,47 +112,6 @@ public class BaseActivity extends AppCompatActivity {
                 Intent intent = new Intent(BaseActivity.this, AboutActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
-                return true;
-            case R.id.debug_on:
-                SharedPreferences debug = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                SharedPreferences.Editor editor = debug.edit();
-                editor.putBoolean("debug", true);
-                editor.apply();
-
-                if(!isServiceRunning(AppLockService.class)) {
-                    startService(new Intent(BaseActivity.this, AppLockService.class));
-                    //get audio service
-                    final AudioManager current = (AudioManager) this
-                            .getSystemService(Context.AUDIO_SERVICE);
-
-                    //get and store the users current sound mode
-                    int audioMode = current.getRingerMode();
-                    SharedPreferences audio = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                    SharedPreferences.Editor editor1 = audio.edit();
-                    editor1.putInt("audioMode", audioMode);
-                    editor1.apply();
-                }
-                if(!isServiceRunning(CallerService.class)){
-                    startService(new Intent(BaseActivity.this, CallerService.class));
-                }
-                return true;
-            case R.id.debug_off:
-                SharedPreferences mSharedPreference = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                Boolean debug2 = (mSharedPreference.getBoolean("debug", false));
-
-                if(debug2) {
-                    SharedPreferences debug1 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                    SharedPreferences.Editor editor1 = debug1.edit();
-                    editor1.putBoolean("debug", false);
-                    editor1.apply();
-
-                    if (isServiceRunning(AppLockService.class)) {
-                        stopService(new Intent(BaseActivity.this, AppLockService.class));
-                    }
-                    if (isServiceRunning(CallerService.class)) {
-                        stopService(new Intent(BaseActivity.this, CallerService.class));
-                    }
-                }
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -270,15 +226,5 @@ public class BaseActivity extends AppCompatActivity {
         mLoadingView.setVisibility(View.GONE);
 
         super.onResume();
-    }
-
-    private boolean isServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
     }
 }
