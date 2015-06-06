@@ -43,11 +43,13 @@ public class ActivityRecognitionIntentService extends IntentService {
 
                 if (activityName.equals("In Vehicle")) {
                     if (confidence >= 90) {
+                        Log.d(TAG, activityName + ", " + confidence);
                         //start applock service
                         startAppLock();
                     }
                 } else if (activityName.equals("Still") || activityName.equals("On Foot") || activityName.equals("On Bicycle") || activityName.equals("Running") || activityName.equals("Walking")) {
                     if (confidence >= 50) {
+                        Log.d(TAG, activityName + ", " + confidence);
                         // /disable applock service
                         stopAppLock();
                     }
