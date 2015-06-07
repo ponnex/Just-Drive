@@ -1,0 +1,17 @@
+<resources>
+
+    <!-- Styles -->
+    <style name="Theme.JustDrive" parent="Base.Theme.JustDrive">
+    </style>
+
+    <style name="Base.Theme.JustDrive" parent="Theme.AppCompat.NoActionBar">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primaryDark</item>
+        <item name="colorAccent">@color/accent</item>
+		<item name="android:windowTranslucentStatus">true</item>
+    </style>
+
+    <style name="AppCompatAlertDialogStyle" parent="Theme.AppCompat" />
+
+</resources>
+

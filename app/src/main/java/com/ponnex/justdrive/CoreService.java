@@ -17,8 +17,6 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import com.google.android.gms.location.ActivityRecognition;
-import com.google.android.gms.location.LocationServices;
-
 
 /**
  * Created by ramos on 4/14/2015.
@@ -54,7 +52,6 @@ public class CoreService extends Service implements ConnectionCallbacks, OnConne
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(ActivityRecognition.API)
-                .addApi(LocationServices.API)
                 .build();
     }
 
