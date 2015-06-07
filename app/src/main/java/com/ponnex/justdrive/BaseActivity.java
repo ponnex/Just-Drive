@@ -126,19 +126,23 @@ public class BaseActivity extends AppCompatActivity {
                 new NavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(final MenuItem menuItem) {
+
+                        coordinatorLayout.animate()
+                                .alpha(0f)
+                                .setDuration(mShortAnimationDuration)
+                                .setListener(null);
+
+                        mLoadingView.setVisibility(View.VISIBLE);
+
+                        menuItem.setChecked(true);
+                        mDrawerLayout.closeDrawers();
+
                         if (menuItem.getItemId() == getSelfNavDrawerItem()) {
                             mDrawerLayout.closeDrawers();
                             return true;
                         } else {
                             switch (menuItem.getItemId()) {
                                 case R.id.navigation_home:
-                                    coordinatorLayout.animate()
-                                            .alpha(0f)
-                                            .setDuration(mShortAnimationDuration)
-                                            .setListener(null);
-
-                                    mLoadingView.setVisibility(View.VISIBLE);
-
                                     mDrawerLayout.setDrawerListener(new DrawerLayout.DrawerListener() {
                                         @Override
                                         public void onDrawerSlide(View drawerView, float slideOffset) {
@@ -167,18 +171,8 @@ public class BaseActivity extends AppCompatActivity {
                                     SharedPreferences.Editor editor = NavItem.edit();
                                     editor.putInt("NavItem", NAVDRAWER_ITEM_HOME);
                                     editor.apply();
-
-                                    menuItem.setChecked(true);
-                                    mDrawerLayout.closeDrawers();
                                     return true;
                                 case R.id.navigation_about:
-                                    coordinatorLayout.animate()
-                                            .alpha(0f)
-                                            .setDuration(mShortAnimationDuration)
-                                            .setListener(null);
-
-                                    mLoadingView.setVisibility(View.VISIBLE);
-
                                     mDrawerLayout.setDrawerListener(new DrawerLayout.DrawerListener() {
                                         @Override
                                         public void onDrawerSlide(View drawerView, float slideOffset) {
@@ -207,9 +201,6 @@ public class BaseActivity extends AppCompatActivity {
                                     SharedPreferences.Editor editor1 = NavItem1.edit();
                                     editor1.putInt("NavItem", NAVDRAWER_ITEM_ABOUT);
                                     editor1.apply();
-
-                                    menuItem.setChecked(true);
-                                    mDrawerLayout.closeDrawers();
                                     return true;
                             }
                         }
@@ -221,10 +212,7 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         invalidateOptionsMenu();
-
-        mLoadingView = findViewById(R.id.loading_spinner);
         mLoadingView.setVisibility(View.GONE);
-
         super.onResume();
     }
 }
