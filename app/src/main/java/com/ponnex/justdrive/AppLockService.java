@@ -52,19 +52,17 @@ import java.util.TreeMap;
  */
 
 public class AppLockService extends Service implements GPSCallback {
-    AlertDialog LockalertDialog;
-    AlertDialog AboutalertDialog;
-    AlertDialog SpeedalertDialog;
-    boolean background = false;
-    boolean LOCKshowing = false;
-    boolean ABOUTshowing = false;
-    boolean SPEEDshowing = false;
-    boolean showdialog = false;
+    private AlertDialog LockalertDialog;
+    private AlertDialog AboutalertDialog;
+    private AlertDialog SpeedalertDialog;
+    private boolean LOCKshowing = false;
+    private boolean ABOUTshowing = false;
+    private boolean SPEEDshowing = false;
+    private boolean showdialog = false;
     private BroadcastReceiver mScreenReceiver, mTextReceiver;
 
     private GPSManager gpsManager = null;
-    private float speed;
-    String speedString;
+    private String speedString;
 
     private String TAG = "com.ponnex.justdrive.AppLockService";
 
@@ -488,7 +486,6 @@ public class AppLockService extends Service implements GPSCallback {
                 homeIntent.addCategory(Intent.CATEGORY_HOME);
                 getApplicationContext().startActivity(homeIntent);
 
-                background = true;
                 dialog.dismiss();
             }
         });
@@ -528,9 +525,7 @@ public class AppLockService extends Service implements GPSCallback {
 
     @Override
     public void onGPSUpdate(Location location) {
-        location.getLatitude();
-        location.getLongitude();
-
+        float speed;
         if(location.hasSpeed()) {
             speed = roundDecimal(convertSpeed(location.getSpeed()), 2);
 

@@ -1,7 +1,10 @@
 package com.ponnex.justdrive;
 
+import android.app.ActivityManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
@@ -113,6 +116,44 @@ public class BaseActivity extends AppCompatActivity {
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
                 return true;
+            case R.id.debug_on:
+                if(!isServiceRunning(AppLockService.class)) {
+                    startService(new Intent(this, AppLockService.class));
+                }
+                if(!isServiceRunning(CallerService.class)) {
+                    startService(new Intent(this, CallerService.class));
+                    //get audio service
+                    final AudioManager current = (AudioManager) this
+                            .getSystemService(Context.AUDIO_SERVICE);
+
+                    //get and store the users current sound mode
+                    int audioMode = current.getRingerMode();
+                    SharedPreferences audio = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                    SharedPreferences.Editor editor = audio.edit();
+                    editor.putInt("audioMode", audioMode);
+                    editor.apply();
+                }
+
+                SharedPreferences debug = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                SharedPreferences.Editor editor = debug.edit();
+                editor.putBoolean("debug", true);
+                editor.apply();
+
+                return true;
+            case R.id.debug_off:
+                if(isServiceRunning(AppLockService.class)) {
+                    stopService(new Intent(this, AppLockService.class));
+                }
+                if(isServiceRunning(CallerService.class)) {
+                    stopService(new Intent(this, CallerService.class));
+                }
+
+                SharedPreferences debug1 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                SharedPreferences.Editor editor1 = debug1.edit();
+                editor1.putBoolean("debug", false);
+                editor1.apply();
+
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -126,21 +167,19 @@ public class BaseActivity extends AppCompatActivity {
                 new NavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(final MenuItem menuItem) {
-
-                        coordinatorLayout.animate()
-                                .alpha(0f)
-                                .setDuration(mShortAnimationDuration)
-                                .setListener(null);
-
-                        mLoadingView.setVisibility(View.VISIBLE);
-
-                        menuItem.setChecked(true);
-                        mDrawerLayout.closeDrawers();
-
                         if (menuItem.getItemId() == getSelfNavDrawerItem()) {
                             mDrawerLayout.closeDrawers();
                             return true;
                         } else {
+                            coordinatorLayout.animate()
+                                    .alpha(0f)
+                                    .setDuration(mShortAnimationDuration)
+                                    .setListener(null);
+
+                            mLoadingView.setVisibility(View.VISIBLE);
+
+                            menuItem.setChecked(true);
+                            mDrawerLayout.closeDrawers();
                             switch (menuItem.getItemId()) {
                                 case R.id.navigation_home:
                                     mDrawerLayout.setDrawerListener(new DrawerLayout.DrawerListener() {
@@ -213,6 +252,17 @@ public class BaseActivity extends AppCompatActivity {
     protected void onResume() {
         invalidateOptionsMenu();
         mLoadingView.setVisibility(View.GONE);
+        coordinatorLayout.setAlpha(1f);
         super.onResume();
+    }
+
+    private boolean isServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

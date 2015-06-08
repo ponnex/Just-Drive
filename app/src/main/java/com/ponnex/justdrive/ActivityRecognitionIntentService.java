@@ -37,12 +37,15 @@ public class ActivityRecognitionIntentService extends IntentService {
             int confidence = mostProbableActivity.getConfidence();
             int activityType = mostProbableActivity.getType();
 
-            if (switchstate()) {
+            SharedPreferences mSharedPreference2 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            Boolean debug = (mSharedPreference2.getBoolean("debug", false));
+
+            if (switchstate() && !debug) {
                 String activityName = getNameFromType(activityType);
                 Log.d(TAG + "_HAS RESULT -->", activityName + ", " + confidence + "% ");
 
                 if (activityName.equals("In Vehicle")) {
-                    if (confidence >= 90) {
+                    if (confidence >= 75) {
                         //start applock service
                         startAppLock();
                     }
@@ -82,10 +85,10 @@ public class ActivityRecognitionIntentService extends IntentService {
 
     private void startAppLock() {
         if(!isServiceRunning(AppLockService.class)) {
-            startService(new Intent(ActivityRecognitionIntentService.this, AppLockService.class));
+            startService(new Intent(this, AppLockService.class));
         }
         if(!isServiceRunning(CallerService.class)) {
-            startService(new Intent(ActivityRecognitionIntentService.this, CallerService.class));
+            startService(new Intent(this, CallerService.class));
             //get audio service
             final AudioManager current = (AudioManager) this
                     .getSystemService(Context.AUDIO_SERVICE);
@@ -101,10 +104,10 @@ public class ActivityRecognitionIntentService extends IntentService {
 
     private void stopAppLock() {
         if(isServiceRunning(AppLockService.class)) {
-            stopService(new Intent(ActivityRecognitionIntentService.this, AppLockService.class));
+            stopService(new Intent(this, AppLockService.class));
         }
         if(isServiceRunning(CallerService.class)) {
-            stopService(new Intent(ActivityRecognitionIntentService.this, CallerService.class));
+            stopService(new Intent(this, CallerService.class));
         }
     }
 

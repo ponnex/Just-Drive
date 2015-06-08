@@ -76,22 +76,21 @@ public class CoreService extends Service implements ConnectionCallbacks, OnConne
             Log.d(TAG, "Disconnected");
             ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(mGoogleApiClient, getActivityDetectionPendingIntent());
             mGoogleApiClient.disconnect();
+        }
 
-            stopService(new Intent(CoreService.this, AppLockService.class));
-            stopService(new Intent(CoreService.this, CallerService.class));
+        stopService(new Intent(CoreService.this, AppLockService.class));
+        stopService(new Intent(CoreService.this, CallerService.class));
 
-            if(gpsManager!=null){
-                gpsManager.stopListening();
-                gpsManager.setGPSCallback(null);
-                gpsManager = null;
-            }
+        if(gpsManager!=null){
+            gpsManager.stopListening();
+            gpsManager.setGPSCallback(null);
+            gpsManager = null;
         }
     }
 
     @Override
     public void onConnected(Bundle bundle) {
         ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates(mGoogleApiClient, DETECTION_INT_MILLIS, getActivityDetectionPendingIntent());
-
         Log.d(TAG, "Connected");
     }
 
