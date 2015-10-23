@@ -44,24 +44,10 @@
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:layout_margin="@dimen/fab_margin"
+            app:borderWidth="0dp"
             android:layout_gravity="bottom|end" />
 
     </android.support.design.widget.CoordinatorLayout>
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <fr.castorflex.android.circularprogressbar.CircularProgressBar
-            android:id="@+id/loading_spinner"
-            android:layout_width="42dp"
-            android:layout_height="42dp"
-            android:indeterminate="true"
-            android:visibility="gone"
-            android:layout_gravity="center"
-            app:cpb_color="?attr/colorAccent" />
-
-    </FrameLayout>
 
     <android.support.design.widget.NavigationView
         android:id="@+id/nav_view"

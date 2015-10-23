@@ -5,9 +5,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -27,31 +30,33 @@ public class BaseActivity extends AppCompatActivity {
 
     private View coordinatorLayout;
 
-    private View mLoadingView;
+    private Toolbar mActionBarToolbar;
 
-    private int mShortAnimationDuration;
+    private Handler mHandler;
 
     protected static final int NAVDRAWER_ITEM_HOME = R.id.navigation_home;
     protected static final int NAVDRAWER_ITEM_ABOUT = R.id.navigation_about;
     protected static final int NAVDRAWER_ITEM_INVALID = -1;
+    private static final int NAVDRAWER_LAUNCH_DELAY = 250;
+    private static final int MAIN_CONTENT_FADEOUT_DURATION = 150;
+    private static final int MAIN_CONTENT_FADEIN_DURATION = 250;
 
     private NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        mShortAnimationDuration = getResources().getInteger(
-                android.R.integer.config_shortAnimTime);
         super.onCreate(savedInstanceState);
+
+        mHandler = new Handler();
     }
 
     @Override
     public void setContentView(int layoutResID) {
         super.setContentView(layoutResID);
 
-        Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        if (mToolbar != null) {
-            setSupportActionBar(mToolbar);
-        }
+        getActionBarToolbar();
+
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
         ActionBar ab = getSupportActionBar();
         if(ab != null) {
@@ -59,21 +64,15 @@ public class BaseActivity extends AppCompatActivity {
             ab.setDisplayHomeAsUpEnabled(true);
         }
 
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         if (navigationView != null) {
             setupDrawerContent(navigationView);
         }
 
         coordinatorLayout = findViewById(R.id.layout_main);
-        coordinatorLayout.setAlpha(0f);
-        coordinatorLayout.animate()
-                .alpha(1f)
-                .setDuration(mShortAnimationDuration)
-                .setListener(null);
-
-        mLoadingView = findViewById(R.id.loading_spinner);
+        if(coordinatorLayout != null) {
+            coordinatorLayout.animate().alpha(1).setDuration(MAIN_CONTENT_FADEIN_DURATION);
+        }
     }
 
     @Override
@@ -81,10 +80,9 @@ public class BaseActivity extends AppCompatActivity {
         if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
             mDrawerLayout.closeDrawers();
         } else {
-            coordinatorLayout.animate()
-                    .alpha(0f)
-                    .setDuration(mShortAnimationDuration)
-                    .setListener(null);
+            if(coordinatorLayout != null) {
+                coordinatorLayout.animate().alpha(0).setDuration(MAIN_CONTENT_FADEOUT_DURATION);
+            }
             super.onBackPressed();
         }
     }
@@ -158,6 +156,25 @@ public class BaseActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    protected Toolbar getActionBarToolbar() {
+        if (mActionBarToolbar == null) {
+
+            Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
+            if (mToolbar != null) {
+                setSupportActionBar(mToolbar);
+            }
+            mActionBarToolbar = (Toolbar) findViewById(R.id.toolbar);
+            if (mActionBarToolbar != null) {
+                // Depending on which version of Android you are on the Toolbar or the ActionBar may be
+                // active so the a11y description is set here.
+                mActionBarToolbar.setNavigationContentDescription(getResources().getString(R.string
+                        .navdrawer_description));
+                setSupportActionBar(mActionBarToolbar);
+            }
+        }
+        return mActionBarToolbar;
+    }
+
     protected int getSelfNavDrawerItem() {
         return NAVDRAWER_ITEM_INVALID;
     }
@@ -168,92 +185,57 @@ public class BaseActivity extends AppCompatActivity {
                     @Override
                     public boolean onNavigationItemSelected(final MenuItem menuItem) {
                         if (menuItem.getItemId() == getSelfNavDrawerItem()) {
-                            mDrawerLayout.closeDrawers();
-                            return true;
+                            mDrawerLayout.closeDrawer(GravityCompat.START);
                         } else {
-                            coordinatorLayout.animate()
-                                    .alpha(0f)
-                                    .setDuration(mShortAnimationDuration)
-                                    .setListener(null);
-
-                            mLoadingView.setVisibility(View.VISIBLE);
-
-                            menuItem.setChecked(true);
-                            mDrawerLayout.closeDrawers();
-                            switch (menuItem.getItemId()) {
-                                case R.id.navigation_home:
-                                    mDrawerLayout.setDrawerListener(new DrawerLayout.DrawerListener() {
-                                        @Override
-                                        public void onDrawerSlide(View drawerView, float slideOffset) {
-
-                                        }
-
-                                        @Override
-                                        public void onDrawerOpened(View drawerView) {
-
-                                        }
-
-                                        @Override
-                                        public void onDrawerClosed(View drawerView) {
-                                            Intent intent = new Intent(BaseActivity.this, MainActivity.class);
-                                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                            startActivity(intent);
-                                        }
-
-                                        @Override
-                                        public void onDrawerStateChanged(int newState) {
-
-                                        }
-                                    });
-
-                                    SharedPreferences NavItem = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                                    SharedPreferences.Editor editor = NavItem.edit();
-                                    editor.putInt("NavItem", NAVDRAWER_ITEM_HOME);
-                                    editor.apply();
-                                    return true;
-                                case R.id.navigation_about:
-                                    mDrawerLayout.setDrawerListener(new DrawerLayout.DrawerListener() {
-                                        @Override
-                                        public void onDrawerSlide(View drawerView, float slideOffset) {
-
-                                        }
-
-                                        @Override
-                                        public void onDrawerOpened(View drawerView) {
-
-                                        }
-
-                                        @Override
-                                        public void onDrawerClosed(View drawerView) {
-                                            Intent intent = new Intent(BaseActivity.this, AboutActivity.class);
-                                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                            startActivity(intent);
-                                        }
-
-                                        @Override
-                                        public void onDrawerStateChanged(int newState) {
-
-                                        }
-                                    });
-
-                                    SharedPreferences NavItem1 = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                                    SharedPreferences.Editor editor1 = NavItem1.edit();
-                                    editor1.putInt("NavItem", NAVDRAWER_ITEM_ABOUT);
-                                    editor1.apply();
-                                    return true;
+                            if (coordinatorLayout != null) {
+                                coordinatorLayout.animate().alpha(0).setDuration(MAIN_CONTENT_FADEOUT_DURATION);
                             }
+                            mHandler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    goToNavDrawerItem(menuItem.getItemId());
+                                }
+                            }, NAVDRAWER_LAUNCH_DELAY);
                         }
+                        menuItem.setChecked(true);
+                        mDrawerLayout.closeDrawer(GravityCompat.START);
                         return true;
                     }
                 });
     }
 
+    private void goToNavDrawerItem(int item) {
+        switch (item) {
+            case R.id.navigation_home:
+                createBackStack(new Intent(this, MainActivity.class));
+                finish();
+                break;
+            case R.id.navigation_about:
+                createBackStack(new Intent(this, AboutActivity.class));
+                break;
+        }
+    }
+
     @Override
-    protected void onResume() {
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
         invalidateOptionsMenu();
-        mLoadingView.setVisibility(View.GONE);
-        coordinatorLayout.setAlpha(1f);
-        super.onResume();
+        if(coordinatorLayout != null) {
+            coordinatorLayout.animate().alpha(1).setDuration(MAIN_CONTENT_FADEIN_DURATION);
+        }
+    }
+
+    private void createBackStack(Intent intent) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            TaskStackBuilder builder = TaskStackBuilder.create(this);
+            builder.addNextIntentWithParentStack(intent);
+            builder.startActivities();
+            overridePendingTransition(0, 0);
+        } else {
+            startActivity(intent);
+            overridePendingTransition(0, 0);
+            finish();
+        }
     }
 
     private boolean isServiceRunning(Class<?> serviceClass) {

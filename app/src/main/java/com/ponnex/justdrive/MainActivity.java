@@ -81,7 +81,7 @@ public class MainActivity extends BaseActivity implements SharedPreferences.OnSh
         }
 
         if(Build.VERSION.SDK_INT >= 21) {
-            showDialog();
+            //showDialog();
         }
 
         fab = (FloatingActionButton) findViewById(R.id.fab);

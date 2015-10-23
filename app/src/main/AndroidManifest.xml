@@ -48,7 +48,11 @@
         <activity
             android:name=".AboutActivity"
             android:label="@string/title_about"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
+            android:configChanges="keyboardHidden|orientation|screenSize">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
 
         <service android:name=".ActivityRecognitionIntentService" android:exported="false"/>
 
