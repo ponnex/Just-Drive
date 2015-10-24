@@ -34,6 +34,7 @@ public class MainActivity extends BaseActivity implements SharedPreferences.OnSh
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        overridePendingTransition(0, 0);
 
         if (Build.VERSION.SDK_INT >= 21) {
             setContentView(R.layout.activity_main_lollipop);
@@ -48,7 +49,7 @@ public class MainActivity extends BaseActivity implements SharedPreferences.OnSh
         boolean hasTelephony = pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
 
         if(!hasTelephony) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(getApplicationContext(), R.style.AppCompatAlertDialogStyle));
+            AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this.getApplicationContext(), R.style.AppCompatAlertDialogStyle));
             alertDialog = builder.create();
             alertDialog.setTitle("DEVICE DOESN'T HAVE TELEPHONY FEATURES");
             alertDialog.setMessage("Just Drive works on devices with telephony features only");
@@ -69,7 +70,7 @@ public class MainActivity extends BaseActivity implements SharedPreferences.OnSh
             negative.setTextColor(getResources().getColor(R.color.accent));
         }
 
-        SharedPreferences mSharedPreference = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        SharedPreferences mSharedPreference = PreferenceManager.getDefaultSharedPreferences(this.getApplicationContext());
         Boolean isSwitch = (mSharedPreference.getBoolean("switch", true));
 
         if (isPlayServicesConfigured()) {
@@ -80,9 +81,9 @@ public class MainActivity extends BaseActivity implements SharedPreferences.OnSh
             }
         }
 
-        if(Build.VERSION.SDK_INT >= 21) {
-            //showDialog();
-        }
+        //if(Build.VERSION.SDK_INT >= 21) {
+        //    showDialog();
+        //}
 
         fab = (FloatingActionButton) findViewById(R.id.fab);
 
@@ -142,8 +143,9 @@ public class MainActivity extends BaseActivity implements SharedPreferences.OnSh
         super.onResume();
     }
 
+    /*
     private void showDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(getApplicationContext(), R.style.AppCompatAlertDialogStyle));
+        AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this.getApplicationContext(), R.style.AppCompatAlertDialogStyle));
         alertDialog = builder.create();
         alertDialog.setTitle(getText(R.string.lollipop_title));
         alertDialog.setMessage(getText(R.string.lollipop_message));
@@ -173,6 +175,7 @@ public class MainActivity extends BaseActivity implements SharedPreferences.OnSh
         Button negative = alertDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
         negative.setTextColor(accentcolor);
     }
+    */
 
     private boolean isPlayServicesConfigured() {
         final int googlePlayServicesCheck = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this.getApplicationContext());

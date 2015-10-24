@@ -207,11 +207,51 @@ public class BaseActivity extends AppCompatActivity {
     private void goToNavDrawerItem(int item) {
         switch (item) {
             case R.id.navigation_home:
-                createBackStack(new Intent(this, MainActivity.class));
+                mDrawerLayout.setDrawerListener(new DrawerLayout.DrawerListener() {
+                    @Override
+                    public void onDrawerSlide(View drawerView, float slideOffset) {
+
+                    }
+
+                    @Override
+                    public void onDrawerOpened(View drawerView) {
+
+                    }
+
+                    @Override
+                    public void onDrawerClosed(View drawerView) {
+                        createBackStack(new Intent(BaseActivity.this, MainActivity.class));
+                    }
+
+                    @Override
+                    public void onDrawerStateChanged(int newState) {
+
+                    }
+                });
                 finish();
                 break;
             case R.id.navigation_about:
-                createBackStack(new Intent(this, AboutActivity.class));
+                mDrawerLayout.setDrawerListener(new DrawerLayout.DrawerListener() {
+                    @Override
+                    public void onDrawerSlide(View drawerView, float slideOffset) {
+
+                    }
+
+                    @Override
+                    public void onDrawerOpened(View drawerView) {
+
+                    }
+
+                    @Override
+                    public void onDrawerClosed(View drawerView) {
+                        createBackStack(new Intent(BaseActivity.this, AboutActivity.class));
+                    }
+
+                    @Override
+                    public void onDrawerStateChanged(int newState) {
+
+                    }
+                });
                 break;
         }
     }
@@ -230,10 +270,8 @@ public class BaseActivity extends AppCompatActivity {
             TaskStackBuilder builder = TaskStackBuilder.create(this);
             builder.addNextIntentWithParentStack(intent);
             builder.startActivities();
-            overridePendingTransition(0, 0);
         } else {
             startActivity(intent);
-            overridePendingTransition(0, 0);
             finish();
         }
     }

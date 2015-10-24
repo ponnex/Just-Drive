@@ -20,6 +20,7 @@ public class AboutActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_about);
+        overridePendingTransition(0, 0);
 
         TextView textView_version = (TextView)findViewById(R.id.version_name);
 
